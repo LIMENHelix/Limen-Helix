@@ -187,6 +187,32 @@
   color: #ddd; /* Light gray instead of near-white */
 }
 
+    /* Floating Phase Echo HUD */
+    .phase-hud {
+      position: fixed;
+      bottom: 1rem;
+      left: 1rem;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      color: #f5f0dc;
+      font-size: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      z-index: 1000;
+    }
+
+    .phase-hud.show {
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      .phase-hud {
+        display: none;
+      }
+    }
+
 
 
 
@@ -205,12 +231,14 @@
         <li><a href="#phase7">Phase 7</a></li>
         <li><a href="#phase8">Phase 8</a></li>
         <li><a href="#phase9">Phase 9</a></li>
-        <li><a href="#phase10">Phase 10</a></li>
+      <li><a href="#phase10">Phase 10</a></li>
       </ul>
     </nav>
 
+    <div id="phase-hud" class="phase-hud"></div>
+
   <!-- Phase 0 -->
-<section id="phase0" class="phase0">
+  <section id="phase0" class="phase0">
   <h1>Phase 0 – Source</h1>
 
   <p class="ritual">This is the ground before the story.</p>
@@ -519,6 +547,29 @@
 </section>
 
 
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const hud = document.getElementById('phase-hud');
+        const sections = document.querySelectorAll('section[id^="phase"]');
+        let active = null;
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.intersectionRatio >= 0.5) {
+              active = entry.target;
+              const title = entry.target.querySelector('h1');
+              if (title) {
+                hud.textContent = title.textContent.trim();
+                hud.classList.add('show');
+              }
+            } else if (active === entry.target) {
+              hud.classList.remove('show');
+            }
+          });
+        }, { threshold: 0.5 });
+
+        sections.forEach(section => observer.observe(section));
+      });
+    </script>
 
 </body>
 </html>
