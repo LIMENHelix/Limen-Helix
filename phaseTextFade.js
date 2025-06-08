@@ -8,5 +8,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  document.querySelectorAll('.phase-text').forEach(el => observer.observe(el));
+  document.querySelectorAll('.phase-text, .phase-glyph, .phase-particle').forEach(el => observer.observe(el));
 });
