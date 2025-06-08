@@ -253,14 +253,17 @@
       20% { opacity: 0.8; }
       to { transform: translateY(-80px); opacity: 0; }
     }
-.phase-text {
+.phase-text, .phase-glyph, .phase-particle {
   opacity: 0;
-  transition: opacity 0.6s ease-out;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
 
-.phase-text.fade-in {
+.phase-text.fade-in, .phase-glyph.fade-in, .phase-particle.fade-in {
   opacity: 1;
+  transform: translateY(0);
 }
+
 
 
 
