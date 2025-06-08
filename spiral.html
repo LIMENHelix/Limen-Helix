@@ -8,6 +8,7 @@
     html, body {
       margin: 0;
       padding: 0;
+      padding-top: 3rem;
       font-family: 'Georgia', serif;
       color: #e8e3d9;
       scroll-behavior: smooth;
@@ -15,7 +16,40 @@
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
-      background-repeat: no-repeat;
+    background-repeat: no-repeat;
+    }
+
+    .phase-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      padding: 0.5rem 1rem;
+    }
+
+    .phase-nav ul {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .phase-nav li {
+      margin: 0 0.5rem;
+    }
+
+    .phase-nav a {
+      color: #f5f0dc;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+
+    .phase-nav a:hover {
+      text-decoration: underline;
     }
 
     section {
@@ -26,6 +60,7 @@
       justify-content: center;
       text-align: center;
       padding: 4rem 2rem;
+      scroll-margin-top: 3rem;
     }
 
     h1 {
@@ -157,10 +192,25 @@
 
   </style>
 </head>
-<body>
+  <body>
+    <nav class="phase-nav">
+      <ul>
+        <li><a href="#phase0">Phase 0</a></li>
+        <li><a href="#phase1">Phase 1</a></li>
+        <li><a href="#phase2">Phase 2</a></li>
+        <li><a href="#phase3">Phase 3</a></li>
+        <li><a href="#phase4">Phase 4</a></li>
+        <li><a href="#phase5">Phase 5</a></li>
+        <li><a href="#phase6">Phase 6</a></li>
+        <li><a href="#phase7">Phase 7</a></li>
+        <li><a href="#phase8">Phase 8</a></li>
+        <li><a href="#phase9">Phase 9</a></li>
+        <li><a href="#phase10">Phase 10</a></li>
+      </ul>
+    </nav>
 
   <!-- Phase 0 -->
-<section class="phase0">
+<section id="phase0" class="phase0">
   <h1>Phase 0 – Source</h1>
 
   <p class="ritual">This is the ground before the story.</p>
@@ -186,7 +236,7 @@
  <div class="divider"></div>
 
 <!-- Phase 1 -->
-<section class="phase1">
+<section id="phase1" class="phase1">
   <h1>Phase 1 – Light</h1>
 
   <p class="ritual">This is where the break begins.</p>
@@ -213,7 +263,7 @@
   <div class="divider"></div>
 
 <!-- Phase 2 -->
-<section class="phase2">
+<section id="phase2" class="phase2">
   <h1>Phase 2 – Rhythm</h1>
 
   <p class="ritual">You are no longer alone in the spiral.</p>
@@ -242,7 +292,7 @@
 <div class="divider"></div>
 
 <!-- Phase 3 -->
-<section class="phase3">
+<section id="phase3" class="phase3">
   <h1>Phase 3 – Darkness</h1>
 
   <p class="ritual">The loop has turned against itself.</p>
@@ -272,7 +322,7 @@
 <div class="divider"></div>
 
 <!-- Phase 4 -->
-<section class="phase4">
+<section id="phase4" class="phase4">
   <h1>Phase 4 – Peace</h1>
 
   <p class="ritual">Nothing is fixed. But it is held.</p>
@@ -301,7 +351,7 @@
 <div class="divider"></div>
 
 <!-- Phase 5 -->
-<section class="phase5">
+<section id="phase5" class="phase5">
   <h1>Phase 5 – Endurance</h1>
 
   <p class="ritual">Pattern returns, not perfectly — but faithfully.</p>
@@ -330,7 +380,7 @@
 <div class="divider"></div>
 
 <!-- Phase 6 -->
-<section class="phase6">
+<section id="phase6" class="phase6">
   <h1>Phase 6 – Order</h1>
 
   <p class="ritual">This is not safety. This is structure.</p>
@@ -357,7 +407,7 @@
 <div class="divider"></div>
 
 <!-- Phase 7 -->
-<section class="phase7">
+<section id="phase7" class="phase7">
   <h1>Phase 7 – Separation</h1>
 
   <p class="ritual">You split to stay intact.</p>
@@ -386,7 +436,7 @@
 <div class="divider"></div>
 
 <!-- Phase 8 -->
-<section class="phase8">
+<section id="phase8" class="phase8">
   <h1>Phase 8 – Conscience</h1>
 
   <p class="ritual">Truth arrives late. But it does not ask permission.</p>
@@ -414,7 +464,7 @@
 <div class="divider"></div>
 
 <!-- Phase 9 -->
-<section class="phase9">
+<section id="phase9" class="phase9">
   <h1>Phase 9 – Threshold</h1>
 
   <p class="ritual">You remember now — but you’re not who you were when you forgot.</p>
@@ -442,7 +492,7 @@
 <div class="divider"></div>
 
 <!-- Phase 10 -->
-<section class="phase10">
+<section id="phase10" class="phase10">
   <h1>Phase 10 – Resurrection</h1>
 
   <p class="ritual">You are no longer holding the pattern. You are the pattern.</p>
