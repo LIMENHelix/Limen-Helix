@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-archetype="Analyst" style="--phase: 0;">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -67,9 +67,97 @@
       margin-top: 2rem;
       border-radius: 12px;
     }
+
+    /* === Cognition Engine: Latent Start & Phase Shift === */
+    .latent-layer {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(12,12,12,0.97) 0%, rgba(0,0,0,0.99) 100%);
+      pointer-events: none;
+      z-index: 500;
+      opacity: calc(1 - var(--phase, 0));
+      transition: opacity 0.3s ease-out;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .latent-layer::before {
+      content: '...';
+      font-size: 3rem;
+      color: #333;
+      animation: pulse-latent 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-latent {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.6; }
+    }
+
+    .latent-layer.resolved {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Phase-based content resolution */
+    .overlay {
+      filter: blur(calc((1 - var(--phase, 0)) * 3px));
+      transition: filter 0.5s ease-out;
+    }
+
+    /* === Archetype-Based Styling === */
+
+    /* Analyst: structured, clear */
+    [data-archetype="Analyst"] h1 {
+      letter-spacing: 1px;
+    }
+    [data-archetype="Analyst"] p {
+      line-height: 1.8;
+    }
+
+    /* Engineer: compact, efficient */
+    [data-archetype="Engineer"] .overlay {
+      padding: 2rem;
+    }
+    [data-archetype="Engineer"] h1 {
+      font-size: 2.2rem;
+    }
+    [data-archetype="Engineer"] p {
+      font-size: 1.05rem;
+    }
+
+    /* Philosopher: spacious, contemplative */
+    [data-archetype="Philosopher"] .overlay {
+      padding: 5rem;
+    }
+    [data-archetype="Philosopher"] h1 {
+      font-size: 3.2rem;
+      font-weight: 300;
+    }
+    [data-archetype="Philosopher"] p {
+      font-size: 1.35rem;
+      line-height: 2;
+      max-width: 600px;
+    }
+
+    /* Artist: expressive, flowing */
+    [data-archetype="Artist"] h1 {
+      font-style: italic;
+      transform: rotate(-0.5deg);
+    }
+    [data-archetype="Artist"] p {
+      font-size: 1.25rem;
+    }
+    [data-archetype="Artist"] .button {
+      background-color: #a08d4b;
+      border-radius: 20px;
+    }
   </style>
 </head>
 <body>
+  <!-- Latent layer: visible until cognition resolves -->
+  <div class="latent-layer" id="latent-layer"></div>
+
   <div class="overlay">
     <h1>There is a structure in your suffering.</h1>
     <p><em>LIMEN Helix shows you how to return through it.</em></p>
@@ -92,5 +180,29 @@
       &copy; LIMEN Helix Transformational Sciences – All resonance held in pattern.
     </footer>
   </div>
+
+  <!-- Cognition Engine -->
+  <script src="cognitionEngine.js"></script>
+  <script>
+    (function() {
+      // Start the cognition engine
+      var engine = startCognitionEngine({ phaseSeconds: 5 });
+
+      // Subscribe to state updates
+      engine.subscribe(function(state) {
+        // Update archetype data attribute
+        document.documentElement.dataset.archetype = state.archetype;
+
+        // Update phase CSS variable
+        document.documentElement.style.setProperty('--phase', state.phase.toFixed(3));
+
+        // Mark latent layer as resolved when phase completes
+        if (state.phase >= 0.95) {
+          var latent = document.getElementById('latent-layer');
+          if (latent) latent.classList.add('resolved');
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

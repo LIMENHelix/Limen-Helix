@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-archetype="Analyst" style="--phase: 0;">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -264,6 +264,122 @@
   transform: translateY(0);
 }
 
+/* === Cognition Engine: Latent Start & Phase Shift === */
+
+/* Latent start: page begins unresolved */
+.latent-layer {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(12,12,12,0.95) 0%, rgba(0,0,0,0.98) 100%);
+  pointer-events: none;
+  z-index: 500;
+  opacity: calc(1 - var(--phase, 0));
+  transition: opacity 0.3s ease-out;
+}
+
+.latent-layer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="55" text-anchor="middle" font-size="40" fill="%23333" opacity="0.3">...</text></svg>') center center no-repeat;
+  background-size: 60px;
+  animation: pulse-latent 2s ease-in-out infinite;
+}
+
+@keyframes pulse-latent {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+
+/* Phase-based content resolution */
+body {
+  filter: blur(calc((1 - var(--phase, 0)) * 2px));
+  transition: filter 0.5s ease-out;
+}
+
+/* Hide latent layer when phase completes */
+.latent-layer.resolved {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* === Archetype-Based Styling === */
+
+/* Analyst: structured, balanced, clear hierarchy */
+[data-archetype="Analyst"] section {
+  text-align: left;
+  padding-left: 10%;
+  padding-right: 10%;
+}
+[data-archetype="Analyst"] h1 {
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: 2.4rem;
+}
+[data-archetype="Analyst"] p {
+  line-height: 1.8;
+}
+
+/* Engineer: dense, compact, information-rich */
+[data-archetype="Engineer"] section {
+  padding: 2rem 1.5rem;
+}
+[data-archetype="Engineer"] h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+[data-archetype="Engineer"] p {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  max-width: 800px;
+}
+[data-archetype="Engineer"] .phase-nav {
+  font-size: 0.85rem;
+}
+
+/* Philosopher: spacious, contemplative, centered */
+[data-archetype="Philosopher"] section {
+  min-height: 120vh;
+  padding: 6rem 2rem;
+}
+[data-archetype="Philosopher"] h1 {
+  font-size: 3.2rem;
+  font-weight: 300;
+  letter-spacing: 4px;
+}
+[data-archetype="Philosopher"] p {
+  font-size: 1.3rem;
+  line-height: 2;
+  max-width: 550px;
+}
+[data-archetype="Philosopher"] .divider {
+  height: 12px;
+}
+
+/* Artist: expressive, flowing, asymmetric */
+[data-archetype="Artist"] section {
+  text-align: left;
+  padding-left: 8%;
+  padding-right: 15%;
+}
+[data-archetype="Artist"] h1 {
+  font-style: italic;
+  font-size: 2.6rem;
+  transform: rotate(-1deg);
+}
+[data-archetype="Artist"] p {
+  font-size: 1.15rem;
+  opacity: 0.9;
+}
+[data-archetype="Artist"] .particle {
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 220, 180, 0.9);
+}
+[data-archetype="Artist"] .divider {
+  background: linear-gradient(to right, #d4a574 0%, transparent 80%);
+}
+
 
 
 
@@ -272,6 +388,9 @@
   </style>
 </head>
   <body>
+    <!-- Latent layer: visible until cognition resolves -->
+    <div class="latent-layer" id="latent-layer"></div>
+
     <nav class="phase-nav">
       <ul>
         <li><a href="#phase0">Phase 0</a></li>
@@ -599,6 +718,30 @@
   </iframe>
 </section>
 
+
+  <!-- Cognition Engine: must load before other scripts -->
+  <script src="cognitionEngine.js"></script>
+  <script>
+    (function() {
+      // Start the cognition engine
+      var engine = startCognitionEngine({ phaseSeconds: 5 });
+
+      // Subscribe to state updates
+      engine.subscribe(function(state) {
+        // Update archetype data attribute
+        document.documentElement.dataset.archetype = state.archetype;
+
+        // Update phase CSS variable
+        document.documentElement.style.setProperty('--phase', state.phase.toFixed(3));
+
+        // Mark latent layer as resolved when phase completes
+        if (state.phase >= 0.95) {
+          var latent = document.getElementById('latent-layer');
+          if (latent) latent.classList.add('resolved');
+        }
+      });
+    })();
+  </script>
 
   <script src="scrollAnimations.js"></script>
   <script src="phaseTextFade.js"></script>
