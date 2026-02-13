@@ -21,7 +21,7 @@ body{background:#000;overflow:hidden;height:100vh;width:100vw;font-family:Georgi
 @keyframes gb{0%,100%{opacity:.3;text-shadow:0 0 15px rgba(201,169,78,0.2)}50%{opacity:.8;text-shadow:0 0 30px rgba(201,169,78,0.5)}}
 
 /* THE EYE */
-#eye-container{position:relative;z-index:3;width:60vmin;max-width:500px;height:30vmin;max-height:250px}
+#eye-container{position:relative;z-index:3;width:75vmin;max-width:650px;height:38vmin;max-height:325px}
 #eyeCanvas{width:100%;height:100%}
 
 /* Text below eye */
@@ -66,7 +66,7 @@ body{background:#000;overflow:hidden;height:100vh;width:100vw;font-family:Georgi
   <div id="gt">
     <div id="gt1">Enter the Threshold</div>
     <div id="gt2">seek what lies beyond the pattern</div>
-    <div id="gt3">⚠ enter at the risk of enlightenment ⚠</div>
+    <div id="gt3">⚠ THE TRUTH LIVES BEYOND THIS POINT · THERE IS NO GOING BACK ⚠</div>
   </div>
 </div>
 
@@ -160,144 +160,255 @@ resizeEye();
 function drawEye(){
   var w=ec.width,h=ec.height,cx=w/2,cy=h/2;
   ex.clearRect(0,0,w,h);
-  eyeOpen+=(eyeTarget-eyeOpen)*0.06;
-  eyeT+=0.02;
+  eyeOpen+=(eyeTarget-eyeOpen)*0.05;
+  eyeT+=0.015;
   
-  var eyeW=w*0.42;
-  var eyeH=h*0.4*eyeOpen;
+  var eyeW=w*0.45;
+  var eyeH=h*0.42*eyeOpen;
+  
+  // ALL-SEEING EYE RAYS — visible even when closed, radiating from behind
+  if(eyeOpen>0.01||true){
+    var rayAlpha=0.02+eyeOpen*0.06;
+    for(var r=0;r<60;r++){
+      var a=(r/60)*Math.PI*2+eyeT*0.08+Math.sin(r*0.5)*0.1;
+      var rLen=Math.max(w,h)*(0.3+Math.sin(eyeT+r*1.1)*0.15);
+      ex.beginPath();ex.moveTo(cx,cy);
+      ex.lineTo(cx+Math.cos(a)*rLen,cy+Math.sin(a)*rLen);
+      var rc=r%5;
+      if(rc===0)ex.strokeStyle='rgba(201,169,78,'+rayAlpha+')';
+      else if(rc===1)ex.strokeStyle='rgba(140,200,255,'+rayAlpha*0.7+')';
+      else if(rc===2)ex.strokeStyle='rgba(255,255,255,'+rayAlpha*0.5+')';
+      else if(rc===3)ex.strokeStyle='rgba(200,140,255,'+rayAlpha*0.6+')';
+      else ex.strokeStyle='rgba(255,200,130,'+rayAlpha*0.8+')';
+      ex.lineWidth=0.5+Math.sin(eyeT*2+r)*0.5;
+      ex.stroke();
+    }
+  }
   
   if(eyeOpen>0.03){
     // Clip to eye shape
     ex.save();
     ex.beginPath();
     ex.moveTo(cx-eyeW,cy);
-    ex.bezierCurveTo(cx-eyeW*0.6,cy-eyeH,cx+eyeW*0.6,cy-eyeH,cx+eyeW,cy);
-    ex.bezierCurveTo(cx+eyeW*0.6,cy+eyeH,cx-eyeW*0.6,cy+eyeH,cx-eyeW,cy);
+    ex.bezierCurveTo(cx-eyeW*0.55,cy-eyeH*1.1,cx+eyeW*0.55,cy-eyeH*1.1,cx+eyeW,cy);
+    ex.bezierCurveTo(cx+eyeW*0.55,cy+eyeH*1.1,cx-eyeW*0.55,cy+eyeH*1.1,cx-eyeW,cy);
     ex.closePath();
     ex.clip();
     
-    var maxR=Math.max(eyeW,eyeH)*1.3;
+    var maxR=Math.max(eyeW,eyeH)*1.4;
     
-    // BASE: Deep cosmic gradient
+    // LAYER 1: Cosmic nebula base
     var baseGrad=ex.createRadialGradient(cx,cy,0,cx,cy,maxR);
     baseGrad.addColorStop(0,'rgba(255,255,255,'+(1.0*eyeOpen)+')');
-    baseGrad.addColorStop(0.04,'rgba(200,235,255,'+(0.95*eyeOpen)+')');
-    baseGrad.addColorStop(0.1,'rgba(120,200,255,'+(0.85*eyeOpen)+')');
-    baseGrad.addColorStop(0.25,'rgba(60,100,200,'+(0.6*eyeOpen)+')');
-    baseGrad.addColorStop(0.45,'rgba(180,80,180,'+(0.35*eyeOpen)+')');
-    baseGrad.addColorStop(0.7,'rgba(40,20,80,'+(0.2*eyeOpen)+')');
-    baseGrad.addColorStop(1,'rgba(5,2,15,'+(0.1*eyeOpen)+')');
+    baseGrad.addColorStop(0.03,'rgba(220,240,255,'+(0.97*eyeOpen)+')');
+    baseGrad.addColorStop(0.08,'rgba(140,210,255,'+(0.9*eyeOpen)+')');
+    baseGrad.addColorStop(0.18,'rgba(80,140,255,'+(0.75*eyeOpen)+')');
+    baseGrad.addColorStop(0.3,'rgba(180,100,220,'+(0.5*eyeOpen)+')');
+    baseGrad.addColorStop(0.45,'rgba(220,160,60,'+(0.35*eyeOpen)+')');
+    baseGrad.addColorStop(0.6,'rgba(180,40,80,'+(0.2*eyeOpen)+')');
+    baseGrad.addColorStop(0.8,'rgba(40,15,80,'+(0.15*eyeOpen)+')');
+    baseGrad.addColorStop(1,'rgba(5,2,15,'+(0.05*eyeOpen)+')');
     ex.fillStyle=baseGrad;
     ex.fillRect(0,0,w,h);
     
-    // ═══ CRYSTALLINE FRACTAL SHARDS — asymmetric, jagged ═══
-    // Each shard is unique — different length, angle offset, color, branches
-    var seed=137.508;// golden angle for natural asymmetry
-    for(var shard=0;shard<55;shard++){
-      var baseA=shard*seed*(Math.PI/180)+eyeT*0.15;
-      var shardLen=maxR*(0.15+((shard*13+7)%23)/23*0.65);
-      var jitter=(Math.sin(shard*3.7+eyeT*0.8)*0.4);
-      baseA+=jitter;
+    // LAYER 2: Asymmetric nebula clouds
+    for(var neb=0;neb<6;neb++){
+      var nx=cx+Math.sin(neb*2.1+eyeT*0.3)*maxR*0.4;
+      var ny=cy+Math.cos(neb*1.7+eyeT*0.2)*maxR*0.3;
+      var nr=maxR*(0.15+neb*0.06);
+      var nebGrad=ex.createRadialGradient(nx,ny,0,nx,ny,nr);
+      var nebColors=[
+        ['rgba(100,180,255,','rgba(60,120,200,'],
+        ['rgba(200,130,255,','rgba(140,60,180,'],
+        ['rgba(255,180,120,','rgba(200,120,60,'],
+        ['rgba(120,255,200,','rgba(60,180,140,'],
+        ['rgba(255,130,180,','rgba(200,80,130,'],
+        ['rgba(180,220,255,','rgba(120,160,200,']
+      ][neb];
+      nebGrad.addColorStop(0,nebColors[0]+(0.12*eyeOpen)+')');
+      nebGrad.addColorStop(0.5,nebColors[1]+(0.06*eyeOpen)+')');
+      nebGrad.addColorStop(1,'rgba(0,0,0,0)');
+      ex.fillStyle=nebGrad;
+      ex.fillRect(0,0,w,h);
+    }
+    
+    // LAYER 3: 80 crystalline fractal shards — golden angle distribution
+    var seed=137.508;
+    for(var shard=0;shard<80;shard++){
+      var baseA=shard*seed*(Math.PI/180)+eyeT*0.12;
+      var shardLen=maxR*(0.1+((shard*17+11)%29)/29*0.7);
+      baseA+=Math.sin(shard*2.3+eyeT*0.6)*0.5;
       
-      // Main crystal spine
       ex.beginPath();
-      var sx=cx,sy=cy;
-      ex.moveTo(sx,sy);
-      var segments=4+shard%5;
       var pts=[];
-      for(var seg=0;seg<segments;seg++){
-        var ratio=(seg+1)/segments;
-        var drift=Math.sin(eyeT*1.5+shard*2.3+seg*4.1)*(20-ratio*15);
+      ex.moveTo(cx,cy);
+      var segs=3+shard%6;
+      for(var seg=0;seg<segs;seg++){
+        var ratio=(seg+1)/segs;
+        var drift=Math.sin(eyeT*1.2+shard*1.9+seg*3.7)*(25-ratio*20);
         var nx=cx+Math.cos(baseA)*(shardLen*ratio)+Math.cos(baseA+1.57)*drift;
         var ny=cy+Math.sin(baseA)*(shardLen*ratio)+Math.sin(baseA+1.57)*drift;
         ex.lineTo(nx,ny);
         pts.push({x:nx,y:ny});
       }
       
-      // Crystal color — pull from a wide asymmetric palette
-      var cIdx=(shard*7)%6;
-      var alpha=(0.08+Math.sin(eyeT*2+shard)*0.04)*eyeOpen;
-      if(cIdx===0)ex.strokeStyle='rgba(180,230,255,'+alpha+')';// baby blue
-      else if(cIdx===1)ex.strokeStyle='rgba(255,220,130,'+alpha+')';// gold
-      else if(cIdx===2)ex.strokeStyle='rgba(200,140,255,'+alpha+')';// violet
-      else if(cIdx===3)ex.strokeStyle='rgba(255,180,200,'+alpha+')';// pink
-      else if(cIdx===4)ex.strokeStyle='rgba(130,255,220,'+alpha+')';// cyan-green
-      else ex.strokeStyle='rgba(255,255,255,'+alpha+')';// white
-      
-      ex.lineWidth=1+((shard*3)%4)*0.4;
-      ex.shadowColor=ex.strokeStyle.replace(alpha+'',Math.min(alpha*3,0.5)+'');
-      ex.shadowBlur=8;
+      var colors=[
+        'rgba(180,235,255,','rgba(255,225,140,','rgba(210,150,255,',
+        'rgba(255,170,200,','rgba(140,255,220,','rgba(255,255,255,',
+        'rgba(100,200,255,','rgba(255,200,100,'
+      ];
+      var alpha=(0.06+Math.sin(eyeT*1.8+shard*0.7)*0.04)*eyeOpen;
+      ex.strokeStyle=colors[(shard*7)%colors.length]+alpha+')';
+      ex.lineWidth=0.8+((shard*3)%5)*0.3;
+      ex.shadowColor=ex.strokeStyle.replace(alpha+'',Math.min(alpha*4,0.4)+'');
+      ex.shadowBlur=6;
       ex.stroke();
       ex.shadowBlur=0;
       
-      // Crystal branches — asymmetric forks off the main spine
+      // Branches
       if(shard%3===0&&pts.length>1){
-        for(var b=0;b<pts.length-1;b++){
-          if((b+shard)%2!==0)continue;
-          var bp=pts[b];
-          var branchA=baseA+((shard%2===0)?0.6:-0.5)+Math.sin(eyeT+shard+b)*0.3;
-          var branchLen=shardLen*0.25*(1-b/pts.length);
-          ex.beginPath();
-          ex.moveTo(bp.x,bp.y);
-          ex.lineTo(bp.x+Math.cos(branchA)*branchLen+Math.sin(eyeT*3+b)*5,
-                    bp.y+Math.sin(branchA)*branchLen+Math.cos(eyeT*3+b)*5);
-          ex.strokeStyle='rgba(180,220,255,'+(0.05*eyeOpen)+')';
-          ex.lineWidth=0.7;
-          ex.stroke();
-        }
+        var bp=pts[Math.floor(pts.length/2)];
+        var brA=baseA+((shard%2===0)?0.7:-0.6)+Math.sin(eyeT+shard)*0.4;
+        var brL=shardLen*0.3;
+        ex.beginPath();ex.moveTo(bp.x,bp.y);
+        ex.lineTo(bp.x+Math.cos(brA)*brL+Math.sin(eyeT*2+shard)*6,bp.y+Math.sin(brA)*brL+Math.cos(eyeT*2+shard)*6);
+        ex.strokeStyle='rgba(180,220,255,'+(0.04*eyeOpen)+')';
+        ex.lineWidth=0.6;ex.stroke();
       }
       
-      // Crystal tip glow — bright point at end of some shards
-      if(shard%4===0&&pts.length>0){
+      // Crystal tip sparks
+      if(shard%5===0&&pts.length>0){
         var tip=pts[pts.length-1];
-        var tipPulse=Math.abs(Math.sin(eyeT*3+shard*1.7));
-        ex.beginPath();
-        ex.arc(tip.x,tip.y,1.5+tipPulse*2,0,Math.PI*2);
-        ex.fillStyle='rgba(200,235,255,'+(0.3*eyeOpen*tipPulse)+')';
-        ex.shadowColor='rgba(150,210,255,0.7)';ex.shadowBlur=8;
+        var tp=Math.abs(Math.sin(eyeT*2.5+shard*1.3));
+        ex.beginPath();ex.arc(tip.x,tip.y,1+tp*3,0,Math.PI*2);
+        ex.fillStyle='rgba(200,240,255,'+(0.35*eyeOpen*tp)+')';
+        ex.shadowColor='rgba(150,220,255,0.8)';ex.shadowBlur=10;
         ex.fill();ex.shadowBlur=0;
       }
     }
     
-    // Electric crackling between nearby crystal tips
-    for(var e=0;e<6;e++){
-      var ea1=(e*seed*3+eyeT*30)*(Math.PI/180);
-      var ea2=ea1+0.3+Math.sin(eyeT*4+e)*0.2;
-      var er1=maxR*(0.3+Math.sin(eyeT+e)*0.15);
-      var er2=maxR*(0.35+Math.cos(eyeT*1.3+e)*0.15);
+    // LAYER 4: Electric arcs crackling across
+    for(var e=0;e<10;e++){
+      var ea=eyeT*1.5+e*seed*2*(Math.PI/180);
+      var er=maxR*(0.2+Math.sin(eyeT*0.8+e)*0.2);
       ex.beginPath();
-      var ex1=cx+Math.cos(ea1)*er1,ey1=cy+Math.sin(ea1)*er1;
-      var ex2=cx+Math.cos(ea2)*er2,ey2=cy+Math.sin(ea2)*er2;
-      ex.moveTo(ex1,ey1);
-      // Jagged arc path
-      var midX=(ex1+ex2)/2+Math.sin(eyeT*6+e)*15;
-      var midY=(ey1+ey2)/2+Math.cos(eyeT*6+e)*15;
-      ex.lineTo(midX,midY);
-      ex.lineTo(ex2,ey2);
-      ex.strokeStyle='rgba(100,180,255,'+(0.15*eyeOpen*Math.abs(Math.sin(eyeT*5+e)))+')';
-      ex.lineWidth=1;
-      ex.shadowColor='rgba(80,160,255,0.6)';ex.shadowBlur=6;
+      var ax=cx+Math.cos(ea)*er,ay=cy+Math.sin(ea)*er;
+      ex.moveTo(ax,ay);
+      for(var zag=0;zag<5;zag++){
+        ax+=Math.sin(eyeT*10+e*4+zag*3)*18;
+        ay+=Math.cos(eyeT*8+e*3+zag*4)*14;
+        ex.lineTo(ax,ay);
+      }
+      ex.strokeStyle='rgba(100,190,255,'+(0.1*eyeOpen*Math.abs(Math.sin(eyeT*4+e)))+')';
+      ex.lineWidth=1.2;ex.shadowColor='rgba(80,170,255,0.7)';ex.shadowBlur=8;
       ex.stroke();ex.shadowBlur=0;
     }
     
-    // Floating knowledge particles — asymmetric sizes and orbits
-    for(var sp=0;sp<25;sp++){
-      var sa=eyeT*0.4+sp*0.251+Math.sin(sp*1.7)*0.5;
-      var sr=maxR*(0.08+((sp*11)%25)/25*0.75);
-      var sx=cx+Math.cos(sa)*sr+Math.sin(eyeT*2.3+sp*1.3)*12;
-      var sy=cy+Math.sin(sa)*sr+Math.cos(eyeT*1.7+sp*0.9)*12;
-      var ss=0.5+((sp*7)%5)*0.6+Math.sin(eyeT*3+sp)*0.8;
+    // LAYER 5: 35 floating knowledge particles — multi-color, multi-size
+    for(var sp=0;sp<35;sp++){
+      var sa=eyeT*0.35+sp*0.251+Math.sin(sp*1.3)*0.8;
+      var sr=maxR*(0.06+((sp*13)%30)/30*0.8);
+      var sx=cx+Math.cos(sa)*sr+Math.sin(eyeT*1.9+sp*1.1)*15;
+      var sy=cy+Math.sin(sa)*sr+Math.cos(eyeT*1.4+sp*0.8)*15;
+      var ss=0.4+((sp*7)%6)*0.5+Math.sin(eyeT*2.5+sp)*0.8;
       if(ss>0.3){
         ex.beginPath();ex.arc(sx,sy,ss,0,Math.PI*2);
-        var spC=sp%4;
-        if(spC===0)ex.fillStyle='rgba(200,235,255,'+(0.5*eyeOpen*Math.abs(Math.sin(eyeT*3+sp)))+')';
-        else if(spC===1)ex.fillStyle='rgba(255,220,150,'+(0.4*eyeOpen*Math.abs(Math.sin(eyeT*2.5+sp)))+')';
-        else if(spC===2)ex.fillStyle='rgba(200,150,255,'+(0.4*eyeOpen*Math.abs(Math.sin(eyeT*2.8+sp)))+')';
-        else ex.fillStyle='rgba(150,255,220,'+(0.35*eyeOpen*Math.abs(Math.sin(eyeT*2.2+sp)))+')';
-        ex.shadowColor='rgba(150,200,255,0.5)';ex.shadowBlur=4;
+        var spColors=['rgba(200,240,255,','rgba(255,225,160,','rgba(210,160,255,','rgba(160,255,220,','rgba(255,180,200,'];
+        ex.fillStyle=spColors[sp%5]+(0.45*eyeOpen*Math.abs(Math.sin(eyeT*2.5+sp)))+')';
+        ex.shadowColor='rgba(180,220,255,0.5)';ex.shadowBlur=5;
         ex.fill();ex.shadowBlur=0;
       }
     }
+    
+    // LAYER 6: Inner iris golden ring
+    var irisR=eyeH*0.5;
+    if(irisR>5){
+      ex.beginPath();ex.arc(cx,cy,irisR,0,Math.PI*2);
+      ex.strokeStyle='rgba(201,169,78,'+(0.15*eyeOpen)+')';
+      ex.lineWidth=2;ex.stroke();
+      // Iris threads
+      for(var i=0;i<30;i++){
+        var a=(i/30)*Math.PI*2+eyeT*0.4;
+        ex.beginPath();
+        ex.moveTo(cx+Math.cos(a)*irisR*0.15,cy+Math.sin(a)*irisR*0.15);
+        ex.lineTo(cx+Math.cos(a+Math.sin(eyeT+i)*0.05)*irisR*1.2,cy+Math.sin(a+Math.sin(eyeT+i)*0.05)*irisR*1.2);
+        ex.strokeStyle='rgba(201,169,78,'+(0.06*eyeOpen)+')';
+        ex.lineWidth=0.8;ex.stroke();
+      }
+    }
+    
+    // LAYER 7: PUPIL — the forbidden void
+    var pupilR=Math.max(eyeH*0.16,4);
+    // Blue corona
+    var corona=ex.createRadialGradient(cx,cy,pupilR*0.6,cx,cy,pupilR*2.5);
+    corona.addColorStop(0,'rgba(0,0,5,'+(0.97*eyeOpen)+')');
+    corona.addColorStop(0.4,'rgba(15,30,60,'+(0.6*eyeOpen)+')');
+    corona.addColorStop(0.7,'rgba(50,100,180,'+(0.25*eyeOpen)+')');
+    corona.addColorStop(1,'rgba(100,180,255,'+(0.03*eyeOpen)+')');
+    ex.beginPath();ex.arc(cx,cy,pupilR*2.5,0,Math.PI*2);
+    ex.fillStyle=corona;ex.fill();
+    
+    // Void
+    ex.beginPath();ex.arc(cx,cy,pupilR,0,Math.PI*2);
+    ex.fillStyle='rgba(0,0,0,'+(0.99*eyeOpen)+')';ex.fill();
+    
+    // Micro lightning around pupil
+    for(var arc=0;arc<16;arc++){
+      var aa=(arc/16)*Math.PI*2+eyeT*2.5;
+      var flickr=Math.abs(Math.sin(eyeT*6+arc*2.1));
+      if(flickr>0.5){
+        ex.beginPath();
+        ex.moveTo(cx+Math.cos(aa)*pupilR,cy+Math.sin(aa)*pupilR);
+        ex.lineTo(cx+Math.cos(aa+0.1)*(pupilR*1.8+Math.sin(eyeT*9+arc)*6),cy+Math.sin(aa+0.1)*(pupilR*1.8+Math.sin(eyeT*9+arc)*6));
+        ex.strokeStyle='rgba(130,200,255,'+(0.4*eyeOpen*flickr)+')';
+        ex.lineWidth=0.8;ex.shadowColor='rgba(80,170,255,0.9)';ex.shadowBlur=4;
+        ex.stroke();ex.shadowBlur=0;
+      }
+    }
+    
+    // Light reflections
+    ex.beginPath();ex.arc(cx-pupilR*0.45,cy-pupilR*0.4,pupilR*0.25,0,Math.PI*2);
+    ex.fillStyle='rgba(220,240,255,'+(0.65*eyeOpen)+')';ex.fill();
+    ex.beginPath();ex.arc(cx+pupilR*0.3,cy+pupilR*0.2,pupilR*0.12,0,Math.PI*2);
+    ex.fillStyle='rgba(255,255,255,'+(0.35*eyeOpen)+')';ex.fill();
+    
+    ex.restore();
+    
+    // Eye outline — double glow
+    ex.beginPath();
+    ex.moveTo(cx-eyeW,cy);
+    ex.bezierCurveTo(cx-eyeW*0.55,cy-eyeH*1.1,cx+eyeW*0.55,cy-eyeH*1.1,cx+eyeW,cy);
+    ex.bezierCurveTo(cx+eyeW*0.55,cy+eyeH*1.1,cx-eyeW*0.55,cy+eyeH*1.1,cx-eyeW,cy);
+    ex.closePath();
+    ex.strokeStyle='rgba(201,169,78,'+(0.5+eyeOpen*0.5)+')';
+    ex.lineWidth=2.5+eyeOpen*2;
+    ex.shadowColor='rgba(140,210,255,'+(0.7*eyeOpen)+')';
+    ex.shadowBlur=50+eyeOpen*60;
+    ex.stroke();
+    ex.strokeStyle='rgba(255,230,170,'+(0.25*eyeOpen)+')';
+    ex.lineWidth=1;
+    ex.shadowColor='rgba(255,210,120,'+(0.5*eyeOpen)+')';
+    ex.shadowBlur=25;
+    ex.stroke();
+    ex.shadowBlur=0;
+  }
+  
+  // Closed slit
+  if(eyeOpen<0.7){
+    var la=1-eyeOpen/0.7;
+    ex.beginPath();
+    ex.moveTo(cx-eyeW,cy);
+    ex.bezierCurveTo(cx-eyeW*0.5,cy-eyeW*0.02*la,cx+eyeW*0.5,cy-eyeW*0.02*la,cx+eyeW,cy);
+    ex.strokeStyle='rgba(201,169,78,'+(0.55*la)+')';
+    ex.lineWidth=2.5;
+    ex.shadowColor='rgba(140,210,255,'+(0.35*la)+')';
+    ex.shadowBlur=25;
+    ex.stroke();
+    ex.shadowBlur=0;
+  }
+  
+  requestAnimationFrame(drawEye);
+}
     
     // Iris ring detail — golden threads
     var irisR=eyeH*0.55;
