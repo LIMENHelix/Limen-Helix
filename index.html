@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LIMEN Helix – The Threshold</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>LIMEN Helix – The Threshold v3</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;overflow:hidden;height:100vh;width:100vw;font-family:Georgia,serif}
@@ -51,7 +54,7 @@ body{background:#000;overflow:hidden;height:100vh;width:100vw;font-family:Georgi
 .pb{display:inline-block;background:none;border:1px solid rgba(201,169,78,0.12);color:#444;padding:10px 28px;font-size:.55rem;letter-spacing:3px;cursor:pointer;text-transform:uppercase;font-family:monospace;transition:all .3s;text-decoration:none;margin-top:1rem}
 .pb:hover{color:#C9A94E;border-color:rgba(201,169,78,0.35)}
 .gate-opening{opacity:0!important;transition:opacity 1.2s!important}
-@media(max-width:600px){#eye-container{width:85vmin;height:42vmin}.cg{font-size:1rem}#gt1{font-size:.55rem}#gt2{font-size:.65rem}.ctt{font-size:1.5rem}.og{gap:6px}.oc{padding:16px 10px}}
+@media(max-width:600px){#eye-container{width:90vmin;height:45vmin}.cg{font-size:1rem}#gt1{font-size:.5rem;letter-spacing:8px}#gt2{font-size:.6rem}#gt3{font-size:.4rem;letter-spacing:3px}#gt{padding:1rem 1.5rem}.ctt{font-size:1.5rem}.og{gap:6px}.oc{padding:16px 10px}}
 </style>
 </head>
 <body>
@@ -94,15 +97,20 @@ var words=['ΛΙΜΕΝ','ΕΛΙΞ','ΦΑΣΙΣ','ΚΑΤΩΦΛΙ','ΣΠΕΙΡΑ',
 var greekChars='ΩΔΨΦΛΣΘΑΒΓΕΖΗΙΚΜΝΞΟΠΡΤΥΧωδψφλσθαβγεζηικμνξοπρτυχ∞∑∏∫√∂'.split('');
 
 // ═══ MATRIX RAIN ═══
+// ═══ CANVAS DPI FIX ═══
+var dpr=window.devicePixelRatio||1;
+
 var mc=document.getElementById('matrix'),mx=mc.getContext('2d');
-mc.width=window.innerWidth;mc.height=window.innerHeight;
-var fontSize=12,cols=Math.floor(mc.width/(fontSize*0.5));
+mc.width=window.innerWidth*dpr;mc.height=window.innerHeight*dpr;
+mc.style.width=window.innerWidth+'px';mc.style.height=window.innerHeight+'px';
+mx.scale(dpr,dpr);
+var fontSize=12,cols=Math.floor(window.innerWidth/(fontSize*0.5));
 var drops=[],colWords=[],colCharIdx=[];
 for(var i=0;i<cols;i++){drops[i]=Math.random()*-100;colWords[i]=Math.random()<0.4?words[Math.floor(Math.random()*words.length)]:'';colCharIdx[i]=0}
 
 function drawMatrix(){
   mx.fillStyle='rgba(0,0,0,0.035)';
-  mx.fillRect(0,0,mc.width,mc.height);
+  mx.fillRect(0,0,window.innerWidth,window.innerHeight);
   for(var i=0;i<drops.length;i++){
     var ch;
     if(colWords[i]&&colCharIdx[i]<colWords[i].length){ch=colWords[i][colCharIdx[i]];colCharIdx[i]++}
@@ -114,7 +122,7 @@ function drawMatrix(){
     else if(c<0.85){mx.fillStyle='rgba(255,80,180,'+(0.5+Math.random()*0.5)+')';mx.shadowColor='rgba(255,80,180,0.6)'}
     else{mx.fillStyle='rgba(255,160,40,'+(0.5+Math.random()*0.5)+')';mx.shadowColor='rgba(255,160,40,0.6)'}
     mx.shadowBlur=8+Math.random()*8;mx.font=(fontSize-2+Math.random()*4)+'px monospace';mx.fillText(ch,x,y);mx.shadowBlur=0;
-    if(y>mc.height&&Math.random()>0.98){drops[i]=0;colWords[i]=Math.random()<0.4?words[Math.floor(Math.random()*words.length)]:'';colCharIdx[i]=0}
+    if(y>window.innerHeight&&Math.random()>0.98){drops[i]=0;colWords[i]=Math.random()<0.4?words[Math.floor(Math.random()*words.length)]:'';colCharIdx[i]=0}
     drops[i]+=0.25+Math.random()*0.35;
   }
   requestAnimationFrame(drawMatrix);
@@ -123,11 +131,13 @@ drawMatrix();
 
 // ═══ KALEIDOSCOPE ═══
 var kc=document.getElementById('kaleidoscope'),kx=kc.getContext('2d');
-kc.width=window.innerWidth;kc.height=window.innerHeight;
+kc.width=window.innerWidth*dpr;kc.height=window.innerHeight*dpr;
+kc.style.width=window.innerWidth+'px';kc.style.height=window.innerHeight+'px';
+kx.scale(dpr,dpr);
 var t=0;
 function drawK(){
-  kx.clearRect(0,0,kc.width,kc.height);
-  var cx=kc.width/2,cy=kc.height/2,maxR=Math.min(kc.width,kc.height)*0.48;
+  kx.clearRect(0,0,window.innerWidth,window.innerHeight);
+  var cx=window.innerWidth/2,cy=window.innerHeight/2,maxR=Math.min(window.innerWidth,window.innerHeight)*0.48;
   for(var arm=0;arm<12;arm++){
     var ba=(arm/12)*Math.PI*2+t*0.15;kx.beginPath();
     for(var i=0;i<300;i++){var r=i/300,a=ba+r*Math.PI*6+Math.sin(t*0.3+r*4)*0.8,rr=r*maxR,w=Math.sin(t*2+r*10+arm)*rr*0.02;
@@ -500,26 +510,38 @@ function drawEye(){
 }
 drawEye();
 
-// Hover detection
+// Hover detection — mouse AND touch
 var gateEl=document.getElementById('gate');
 gateEl.addEventListener('mouseenter',function(){if(!eyeClicked)eyeTarget=0.85});
 gateEl.addEventListener('mouseleave',function(){if(!eyeClicked)eyeTarget=0});
+// Mobile: eye opens on first touch, stays open
+gateEl.addEventListener('touchstart',function(e){
+  if(!eyeClicked){
+    if(eyeTarget<0.5){
+      eyeTarget=0.85;// first tap opens
+      e.preventDefault();// don't trigger click yet
+    }
+    // second tap (eye already open) will fall through to onclick
+  }
+},{passive:false});
 
 // ═══ FIRE RING ═══
 var fc=document.getElementById('fireRing'),fx2=fc.getContext('2d');
-fc.width=window.innerWidth;fc.height=window.innerHeight;
+fc.width=window.innerWidth*dpr;fc.height=window.innerHeight*dpr;
+fc.style.width=window.innerWidth+'px';fc.style.height=window.innerHeight+'px';
+fx2.scale(dpr,dpr);
 var fireActive=false,fireRadius=0,fireTargetR=0,fireT=0;
 var sparks=[];
 for(var i=0;i<300;i++){sparks.push({angle:Math.random()*Math.PI*2,speed:0.5+Math.random()*2.5,dist:0.92+Math.random()*0.16,size:1+Math.random()*3.5,life:Math.random(),hue:Math.floor(Math.random()*60)+15,drift:(Math.random()-0.5)*0.3})}
 var ringChars='ΩΔΨΦΛΣΘΑΒΓΕΖΗΙΚΜΝΞΟΠΡΤΥΧωδψφλσθ'.split('');
 
 function drawFire(){
-  fx2.clearRect(0,0,fc.width,fc.height);
+  fx2.clearRect(0,0,window.innerWidth,window.innerHeight);
   if(!fireActive||fireRadius<3){
     fireRadius+=(fireTargetR-fireRadius)*0.04;
     requestAnimationFrame(drawFire);return;
   }
-  var cx=fc.width/2,cy=fc.height/2;
+  var cx=window.innerWidth/2,cy=window.innerHeight/2;
   fireRadius+=(fireTargetR-fireRadius)*0.03;
   fireT+=0.03;
   
@@ -558,8 +580,13 @@ drawFire();
 
 // ═══ RESIZE ═══
 window.addEventListener('resize',function(){
-  mc.width=kc.width=fc.width=window.innerWidth;mc.height=kc.height=fc.height=window.innerHeight;
-  cols=Math.floor(mc.width/(fontSize*0.5));drops=[];colWords=[];colCharIdx=[];
+  dpr=window.devicePixelRatio||1;
+  var W=window.innerWidth,H=window.innerHeight;
+  mc.width=kc.width=fc.width=W*dpr;mc.height=kc.height=fc.height=H*dpr;
+  mc.style.width=kc.style.width=fc.style.width=W+'px';
+  mc.style.height=kc.style.height=fc.style.height=H+'px';
+  mx.scale(dpr,dpr);kx.scale(dpr,dpr);fx2.scale(dpr,dpr);
+  cols=Math.floor(W/(fontSize*0.5));drops=[];colWords=[];colCharIdx=[];
   for(var i=0;i<cols;i++){drops[i]=Math.random()*-100;colWords[i]=Math.random()<0.4?words[Math.floor(Math.random()*words.length)]:'';colCharIdx[i]=0}
   resizeEye();
 });
