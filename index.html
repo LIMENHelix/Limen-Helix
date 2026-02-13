@@ -175,6 +175,162 @@
 </p>
     <a class="button" href="spiral.html" style="margin-top: 1rem;">Phasecraft Descent</a>
 
+    <!-- ═══════ THE SIGIL GATE ═══════ -->
+    <div id="sigil-gate" style="margin-top: 4rem; cursor: pointer; position: relative;" onclick="openThreshold()">
+      <div style="position: relative; width: 120px; height: 120px; margin: 0 auto;">
+        <!-- Outer ring - slow rotation -->
+        <svg viewBox="0 0 120 120" style="position: absolute; inset: 0; animation: sigil-orbit 20s linear infinite; filter: drop-shadow(0 0 8px rgba(201,169,78,0.3));">
+          <circle cx="60" cy="60" r="55" fill="none" stroke="#8e793e" stroke-width="0.5" stroke-dasharray="4 8" opacity="0.6"/>
+          <circle cx="60" cy="60" r="50" fill="none" stroke="#C9A94E" stroke-width="0.3" opacity="0.4"/>
+          <!-- Cardinal glyphs -->
+          <text x="60" y="12" text-anchor="middle" fill="#C9A94E" font-size="8" opacity="0.7">Ω</text>
+          <text x="108" y="63" text-anchor="middle" fill="#C9A94E" font-size="8" opacity="0.7">Δ</text>
+          <text x="60" y="115" text-anchor="middle" fill="#C9A94E" font-size="8" opacity="0.7">Ψ</text>
+          <text x="12" y="63" text-anchor="middle" fill="#C9A94E" font-size="8" opacity="0.7">Φ</text>
+        </svg>
+        <!-- Inner ring - counter rotation -->
+        <svg viewBox="0 0 120 120" style="position: absolute; inset: 0; animation: sigil-orbit-reverse 15s linear infinite;">
+          <circle cx="60" cy="60" r="38" fill="none" stroke="#C9A94E" stroke-width="0.5" stroke-dasharray="2 6" opacity="0.5"/>
+          <!-- Triangulation -->
+          <polygon points="60,28 82,72 38,72" fill="none" stroke="#C9A94E" stroke-width="0.4" opacity="0.3"/>
+          <polygon points="60,92 38,48 82,48" fill="none" stroke="#8e793e" stroke-width="0.4" opacity="0.3"/>
+        </svg>
+        <!-- Center eye/void -->
+        <svg viewBox="0 0 120 120" style="position: absolute; inset: 0;">
+          <circle cx="60" cy="60" r="18" fill="rgba(12,12,12,0.9)" stroke="#C9A94E" stroke-width="0.8" style="animation: sigil-pulse 3s ease-in-out infinite;"/>
+          <circle cx="60" cy="60" r="4" fill="#C9A94E" opacity="0.8" style="animation: sigil-core 4s ease-in-out infinite;"/>
+          <!-- Vertical slit -->
+          <line x1="60" y1="45" x2="60" y2="75" stroke="#C9A94E" stroke-width="0.5" opacity="0.6"/>
+        </svg>
+      </div>
+      <p style="font-size: 0.65rem; letter-spacing: 4px; color: #555; margin-top: 1rem; text-transform: uppercase; font-family: monospace;">
+        ⟐ Cross the Threshold ⟐
+      </p>
+    </div>
+
+    <!-- ═══════ THRESHOLD PORTAL OVERLAY ═══════ -->
+    <div id="threshold-portal" style="
+      position: fixed; inset: 0; z-index: 9999;
+      background: radial-gradient(ellipse at center, rgba(12,12,12,0.0) 0%, rgba(0,0,0,0.0) 100%);
+      display: none; align-items: center; justify-content: center; flex-direction: column;
+      opacity: 0; transition: opacity 0.8s ease;
+    ">
+      <!-- Expanding void -->
+      <div id="void-ring" style="
+        width: 0; height: 0; border-radius: 50%;
+        border: 1px solid #C9A94E;
+        box-shadow: 0 0 60px rgba(201,169,78,0.2), inset 0 0 60px rgba(0,0,0,0.9);
+        transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex; align-items: center; justify-content: center; flex-direction: column;
+        overflow: hidden; position: relative;
+      ">
+        <div id="portal-content" style="opacity: 0; transition: opacity 0.6s ease 1.2s; text-align: center; padding: 2rem; width: 100%; max-width: 500px;">
+          <p style="font-size: 0.6rem; letter-spacing: 6px; color: #C9A94E; text-transform: uppercase; margin-bottom: 0.5rem;">You have crossed the limen</p>
+          <h2 style="font-family: Georgia, serif; color: #f8eacb; font-size: 1.8rem; font-weight: 300; margin-bottom: 0.5rem;">The Inner Chamber</h2>
+          <p style="font-size: 0.85rem; color: #777; line-height: 1.6; margin-bottom: 2rem;">
+            What you offer here feeds the pattern.<br>
+            What returns to you is the architecture of your own becoming.
+          </p>
+          
+          <!-- Offering categories as ritual choices -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem;">
+            <a href="https://chapel-pos-v2.vercel.app" style="
+              display: block; padding: 18px 12px; border: 1px solid rgba(201,169,78,0.2);
+              background: rgba(201,169,78,0.03); text-decoration: none; transition: all 0.3s;
+              border-radius: 4px;
+            " onmouseover="this.style.borderColor='rgba(201,169,78,0.5)';this.style.background='rgba(201,169,78,0.08)'" onmouseout="this.style.borderColor='rgba(201,169,78,0.2)';this.style.background='rgba(201,169,78,0.03)'">
+              <span style="font-size: 1.4rem; display: block; margin-bottom: 6px;">✦</span>
+              <span style="font-size: 0.7rem; letter-spacing: 3px; color: #C9A94E; text-transform: uppercase;">Offering</span>
+              <span style="font-size: 0.6rem; display: block; color: #666; margin-top: 4px;">Donation · Tithe</span>
+            </a>
+            <a href="https://chapel-pos-v2.vercel.app" style="
+              display: block; padding: 18px 12px; border: 1px solid rgba(201,169,78,0.2);
+              background: rgba(201,169,78,0.03); text-decoration: none; transition: all 0.3s;
+              border-radius: 4px;
+            " onmouseover="this.style.borderColor='rgba(201,169,78,0.5)';this.style.background='rgba(201,169,78,0.08)'" onmouseout="this.style.borderColor='rgba(201,169,78,0.2)';this.style.background='rgba(201,169,78,0.03)'">
+              <span style="font-size: 1.4rem; display: block; margin-bottom: 6px;">⬡</span>
+              <span style="font-size: 0.7rem; letter-spacing: 3px; color: #C9A94E; text-transform: uppercase;">Workshop</span>
+              <span style="font-size: 0.6rem; display: block; color: #666; margin-top: 4px;">Sessions · Training</span>
+            </a>
+            <a href="https://chapel-pos-v2.vercel.app" style="
+              display: block; padding: 18px 12px; border: 1px solid rgba(201,169,78,0.2);
+              background: rgba(201,169,78,0.03); text-decoration: none; transition: all 0.3s;
+              border-radius: 4px;
+            " onmouseover="this.style.borderColor='rgba(201,169,78,0.5)';this.style.background='rgba(201,169,78,0.08)'" onmouseout="this.style.borderColor='rgba(201,169,78,0.2)';this.style.background='rgba(201,169,78,0.03)'">
+              <span style="font-size: 1.4rem; display: block; margin-bottom: 6px;">⊕</span>
+              <span style="font-size: 0.7rem; letter-spacing: 3px; color: #C9A94E; text-transform: uppercase;">Consultation</span>
+              <span style="font-size: 0.6rem; display: block; color: #666; margin-top: 4px;">1-on-1 · Guidance</span>
+            </a>
+            <a href="https://chapel-pos-v2.vercel.app" style="
+              display: block; padding: 18px 12px; border: 1px solid rgba(201,169,78,0.2);
+              background: rgba(201,169,78,0.03); text-decoration: none; transition: all 0.3s;
+              border-radius: 4px;
+            " onmouseover="this.style.borderColor='rgba(201,169,78,0.5)';this.style.background='rgba(201,169,78,0.08)'" onmouseout="this.style.borderColor='rgba(201,169,78,0.2)';this.style.background='rgba(201,169,78,0.03)'">
+              <span style="font-size: 1.4rem; display: block; margin-bottom: 6px;">◇</span>
+              <span style="font-size: 0.7rem; letter-spacing: 3px; color: #C9A94E; text-transform: uppercase;">Materials</span>
+              <span style="font-size: 0.6rem; display: block; color: #666; margin-top: 4px;">Texts · Resources</span>
+            </a>
+          </div>
+          
+          <button onclick="closeThreshold()" style="
+            background: none; border: 1px solid rgba(201,169,78,0.15); color: #555;
+            padding: 8px 24px; font-size: 0.65rem; letter-spacing: 3px; cursor: pointer;
+            text-transform: uppercase; font-family: monospace; transition: all 0.3s;
+          " onmouseover="this.style.color='#C9A94E';this.style.borderColor='rgba(201,169,78,0.4)'" onmouseout="this.style.color='#555';this.style.borderColor='rgba(201,169,78,0.15)'">
+            ← Return to Pattern
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      @keyframes sigil-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      @keyframes sigil-orbit-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+      @keyframes sigil-pulse { 0%, 100% { stroke-opacity: 0.8; r: 18; } 50% { stroke-opacity: 0.3; r: 20; } }
+      @keyframes sigil-core { 0%, 100% { opacity: 0.8; r: 4; } 50% { opacity: 0.3; r: 3; } }
+      #sigil-gate:hover svg { filter: drop-shadow(0 0 15px rgba(201,169,78,0.5)) !important; }
+      #sigil-gate:hover p { color: #C9A94E !important; }
+    </style>
+
+    <script>
+      function openThreshold() {
+        var portal = document.getElementById('threshold-portal');
+        var voidRing = document.getElementById('void-ring');
+        var content = document.getElementById('portal-content');
+        portal.style.display = 'flex';
+        setTimeout(function() {
+          portal.style.opacity = '1';
+          portal.style.background = 'radial-gradient(ellipse at center, rgba(12,12,12,0.98) 0%, rgba(0,0,0,0.99) 100%)';
+        }, 10);
+        setTimeout(function() {
+          voidRing.style.width = '90vmin';
+          voidRing.style.height = '90vmin';
+          voidRing.style.maxWidth = '600px';
+          voidRing.style.maxHeight = '600px';
+        }, 300);
+        setTimeout(function() {
+          content.style.opacity = '1';
+        }, 1200);
+      }
+      function closeThreshold() {
+        var portal = document.getElementById('threshold-portal');
+        var voidRing = document.getElementById('void-ring');
+        var content = document.getElementById('portal-content');
+        content.style.opacity = '0';
+        setTimeout(function() {
+          voidRing.style.width = '0';
+          voidRing.style.height = '0';
+        }, 200);
+        setTimeout(function() {
+          portal.style.opacity = '0';
+          portal.style.background = 'radial-gradient(ellipse at center, rgba(12,12,12,0.0) 0%, rgba(0,0,0,0.0) 100%)';
+        }, 800);
+        setTimeout(function() {
+          portal.style.display = 'none';
+        }, 1600);
+      }
+    </script>
+    <!-- ═══════ END SIGIL GATE ═══════ -->
 
     <!-- Spotify Embed: Phase 0 – Source -->
     <h2 style="color: #e8e3d9; margin-top: 3rem;">Phase 0 – Source</h2>
