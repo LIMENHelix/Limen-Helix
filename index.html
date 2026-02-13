@@ -9,67 +9,65 @@
 body{background:#000;overflow:hidden;height:100vh;width:100vw;font-family:Georgia,serif}
 #matrix{position:fixed;inset:0;z-index:1}
 #kaleidoscope{position:fixed;inset:0;z-index:2}
+#fireRing{position:fixed;inset:0;z-index:12;pointer-events:none}
+
+/* Gate */
 #gate{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer}
-#gate::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 20%,rgba(0,0,0,0.3) 60%,rgba(0,0,0,0.7) 100%);pointer-events:none;z-index:1}
+#gate::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 20%,rgba(0,0,0,0.25) 55%,rgba(0,0,0,0.65) 100%);pointer-events:none;z-index:1}
+
+/* Corner glyphs */
 .cg{position:absolute;font-size:1.4rem;color:rgba(201,169,78,0.3);letter-spacing:4px;z-index:3;animation:gb 5s ease-in-out infinite;text-shadow:0 0 15px rgba(201,169,78,0.2)}
 .cg.tl{top:1.5rem;left:1.5rem}.cg.tr{top:1.5rem;right:1.5rem;animation-delay:1.2s}.cg.bl{bottom:1.5rem;left:1.5rem;animation-delay:2.5s}.cg.br{bottom:1.5rem;right:1.5rem;animation-delay:3.7s}
 @keyframes gb{0%,100%{opacity:.3;text-shadow:0 0 15px rgba(201,169,78,0.2)}50%{opacity:.8;text-shadow:0 0 30px rgba(201,169,78,0.5)}}
-#eye-wrap{position:relative;z-index:3;width:200px;height:200px;display:flex;align-items:center;justify-content:center}
-#eye-wrap svg{width:100%;height:100%;filter:drop-shadow(0 0 30px rgba(201,169,78,0.3))}
-#gt{text-align:center;z-index:3;opacity:0;animation:fu 2s ease 1s forwards}
-@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-#gt1{font-size:.6rem;letter-spacing:12px;color:rgba(201,169,78,0.5);text-transform:uppercase;font-family:monospace;margin-bottom:.5rem;text-shadow:0 0 20px rgba(201,169,78,0.3)}
-#gt2{font-size:.75rem;color:rgba(201,169,78,0.2);letter-spacing:3px;font-style:italic}
-#gate:hover #gt1{color:rgba(201,169,78,0.9);text-shadow:0 0 30px rgba(201,169,78,0.5)}
+
+/* THE EYE */
+#eye-container{position:relative;z-index:3;width:60vmin;max-width:500px;height:30vmin;max-height:250px}
+#eyeCanvas{width:100%;height:100%}
+
+/* Text below eye */
+#gt{text-align:center;z-index:3;margin-top:2.5rem}
+#gt1{font-size:.7rem;letter-spacing:12px;color:rgba(201,169,78,0.7);text-transform:uppercase;font-family:monospace;margin-bottom:.6rem;text-shadow:0 0 25px rgba(201,169,78,0.4)}
+#gt2{font-size:.85rem;color:rgba(201,169,78,0.3);letter-spacing:4px;font-style:italic;text-shadow:0 0 15px rgba(201,169,78,0.2)}
+#gt3{font-size:.45rem;letter-spacing:6px;color:rgba(255,80,60,0.25);text-transform:uppercase;font-family:monospace;margin-top:1.2rem;animation:warn 3s ease-in-out infinite}
+@keyframes warn{0%,100%{opacity:.25;color:rgba(255,80,60,0.25)}50%{opacity:.6;color:rgba(255,80,60,0.5)}}
+#gate:hover #gt1{color:rgba(201,169,78,1);text-shadow:0 0 35px rgba(201,169,78,0.6)}
 #gate:hover #gt2{color:rgba(201,169,78,0.5)}
-#gate:hover .cg{color:rgba(201,169,78,0.6)}
-#gate:hover #eye-wrap svg{filter:drop-shadow(0 0 60px rgba(201,169,78,0.5)) drop-shadow(0 0 100px rgba(120,80,200,0.2))}
+#gate:hover #gt3{color:rgba(255,80,60,0.6)}
+#gate:hover .cg{color:rgba(201,169,78,0.5)}
 
 /* Portal */
-#portal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0);transition:background 1.2s ease}
+#portal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0);transition:background 1.5s ease}
 #portal *{position:relative;z-index:1}
-#portalRing{position:fixed;inset:0;z-index:9998;pointer-events:none}
-#vr{
-  width:0;height:0;border-radius:50%;
-  background:radial-gradient(ellipse at center,rgba(8,5,18,0.97) 0%,rgba(2,1,5,0.99) 100%);
-  transition:all 2s cubic-bezier(0.16,1,0.3,1);
-  display:flex;align-items:center;justify-content:center;overflow:visible;position:relative;
-}
+#vr{width:0;height:0;border-radius:50%;background:radial-gradient(ellipse at center,rgba(8,5,18,0.97) 0%,rgba(2,1,5,0.99) 100%);transition:all 2s cubic-bezier(0.16,1,0.3,1);display:flex;align-items:center;justify-content:center;overflow:visible;position:relative}
 #pc{opacity:0;transform:scale(0.85);transition:all 1s ease;text-align:center;padding:1.5rem;width:100%;max-width:500px}
 #pc.vis{opacity:1;transform:scale(1)}
 .ctp{font-size:.45rem;letter-spacing:8px;color:#C9A94E;text-transform:uppercase;font-family:monospace;margin-bottom:.5rem}
 .ctt{font-size:1.9rem;color:#f8eacb;font-weight:300;margin-bottom:.3rem}
 .cts{font-size:.78rem;color:#555;line-height:1.8;margin-bottom:1.8rem;font-style:italic}
 .og{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.2rem}
-.oc{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px 14px;border:1px solid rgba(201,169,78,0.15);background:rgba(201,169,78,0.02);text-decoration:none;cursor:pointer;transition:all .4s;position:relative;overflow:hidden;border-radius:3px}
-.oc:hover{border-color:rgba(201,169,78,0.5);background:rgba(201,169,78,0.08);box-shadow:0 0 40px rgba(201,169,78,0.08),0 0 80px rgba(120,80,200,0.04)}
+.oc{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px 14px;border:1px solid rgba(201,169,78,0.15);background:rgba(201,169,78,0.02);text-decoration:none;cursor:pointer;transition:all .4s;overflow:hidden;border-radius:3px}
+.oc:hover{border-color:rgba(201,169,78,0.5);background:rgba(201,169,78,0.08);box-shadow:0 0 40px rgba(201,169,78,0.08)}
 .oi{font-size:1.8rem;margin-bottom:8px;display:block}.on{font-size:.6rem;letter-spacing:4px;color:#C9A94E;text-transform:uppercase;display:block}.od{font-size:.5rem;color:#555;margin-top:5px;letter-spacing:1px;display:block}
 .pb{display:inline-block;background:none;border:1px solid rgba(201,169,78,0.12);color:#444;padding:10px 28px;font-size:.55rem;letter-spacing:3px;cursor:pointer;text-transform:uppercase;font-family:monospace;transition:all .3s;text-decoration:none;margin-top:1rem}
 .pb:hover{color:#C9A94E;border-color:rgba(201,169,78,0.35)}
-.gate-opening{opacity:0!important;transition:opacity 1s!important}
-@media(max-width:600px){#eye-wrap{width:150px;height:150px}.cg{font-size:1rem}.ctt{font-size:1.5rem}.og{gap:6px}.oc{padding:16px 10px}}
+.gate-opening{opacity:0!important;transition:opacity 1.2s!important}
+@media(max-width:600px){#eye-container{width:85vmin;height:42vmin}.cg{font-size:1rem}#gt1{font-size:.55rem}#gt2{font-size:.65rem}.ctt{font-size:1.5rem}.og{gap:6px}.oc{padding:16px 10px}}
 </style>
 </head>
 <body>
 <canvas id="matrix"></canvas>
 <canvas id="kaleidoscope"></canvas>
-<canvas id="portalRing"></canvas>
+<canvas id="fireRing"></canvas>
 
 <div id="gate" onclick="openThreshold()">
   <span class="cg tl">Ω · Α</span><span class="cg tr">Δ · Σ</span>
   <span class="cg bl">Ψ · Θ</span><span class="cg br">Φ · Λ</span>
-  <div id="eye-wrap">
-    <svg viewBox="0 0 200 200">
-      <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(201,169,78,0.15)" stroke-width=".5"><animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="30s" repeatCount="indefinite"/></circle>
-      <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(160,100,255,0.1)" stroke-width=".4" stroke-dasharray="3 5"><animateTransform attributeName="transform" type="rotate" from="360 100 100" to="0 100 100" dur="20s" repeatCount="indefinite"/></circle>
-      <circle cx="100" cy="100" r="50" fill="none" stroke="rgba(201,169,78,0.2)" stroke-width=".5"><animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="15s" repeatCount="indefinite"/></circle>
-      <circle cx="100" cy="100" r="30" fill="rgba(0,0,0,0.8)"/>
-      <ellipse cx="100" cy="100" rx="30" ry="10" fill="none" stroke="rgba(201,169,78,0.8)" stroke-width="1.2"><animate attributeName="ry" values="10;2;10" dur="6s" repeatCount="indefinite"/></ellipse>
-      <circle cx="100" cy="100" r="8" fill="rgba(201,169,78,0.9)"><animate attributeName="r" values="8;5;8" dur="3s" repeatCount="indefinite"/><animate attributeName="fill" values="rgba(201,169,78,0.9);rgba(255,100,200,0.8);rgba(80,180,255,0.9);rgba(201,169,78,0.9)" dur="8s" repeatCount="indefinite"/></circle>
-      <circle cx="100" cy="100" r="3" fill="#000"/>
-    </svg>
+  <div id="eye-container"><canvas id="eyeCanvas"></canvas></div>
+  <div id="gt">
+    <div id="gt1">Enter the Threshold</div>
+    <div id="gt2">seek what lies beyond the pattern</div>
+    <div id="gt3">⚠ enter at the risk of enlightenment ⚠</div>
   </div>
-  <div id="gt"><div id="gt1">Enter the Threshold</div><div id="gt2">click to cross</div></div>
 </div>
 
 <div id="portal">
@@ -91,81 +89,33 @@ body{background:#000;overflow:hidden;height:100vh;width:100vw;font-family:Georgi
 </div>
 
 <script>
-// ═══ GREEK WORDS — esoteric knowledge streams ═══
-var words=[
-  // LIMEN Helix & Phasecraft
-  'ΛΙΜΕΝ','ΕΛΙΞ','ΦΑΣΙΣ','ΚΑΤΩΦΛΙ','ΣΠΕΙΡΑ','ΕΠΙΣΤΡΟΦΗ','ΜΕΤΑΜΟΡΦΩΣΗ','ΑΝΑΓΕΝΝΗΣΗ',
-  'ΦΑΣΗ ΜΗΔΕΝ','ΠΗΓΗ','ΔΙΑΛΥΣΗ','ΑΝΑΔΥΣΗ','ΣΤΑΘΕΡΟΤΗΤΑ','ΕΝΣΩΜΑΤΩΣΗ','ΥΠΕΡΒΑΣΗ',
-  'ΚΥΚΛΟΣ','ΜΟΤΙΒΟ','ΕΛΙΚΑ','ΚΑΤΩΦΛΙ','ΤΕΛΕΤΟΥΡΓΙΑ','ΜΥΗΣΗ','ΑΠΟΚΑΛΥΨΗ',
-  // God & Divine
-  'ΘΕΟΣ','ΛΟΓΟΣ','ΠΝΕΥΜΑ','ΑΓΑΠΗ','ΔΗΜΙΟΥΡΓΟΣ','ΑΙΩΝΙΟΣ','ΦΩΤΕΙΝΟΣ','ΑΓΙΟΣ',
-  'ΘΕΙΑ ΤΑΞΗ','ΟΥΡΑΝΟΣ','ΠΑΝΤΟΓΝΩΣΤΗΣ','ΑΛΗΘΕΙΑ','ΣΟΦΙΑ','ΑΡΜΟΝΙΑ','ΘΕΙΑ ΒΟΥΛΗΣΗ',
-  'ΑΝΑΛΗΨΗ','ΧΑΡΙΣ','ΕΛΕΟΣ','ΛΥΤΡΩΣΗ','ΑΝΑΣΤΑΣΙΣ','ΜΕΤΑΣΤΟΙΧΕΙΩΣΗ',
-  // Satan & Shadow
-  'ΣΑΤΑΝ','ΕΩΣΦΟΡΟΣ','ΣΚΟΤΟΣ','ΠΤΩΣΗ','ΔΑΙΜΩΝ','ΠΕΙΡΑΣΜΟΣ','ΕΞΟΥΣΙΑ',
-  'ΣΚΙΑ','ΑΒΥΣΣΟΣ','ΧΑΟΣ','ΑΠΟΣΤΑΣΙΑ','ΠΛΑΝΗ','ΟΦΙΣ','ΨΕΥΔΟΣ','ΕΚΠΤΩΣΗ',
-  'ΚΟΛΑΣΗ','ΑΠΩΛΕΙΑ','ΠΑΡΑΒΑΣΗ','ΜΑΤΑΙΟΤΗΣ','ΚΟΣΜΟΣ ΣΚΙΩΝ',
-  // Conspiracy & Hidden Knowledge
-  'ΑΠΟΚΡΥΦΑ','ΓΝΩΣΗ','ΜΥΣΤΗΡΙΟ','ΣΥΝΩΜΟΣΙΑ','ΕΛΕΓΧΟΣ','ΠΡΟΠΑΓΑΝΔΑ',
-  'ΑΛΗΘΕΙΑ ΚΡΥΜΜΕΝΗ','ΣΚΙΩΔΗΣ ΚΥΒΕΡΝΗΣΗ','ΤΡΙΤΟ ΜΑΤΙ','ΠΥΡΑΜΙΔΑ',
-  'ΙΛΛΟΥΜΙΝΑΤΙ','ΜΑΣΩΝΙΑ','ΒΑΘΥ ΚΡΑΤΟΣ','ΚΡΥΦΗ ΓΝΩΣΗ','ΧΕΙΡΑΓΩΓΗΣΗ',
-  'ΠΑΡΑΚΟΛΟΥΘΗΣΗ','ΨΕΥΔΗΣ ΣΗΜΑΙΑ','ΜΗΤΡΑ','ΑΦΥΠΝΙΣΗ','ΚΟΚΚΙΝΟ ΧΑΠΙ',
-  // Physiology & Nervous System
-  'ΝΕΥΡΩΝΑΣ','ΣΥΝΑΨΗ','ΝΩΤΙΑΙΟΣ','ΕΓΚΕΦΑΛΟΣ','ΑΜΥΓΔΑΛΗ','ΙΠΠΟΚΑΜΠΟΣ',
-  'ΝΕΥΡΙΚΟ ΣΥΣΤΗΜΑ','ΣΥΜΠΑΘΗΤΙΚΟ','ΠΑΡΑΣΥΜΠΑΘΗΤΙΚΟ','ΠΟΛΥΑΣΦΑΛΤΙΚΟ',
-  'ΝΕΥΡΟΠΛΑΣΤΙΚΟΤΗΤΑ','ΝΤΟΠΑΜΙΝΗ','ΣΕΡΟΤΟΝΙΝΗ','ΚΟΡΤΙΖΟΛΗ','ΑΔΡΕΝΑΛΙΝΗ',
-  'ΩΚΥΤΟΚΙΝΗ','ΜΕΛΑΤΟΝΙΝΗ','ΕΝΔΟΡΦΙΝΗ','ΓΚΑΜΠΑ','ΓΛΟΥΤΑΜΙΝΗ',
-  'ΠΝΕΥΜΟΝΟΓΑΣΤΡΙΚΟ','ΑΥΤΟΝΟΜΟ','ΟΜΟΙΟΣΤΑΣΙΣ','ΤΕΛΟΜΕΡΗ','ΜΙΤΟΧΟΝΔΡΙΑ',
-  'ΕΠΙΓΕΝΕΤΙΚΗ','ΦΛΕΓΜΟΝΗ','ΙΝΤΕΡΛΕΥΚΙΝΗ','ΚΥΤΟΚΙΝΗ',
-  // Systems & Transformation
-  'ΕΝΤΡΟΠΙΑ','ΕΝΕΡΓΕΙΑ','ΣΥΧΝΟΤΗΤΑ','ΔΟΝΗΣΗ','ΚΒΑΝΤΙΚΟ','ΠΕΔΙΟ',
-  'ΤΟΡΟΕΙΔΕΣ','ΦΡΑΚΤΑΛ','ΧΡΥΣΗ ΤΟΜΗ','ΙΕΡΑ ΓΕΩΜΕΤΡΙΑ','ΜΕΡΚΑΜΠΑ',
-  'ΚΟΥΝΤΑΛΙΝΙ','ΤΣΑΚΡΑ','ΕΝΕΡΓΕΙΑΚΟ ΣΩΜΑ','ΑΙΘΕΡΙΚΟ','ΑΣΤΡΙΚΟ'
-];
-// Also keep individual Greek chars for variety
+// ═══ GREEK WORDS ═══
+var words=['ΛΙΜΕΝ','ΕΛΙΞ','ΦΑΣΙΣ','ΚΑΤΩΦΛΙ','ΣΠΕΙΡΑ','ΕΠΙΣΤΡΟΦΗ','ΜΕΤΑΜΟΡΦΩΣΗ','ΑΝΑΓΕΝΝΗΣΗ','ΦΑΣΗ ΜΗΔΕΝ','ΠΗΓΗ','ΔΙΑΛΥΣΗ','ΑΝΑΔΥΣΗ','ΣΤΑΘΕΡΟΤΗΤΑ','ΕΝΣΩΜΑΤΩΣΗ','ΥΠΕΡΒΑΣΗ','ΚΥΚΛΟΣ','ΜΟΤΙΒΟ','ΤΕΛΕΤΟΥΡΓΙΑ','ΜΥΗΣΗ','ΑΠΟΚΑΛΥΨΗ','ΘΕΟΣ','ΛΟΓΟΣ','ΠΝΕΥΜΑ','ΑΓΑΠΗ','ΔΗΜΙΟΥΡΓΟΣ','ΑΙΩΝΙΟΣ','ΦΩΤΕΙΝΟΣ','ΑΓΙΟΣ','ΘΕΙΑ ΤΑΞΗ','ΟΥΡΑΝΟΣ','ΑΛΗΘΕΙΑ','ΣΟΦΙΑ','ΑΡΜΟΝΙΑ','ΑΝΑΛΗΨΗ','ΧΑΡΙΣ','ΕΛΕΟΣ','ΛΥΤΡΩΣΗ','ΑΝΑΣΤΑΣΙΣ','ΣΑΤΑΝ','ΕΩΣΦΟΡΟΣ','ΣΚΟΤΟΣ','ΠΤΩΣΗ','ΔΑΙΜΩΝ','ΠΕΙΡΑΣΜΟΣ','ΣΚΙΑ','ΑΒΥΣΣΟΣ','ΧΑΟΣ','ΑΠΟΣΤΑΣΙΑ','ΠΛΑΝΗ','ΟΦΙΣ','ΑΠΟΚΡΥΦΑ','ΓΝΩΣΗ','ΜΥΣΤΗΡΙΟ','ΣΥΝΩΜΟΣΙΑ','ΕΛΕΓΧΟΣ','ΤΡΙΤΟ ΜΑΤΙ','ΠΥΡΑΜΙΔΑ','ΑΦΥΠΝΙΣΗ','ΚΟΚΚΙΝΟ ΧΑΠΙ','ΜΗΤΡΑ','ΝΕΥΡΩΝΑΣ','ΣΥΝΑΨΗ','ΕΓΚΕΦΑΛΟΣ','ΑΜΥΓΔΑΛΗ','ΙΠΠΟΚΑΜΠΟΣ','ΝΕΥΡΙΚΟ ΣΥΣΤΗΜΑ','ΝΕΥΡΟΠΛΑΣΤΙΚΟΤΗΤΑ','ΝΤΟΠΑΜΙΝΗ','ΣΕΡΟΤΟΝΙΝΗ','ΚΟΡΤΙΖΟΛΗ','ΑΔΡΕΝΑΛΙΝΗ','ΩΚΥΤΟΚΙΝΗ','ΟΜΟΙΟΣΤΑΣΙΣ','ΕΝΤΡΟΠΙΑ','ΕΝΕΡΓΕΙΑ','ΣΥΧΝΟΤΗΤΑ','ΔΟΝΗΣΗ','ΚΒΑΝΤΙΚΟ','ΦΡΑΚΤΑΛ','ΧΡΥΣΗ ΤΟΜΗ','ΙΕΡΑ ΓΕΩΜΕΤΡΙΑ','ΚΟΥΝΤΑΛΙΝΙ','ΤΣΑΚΡΑ'];
 var greekChars='ΩΔΨΦΛΣΘΑΒΓΕΖΗΙΚΜΝΞΟΠΡΤΥΧωδψφλσθαβγεζηικμνξοπρτυχ∞∑∏∫√∂'.split('');
 
-// ═══ MATRIX RAIN — 4x DENSITY, GREEK WORDS ═══
+// ═══ MATRIX RAIN ═══
 var mc=document.getElementById('matrix'),mx=mc.getContext('2d');
 mc.width=window.innerWidth;mc.height=window.innerHeight;
-var fontSize=12;
-var cols=Math.floor(mc.width/(fontSize*0.5));
-var drops=[];
-var colWords=[];// each column gets a word to spell out
-var colCharIdx=[];// position in the current word
-for(var i=0;i<cols;i++){
-  drops[i]=Math.random()*-100;
-  colWords[i]=Math.random()<0.4?words[Math.floor(Math.random()*words.length)]:'';
-  colCharIdx[i]=0;
-}
+var fontSize=12,cols=Math.floor(mc.width/(fontSize*0.5));
+var drops=[],colWords=[],colCharIdx=[];
+for(var i=0;i<cols;i++){drops[i]=Math.random()*-100;colWords[i]=Math.random()<0.4?words[Math.floor(Math.random()*words.length)]:'';colCharIdx[i]=0}
 
 function drawMatrix(){
-  mx.fillStyle='rgba(0,0,0,0.035)';// even slower fade for brighter persistent trails
+  mx.fillStyle='rgba(0,0,0,0.035)';
   mx.fillRect(0,0,mc.width,mc.height);
   for(var i=0;i<drops.length;i++){
     var ch;
-    if(colWords[i]&&colCharIdx[i]<colWords[i].length){
-      ch=colWords[i][colCharIdx[i]];
-      colCharIdx[i]++;
-    }else{
-      ch=greekChars[Math.floor(Math.random()*greekChars.length)];
-      // Chance to start a new word
-      if(Math.random()<0.02){colWords[i]=words[Math.floor(Math.random()*words.length)];colCharIdx[i]=0}
-    }
-    var x=i*(fontSize*0.5);
-    var y=drops[i]*fontSize;
-    var c=Math.random();
+    if(colWords[i]&&colCharIdx[i]<colWords[i].length){ch=colWords[i][colCharIdx[i]];colCharIdx[i]++}
+    else{ch=greekChars[Math.floor(Math.random()*greekChars.length)];if(Math.random()<0.02){colWords[i]=words[Math.floor(Math.random()*words.length)];colCharIdx[i]=0}}
+    var x=i*(fontSize*0.5),y=drops[i]*fontSize,c=Math.random();
     if(c<0.35){mx.fillStyle='rgba(201,169,78,'+(0.6+Math.random()*0.4)+')';mx.shadowColor='rgba(201,169,78,0.7)'}
     else if(c<0.55){mx.fillStyle='rgba(160,100,255,'+(0.5+Math.random()*0.5)+')';mx.shadowColor='rgba(160,100,255,0.6)'}
     else if(c<0.7){mx.fillStyle='rgba(80,180,255,'+(0.5+Math.random()*0.5)+')';mx.shadowColor='rgba(80,180,255,0.6)'}
     else if(c<0.85){mx.fillStyle='rgba(255,80,180,'+(0.5+Math.random()*0.5)+')';mx.shadowColor='rgba(255,80,180,0.6)'}
     else{mx.fillStyle='rgba(255,160,40,'+(0.5+Math.random()*0.5)+')';mx.shadowColor='rgba(255,160,40,0.6)'}
-    mx.shadowBlur=8+Math.random()*8;
-    mx.font=(fontSize-2+Math.random()*4)+'px monospace';
-    mx.fillText(ch,x,y);
-    mx.shadowBlur=0;
+    mx.shadowBlur=8+Math.random()*8;mx.font=(fontSize-2+Math.random()*4)+'px monospace';mx.fillText(ch,x,y);mx.shadowBlur=0;
     if(y>mc.height&&Math.random()>0.98){drops[i]=0;colWords[i]=Math.random()<0.4?words[Math.floor(Math.random()*words.length)]:'';colCharIdx[i]=0}
-    drops[i]+=0.25+Math.random()*0.35;// SLOWER — was 0.4+0.6, now 0.25+0.35
+    drops[i]+=0.25+Math.random()*0.35;
   }
   requestAnimationFrame(drawMatrix);
 }
@@ -179,196 +129,259 @@ function drawK(){
   kx.clearRect(0,0,kc.width,kc.height);
   var cx=kc.width/2,cy=kc.height/2,maxR=Math.min(kc.width,kc.height)*0.48;
   for(var arm=0;arm<12;arm++){
-    var ba=(arm/12)*Math.PI*2+t*0.15;
-    kx.beginPath();
-    for(var i=0;i<300;i++){
-      var r=i/300,a=ba+r*Math.PI*6+Math.sin(t*0.3+r*4)*0.8;
-      var rr=r*maxR,w=Math.sin(t*2+r*10+arm)*rr*0.02;
-      var px=cx+Math.cos(a)*(rr+w),py=cy+Math.sin(a)*(rr+w);
-      if(i===0)kx.moveTo(px,py);else kx.lineTo(px,py);
-    }
-    kx.strokeStyle='hsla('+((arm*30+t*25)%360)+',80%,60%,'+(0.04+Math.sin(t*0.5+arm)*0.02)+')';
-    kx.lineWidth=1.2;kx.stroke();
+    var ba=(arm/12)*Math.PI*2+t*0.15;kx.beginPath();
+    for(var i=0;i<300;i++){var r=i/300,a=ba+r*Math.PI*6+Math.sin(t*0.3+r*4)*0.8,rr=r*maxR,w=Math.sin(t*2+r*10+arm)*rr*0.02;
+    var px=cx+Math.cos(a)*(rr+w),py=cy+Math.sin(a)*(rr+w);if(i===0)kx.moveTo(px,py);else kx.lineTo(px,py)}
+    kx.strokeStyle='hsla('+((arm*30+t*25)%360)+',80%,60%,'+(0.04+Math.sin(t*0.5+arm)*0.02)+')';kx.lineWidth=1.2;kx.stroke();
   }
   for(var l=0;l<8;l++){
-    var lr=maxR*(0.1+l*0.11),s=3+l,rot=t*(l%2===0?0.2:-0.2)+l*0.4;
-    kx.beginPath();
-    for(var si=0;si<=s;si++){
-      var a=(si/s)*Math.PI*2+rot,p=Math.sin(t*1.5+l+si)*lr*0.04;
-      var px=cx+Math.cos(a)*(lr+p),py=cy+Math.sin(a)*(lr+p);
-      if(si===0)kx.moveTo(px,py);else kx.lineTo(px,py);
-    }
-    kx.closePath();
-    kx.strokeStyle='hsla('+((l*45+t*20+120)%360)+',70%,55%,'+(0.06+Math.sin(t+l)*0.03)+')';
-    kx.lineWidth=1+l*0.15;kx.stroke();
+    var lr=maxR*(0.1+l*0.11),s=3+l,rot=t*(l%2===0?0.2:-0.2)+l*0.4;kx.beginPath();
+    for(var si=0;si<=s;si++){var a=(si/s)*Math.PI*2+rot,p=Math.sin(t*1.5+l+si)*lr*0.04;
+    var px=cx+Math.cos(a)*(lr+p),py=cy+Math.sin(a)*(lr+p);if(si===0)kx.moveTo(px,py);else kx.lineTo(px,py)}
+    kx.closePath();kx.strokeStyle='hsla('+((l*45+t*20+120)%360)+',70%,55%,'+(0.06+Math.sin(t+l)*0.03)+')';kx.lineWidth=1+l*0.15;kx.stroke();
   }
   t+=0.012;requestAnimationFrame(drawK);
 }
 drawK();
 
-// ═══ PORTAL RING FIRE EFFECT — ALWAYS VISIBLE ═══
-var pc2=document.getElementById('portalRing'),px2=pc2.getContext('2d');
-pc2.width=window.innerWidth;pc2.height=window.innerHeight;
-pc2.style.display='block';// Always visible
-var portalRadius=0,portalTargetR=0,portalT=0;
+// ═══ THE EYE — canvas drawn, reacts to hover ═══
+var ec=document.getElementById('eyeCanvas'),ex=ec.getContext('2d');
+var eyeOpen=0;// 0=closed, 1=fully open
+var eyeTarget=0;
+var eyeT=0;
+var eyeClicked=false;
 
-// Start with gate-size ring around the eye
-portalTargetR=Math.min(window.innerWidth,window.innerHeight)*0.16;
-
-var sparks=[];
-for(var i=0;i<300;i++){
-  sparks.push({
-    angle:Math.random()*Math.PI*2,
-    speed:0.5+Math.random()*2,
-    dist:0.93+Math.random()*0.14,
-    size:1+Math.random()*3,
-    life:Math.random(),
-    hue:Math.floor(Math.random()*60)+15,
-    drift:(Math.random()-0.5)*0.3
-  });
+function resizeEye(){
+  var cont=document.getElementById('eye-container');
+  ec.width=cont.offsetWidth*2;ec.height=cont.offsetHeight*2;// 2x for retina
 }
+resizeEye();
+
+function drawEye(){
+  var w=ec.width,h=ec.height,cx=w/2,cy=h/2;
+  ex.clearRect(0,0,w,h);
+  eyeOpen+=(eyeTarget-eyeOpen)*0.06;
+  eyeT+=0.02;
+  
+  var eyeW=w*0.42;// horizontal radius of eye shape
+  var eyeH=h*0.4*eyeOpen;// vertical radius — 0 when closed
+  var lidH=h*0.42;// lid always this tall for the shape
+  
+  // Outer glow
+  ex.save();
+  ex.shadowColor='rgba(201,169,78,'+(0.2+eyeOpen*0.3)+')';
+  ex.shadowBlur=40+eyeOpen*30;
+  
+  // Draw eye shape (almond)
+  ex.beginPath();
+  ex.moveTo(cx-eyeW,cy);
+  ex.bezierCurveTo(cx-eyeW*0.6,cy-eyeH,cx+eyeW*0.6,cy-eyeH,cx+eyeW,cy);
+  ex.bezierCurveTo(cx+eyeW*0.6,cy+eyeH,cx-eyeW*0.6,cy+eyeH,cx-eyeW,cy);
+  ex.closePath();
+  
+  // Fill the inside dark
+  ex.fillStyle='rgba(5,3,10,'+(0.7+eyeOpen*0.25)+')';
+  ex.fill();
+  
+  // Eye outline — bright gold
+  ex.strokeStyle='rgba(201,169,78,'+(0.3+eyeOpen*0.5)+')';
+  ex.lineWidth=2+eyeOpen*2;
+  ex.stroke();
+  ex.restore();
+  
+  if(eyeOpen>0.05){
+    // Iris
+    var irisR=eyeH*0.6;
+    if(irisR>2){
+      var iGrad=ex.createRadialGradient(cx,cy,0,cx,cy,irisR);
+      iGrad.addColorStop(0,'rgba(201,169,78,'+(0.9*eyeOpen)+')');
+      iGrad.addColorStop(0.4,'rgba(180,120,40,'+(0.7*eyeOpen)+')');
+      iGrad.addColorStop(0.7,'rgba(120,60,20,'+(0.5*eyeOpen)+')');
+      iGrad.addColorStop(1,'rgba(40,20,5,'+(0.3*eyeOpen)+')');
+      ex.beginPath();
+      ex.arc(cx,cy,irisR,0,Math.PI*2);
+      ex.fillStyle=iGrad;
+      ex.fill();
+      
+      // Iris detail lines
+      for(var i=0;i<16;i++){
+        var a=(i/16)*Math.PI*2+eyeT*0.5;
+        ex.beginPath();
+        ex.moveTo(cx+Math.cos(a)*irisR*0.3,cy+Math.sin(a)*irisR*0.3);
+        ex.lineTo(cx+Math.cos(a)*irisR*0.95,cy+Math.sin(a)*irisR*0.95);
+        ex.strokeStyle='rgba(201,169,78,'+(0.15*eyeOpen)+')';
+        ex.lineWidth=1;
+        ex.stroke();
+      }
+      
+      // Pupil
+      var pupilR=irisR*0.35;
+      ex.beginPath();
+      ex.arc(cx,cy,pupilR,0,Math.PI*2);
+      ex.fillStyle='rgba(0,0,0,'+(0.95*eyeOpen)+')';
+      ex.fill();
+      
+      // Pupil light reflection
+      ex.beginPath();
+      ex.arc(cx-pupilR*0.3,cy-pupilR*0.3,pupilR*0.25,0,Math.PI*2);
+      ex.fillStyle='rgba(255,255,255,'+(0.3*eyeOpen)+')';
+      ex.fill();
+    }
+  }
+  
+  // Top and bottom lids (always drawn to create the closed look)
+  // These create the "closed" effect by covering the eye
+  var lidCover=1-eyeOpen;
+  if(lidCover>0.02){
+    // Top lid
+    ex.beginPath();
+    ex.moveTo(cx-eyeW-10,cy);
+    ex.bezierCurveTo(cx-eyeW*0.6,cy-lidH,cx+eyeW*0.6,cy-lidH,cx+eyeW+10,cy);
+    ex.lineTo(cx+eyeW+10,cy-h);
+    ex.lineTo(cx-eyeW-10,cy-h);
+    ex.closePath();
+    ex.fillStyle='rgba(5,3,10,'+lidCover+')';
+    ex.fill();
+    
+    // Bottom lid
+    ex.beginPath();
+    ex.moveTo(cx-eyeW-10,cy);
+    ex.bezierCurveTo(cx-eyeW*0.6,cy+lidH,cx+eyeW*0.6,cy+lidH,cx+eyeW+10,cy);
+    ex.lineTo(cx+eyeW+10,cy+h);
+    ex.lineTo(cx-eyeW-10,cy+h);
+    ex.closePath();
+    ex.fillStyle='rgba(5,3,10,'+lidCover+')';
+    ex.fill();
+    
+    // Lid line (the "closed eye" line)
+    if(lidCover>0.3){
+      ex.beginPath();
+      ex.moveTo(cx-eyeW,cy);
+      ex.bezierCurveTo(cx-eyeW*0.5,cy-lidH*0.15*lidCover,cx+eyeW*0.5,cy-lidH*0.15*lidCover,cx+eyeW,cy);
+      ex.strokeStyle='rgba(201,169,78,'+(0.4*lidCover)+')';
+      ex.lineWidth=2;
+      ex.shadowColor='rgba(201,169,78,'+(0.3*lidCover)+')';
+      ex.shadowBlur=15;
+      ex.stroke();
+      ex.shadowBlur=0;
+    }
+  }
+  
+  requestAnimationFrame(drawEye);
+}
+drawEye();
+
+// Hover detection
+var gateEl=document.getElementById('gate');
+gateEl.addEventListener('mouseenter',function(){if(!eyeClicked)eyeTarget=0.85});
+gateEl.addEventListener('mouseleave',function(){if(!eyeClicked)eyeTarget=0});
+
+// ═══ FIRE RING ═══
+var fc=document.getElementById('fireRing'),fx2=fc.getContext('2d');
+fc.width=window.innerWidth;fc.height=window.innerHeight;
+var fireActive=false,fireRadius=0,fireTargetR=0,fireT=0;
+var sparks=[];
+for(var i=0;i<300;i++){sparks.push({angle:Math.random()*Math.PI*2,speed:0.5+Math.random()*2.5,dist:0.92+Math.random()*0.16,size:1+Math.random()*3.5,life:Math.random(),hue:Math.floor(Math.random()*60)+15,drift:(Math.random()-0.5)*0.3})}
 var ringChars='ΩΔΨΦΛΣΘΑΒΓΕΖΗΙΚΜΝΞΟΠΡΤΥΧωδψφλσθ'.split('');
 
-function drawPortalRing(){
-  px2.clearRect(0,0,pc2.width,pc2.height);
+function drawFire(){
+  fx2.clearRect(0,0,fc.width,fc.height);
+  if(!fireActive||fireRadius<3){
+    fireRadius+=(fireTargetR-fireRadius)*0.04;
+    requestAnimationFrame(drawFire);return;
+  }
+  var cx=fc.width/2,cy=fc.height/2;
+  fireRadius+=(fireTargetR-fireRadius)*0.03;
+  fireT+=0.03;
   
-  var cx=pc2.width/2,cy=pc2.height/2;
-  portalRadius+=(portalTargetR-portalRadius)*0.03;
-  portalT+=0.03;
-  
-  if(portalRadius<3){requestAnimationFrame(drawPortalRing);return}
-  
-  // Multiple glowing rings — BRIGHT
+  // 6 glowing rings
   for(var r=0;r<6;r++){
-    var rr=portalRadius-r*2.5;
-    if(rr<1)continue;
-    px2.beginPath();
-    px2.arc(cx,cy,rr,0,Math.PI*2);
-    var alpha=0.2-r*0.025;
-    px2.strokeStyle='rgba(255,'+(170-r*15)+','+(40+r*8)+','+alpha+')';
-    px2.lineWidth=10-r*1.5;
-    px2.shadowColor='rgba(255,140,30,0.5)';
-    px2.shadowBlur=35-r*4;
-    px2.stroke();
-    px2.shadowBlur=0;
+    var rr=fireRadius-r*2.5;if(rr<1)continue;
+    fx2.beginPath();fx2.arc(cx,cy,rr,0,Math.PI*2);
+    fx2.strokeStyle='rgba(255,'+(170-r*15)+','+(40+r*8)+','+(0.2-r*0.025)+')';
+    fx2.lineWidth=10-r*1.5;fx2.shadowColor='rgba(255,140,30,0.5)';fx2.shadowBlur=35-r*4;fx2.stroke();fx2.shadowBlur=0;
   }
+  // White hot edge
+  fx2.beginPath();fx2.arc(cx,cy,fireRadius,0,Math.PI*2);
+  fx2.strokeStyle='rgba(255,230,170,0.4)';fx2.lineWidth=3;fx2.shadowColor='rgba(255,210,120,0.8)';fx2.shadowBlur=30;fx2.stroke();fx2.shadowBlur=0;
   
-  // White-hot inner edge
-  px2.beginPath();
-  px2.arc(cx,cy,portalRadius,0,Math.PI*2);
-  px2.strokeStyle='rgba(255,230,170,0.4)';
-  px2.lineWidth=3;
-  px2.shadowColor='rgba(255,210,120,0.8)';
-  px2.shadowBlur=30;
-  px2.stroke();
-  px2.shadowBlur=0;
-  
-  // Orbiting Greek runes
-  var runeCount=48;
-  for(var i=0;i<runeCount;i++){
-    var a=(i/runeCount)*Math.PI*2+portalT*0.6;
-    var rx=cx+Math.cos(a)*portalRadius;
-    var ry=cy+Math.sin(a)*portalRadius;
-    var ch=ringChars[i%ringChars.length];
-    var pulse=0.4+Math.sin(portalT*3+i)*0.4;
-    px2.save();
-    px2.translate(rx,ry);
-    px2.rotate(a+Math.PI/2);
-    px2.font='bold 10px monospace';
-    px2.fillStyle='rgba(255,210,90,'+pulse+')';
-    px2.shadowColor='rgba(255,160,30,0.9)';
-    px2.shadowBlur=12;
-    px2.textAlign='center';
-    px2.fillText(ch,0,0);
-    px2.restore();
+  // Orbiting runes
+  for(var i=0;i<48;i++){
+    var a=(i/48)*Math.PI*2+fireT*0.6;
+    fx2.save();fx2.translate(cx+Math.cos(a)*fireRadius,cy+Math.sin(a)*fireRadius);fx2.rotate(a+Math.PI/2);
+    fx2.font='bold 10px monospace';fx2.fillStyle='rgba(255,210,90,'+(0.4+Math.sin(fireT*3+i)*0.4)+')';
+    fx2.shadowColor='rgba(255,160,30,0.9)';fx2.shadowBlur=12;fx2.textAlign='center';fx2.fillText(ringChars[i%ringChars.length],0,0);fx2.restore();
   }
-  
-  // Fire sparks
+  // Sparks
   for(var i=0;i<sparks.length;i++){
-    var s=sparks[i];
-    s.angle+=s.speed*0.02;
-    s.life-=0.003;
-    s.dist+=s.drift*0.001;
-    if(s.life<=0){s.angle=Math.random()*Math.PI*2;s.life=0.5+Math.random()*0.5;s.dist=0.93+Math.random()*0.14}
-    var sx=cx+Math.cos(s.angle)*portalRadius*s.dist;
-    var sy=cy+Math.sin(s.angle)*portalRadius*s.dist;
-    var trailX=sx+Math.sin(portalT*5+i)*4;
-    var trailY=sy-s.size*3*s.life;
-    px2.beginPath();
-    px2.arc(trailX,trailY,s.size*s.life,0,Math.PI*2);
-    px2.fillStyle='hsla('+s.hue+',100%,'+(50+s.life*30)+'%,'+(s.life*0.9)+')';
-    px2.shadowColor='hsla('+s.hue+',100%,60%,0.6)';
-    px2.shadowBlur=10;
-    px2.fill();
-    px2.shadowBlur=0;
+    var s=sparks[i];s.angle+=s.speed*0.02;s.life-=0.003;s.dist+=s.drift*0.001;
+    if(s.life<=0){s.angle=Math.random()*Math.PI*2;s.life=0.5+Math.random()*0.5;s.dist=0.92+Math.random()*0.16}
+    var sx=cx+Math.cos(s.angle)*fireRadius*s.dist,sy=cy+Math.sin(s.angle)*fireRadius*s.dist;
+    fx2.beginPath();fx2.arc(sx+Math.sin(fireT*5+i)*4,sy-s.size*3*s.life,s.size*s.life,0,Math.PI*2);
+    fx2.fillStyle='hsla('+s.hue+',100%,'+(50+s.life*30)+'%,'+(s.life*0.9)+')';fx2.shadowColor='hsla('+s.hue+',100%,60%,0.6)';fx2.shadowBlur=10;fx2.fill();fx2.shadowBlur=0;
   }
+  // Flares
+  if(Math.random()<0.15){var fa=Math.random()*Math.PI*2;fx2.beginPath();fx2.arc(cx+Math.cos(fa)*fireRadius,cy+Math.sin(fa)*fireRadius,3+Math.random()*6,0,Math.PI*2);fx2.fillStyle='rgba(255,245,210,0.7)';fx2.shadowColor='rgba(255,220,120,1)';fx2.shadowBlur=30;fx2.fill();fx2.shadowBlur=0}
   
-  // Bright flares — more frequent
-  if(Math.random()<0.15){
-    var fa=Math.random()*Math.PI*2;
-    px2.beginPath();
-    px2.arc(cx+Math.cos(fa)*portalRadius,cy+Math.sin(fa)*portalRadius,3+Math.random()*6,0,Math.PI*2);
-    px2.fillStyle='rgba(255,245,210,0.7)';
-    px2.shadowColor='rgba(255,220,120,1)';
-    px2.shadowBlur=30;
-    px2.fill();
-    px2.shadowBlur=0;
-  }
-  
-  requestAnimationFrame(drawPortalRing);
+  requestAnimationFrame(drawFire);
 }
-drawPortalRing();
+drawFire();
 
 // ═══ RESIZE ═══
 window.addEventListener('resize',function(){
-  mc.width=kc.width=pc2.width=window.innerWidth;
-  mc.height=kc.height=pc2.height=window.innerHeight;
-  cols=Math.floor(mc.width/(fontSize*0.5));
-  drops=[];colWords=[];colCharIdx=[];
+  mc.width=kc.width=fc.width=window.innerWidth;mc.height=kc.height=fc.height=window.innerHeight;
+  cols=Math.floor(mc.width/(fontSize*0.5));drops=[];colWords=[];colCharIdx=[];
   for(var i=0;i<cols;i++){drops[i]=Math.random()*-100;colWords[i]=Math.random()<0.4?words[Math.floor(Math.random()*words.length)]:'';colCharIdx[i]=0}
+  resizeEye();
 });
 
 // ═══ PORTAL CONTROLS ═══
 function openThreshold(){
+  eyeClicked=true;
+  eyeTarget=1;// fully open the eye
+  
+  // After eye opens, start fire ring
+  setTimeout(function(){
+    fireActive=true;
+    var targetSize=Math.min(window.innerWidth,window.innerHeight)*0.44;
+    if(targetSize>340)targetSize=340;
+    fireTargetR=targetSize;
+  },400);
+  
   var g=document.getElementById('gate'),p=document.getElementById('portal'),
       vr=document.getElementById('vr'),pc=document.getElementById('pc');
-  g.classList.add('gate-opening');
   
-  // Expand fire ring to portal size
-  var targetSize=Math.min(window.innerWidth,window.innerHeight)*0.44;
-  if(targetSize>340)targetSize=340;
-  portalTargetR=targetSize;
-  
+  setTimeout(function(){g.classList.add('gate-opening')},800);
   setTimeout(function(){
     p.style.display='flex';
     setTimeout(function(){p.style.background='rgba(0,0,0,0.8)'},50);
-  },600);
+  },1200);
   setTimeout(function(){
     vr.style.width='90vmin';vr.style.height='90vmin';
     vr.style.maxWidth='680px';vr.style.maxHeight='680px';
-  },900);
-  setTimeout(function(){pc.classList.add('vis')},1900);
-  setTimeout(function(){g.style.display='none'},2000);
+  },1400);
+  setTimeout(function(){pc.classList.add('vis')},2200);
+  setTimeout(function(){g.style.display='none'},2500);
 }
 
 function closeThreshold(){
   var g=document.getElementById('gate'),p=document.getElementById('portal'),
       vr=document.getElementById('vr'),pc=document.getElementById('pc');
   pc.classList.remove('vis');
-  // Shrink ring back to gate size
-  portalTargetR=Math.min(window.innerWidth,window.innerHeight)*0.16;
+  fireTargetR=0;
   setTimeout(function(){vr.style.width='0';vr.style.height='0'},300);
   setTimeout(function(){p.style.background='rgba(0,0,0,0)'},1000);
   setTimeout(function(){
-    p.style.display='none';
+    p.style.display='none';fireActive=false;fireRadius=0;
+    eyeClicked=false;eyeTarget=0;
     g.style.display='flex';g.classList.remove('gate-opening');
   },1400);
 }
 
-// Parallax
-document.getElementById('gate').addEventListener('mousemove',function(e){
+// Parallax on eye
+gateEl.addEventListener('mousemove',function(e){
   var r=this.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
-  document.getElementById('eye-wrap').style.transform='translate('+x*30+'px,'+y*30+'px)';
+  document.getElementById('eye-container').style.transform='translate('+x*20+'px,'+y*15+'px)';
 });
 </script>
 </body>
