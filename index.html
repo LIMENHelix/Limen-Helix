@@ -43,7 +43,7 @@ body{background:#000;overflow:hidden;height:100vh;width:100vw;font-family:Georgi
 #pc.vis{opacity:1;transform:scale(1)}
 .ctp{font-size:.45rem;letter-spacing:8px;color:#C9A94E;text-transform:uppercase;font-family:monospace;margin-bottom:.5rem}
 .ctt{font-size:1.9rem;color:#f8eacb;font-weight:300;margin-bottom:.3rem}
-.cts{font-size:.78rem;color:#555;line-height:1.8;margin-bottom:1.8rem;font-style:italic}
+.cts{font-size:1rem;color:#888;line-height:1.9;margin-bottom:1.8rem;font-style:italic;font-weight:600;text-shadow:0 0 10px rgba(201,169,78,0.15)}
 .og{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.2rem}
 .oc{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px 14px;border:1px solid rgba(201,169,78,0.15);background:rgba(201,169,78,0.02);text-decoration:none;cursor:pointer;transition:all .4s;overflow:hidden;border-radius:3px}
 .oc:hover{border-color:rgba(201,169,78,0.5);background:rgba(201,169,78,0.08);box-shadow:0 0 40px rgba(201,169,78,0.08)}
@@ -178,87 +178,123 @@ function drawEye(){
     
     var maxR=Math.max(eyeW,eyeH)*1.3;
     
-    // BASE: Deep cosmic blue-black
+    // BASE: Deep cosmic gradient
     var baseGrad=ex.createRadialGradient(cx,cy,0,cx,cy,maxR);
     baseGrad.addColorStop(0,'rgba(255,255,255,'+(1.0*eyeOpen)+')');
-    baseGrad.addColorStop(0.05,'rgba(200,230,255,'+(0.95*eyeOpen)+')');
-    baseGrad.addColorStop(0.1,'rgba(140,200,255,'+(0.9*eyeOpen)+')');
-    baseGrad.addColorStop(0.2,'rgba(80,160,255,'+(0.8*eyeOpen)+')');
-    baseGrad.addColorStop(0.35,'rgba(255,210,100,'+(0.6*eyeOpen)+')');
-    baseGrad.addColorStop(0.5,'rgba(200,80,200,'+(0.4*eyeOpen)+')');
-    baseGrad.addColorStop(0.7,'rgba(60,30,120,'+(0.3*eyeOpen)+')');
-    baseGrad.addColorStop(1,'rgba(10,5,30,'+(0.15*eyeOpen)+')');
+    baseGrad.addColorStop(0.04,'rgba(200,235,255,'+(0.95*eyeOpen)+')');
+    baseGrad.addColorStop(0.1,'rgba(120,200,255,'+(0.85*eyeOpen)+')');
+    baseGrad.addColorStop(0.25,'rgba(60,100,200,'+(0.6*eyeOpen)+')');
+    baseGrad.addColorStop(0.45,'rgba(180,80,180,'+(0.35*eyeOpen)+')');
+    baseGrad.addColorStop(0.7,'rgba(40,20,80,'+(0.2*eyeOpen)+')');
+    baseGrad.addColorStop(1,'rgba(5,2,15,'+(0.1*eyeOpen)+')');
     ex.fillStyle=baseGrad;
     ex.fillRect(0,0,w,h);
     
-    // Electric blue lightning bolts
-    for(var bolt=0;bolt<8;bolt++){
-      var ba=(bolt/8)*Math.PI*2+eyeT*0.4+Math.sin(eyeT+bolt)*0.3;
+    // ═══ CRYSTALLINE FRACTAL SHARDS — asymmetric, jagged ═══
+    // Each shard is unique — different length, angle offset, color, branches
+    var seed=137.508;// golden angle for natural asymmetry
+    for(var shard=0;shard<55;shard++){
+      var baseA=shard*seed*(Math.PI/180)+eyeT*0.15;
+      var shardLen=maxR*(0.15+((shard*13+7)%23)/23*0.65);
+      var jitter=(Math.sin(shard*3.7+eyeT*0.8)*0.4);
+      baseA+=jitter;
+      
+      // Main crystal spine
       ex.beginPath();
-      var bx=cx,by=cy;
-      ex.moveTo(bx,by);
-      var bLen=maxR*(0.3+Math.random()*0.5);
-      for(var seg=0;seg<12;seg++){
-        var ratio=seg/12;
-        bx=cx+Math.cos(ba)*(bLen*ratio)+Math.sin(eyeT*8+bolt*3+seg*2)*(15-ratio*10);
-        by=cy+Math.sin(ba)*(bLen*ratio)+Math.cos(eyeT*6+bolt*2+seg*3)*(15-ratio*10);
-        ex.lineTo(bx,by);
+      var sx=cx,sy=cy;
+      ex.moveTo(sx,sy);
+      var segments=4+shard%5;
+      var pts=[];
+      for(var seg=0;seg<segments;seg++){
+        var ratio=(seg+1)/segments;
+        var drift=Math.sin(eyeT*1.5+shard*2.3+seg*4.1)*(20-ratio*15);
+        var nx=cx+Math.cos(baseA)*(shardLen*ratio)+Math.cos(baseA+1.57)*drift;
+        var ny=cy+Math.sin(baseA)*(shardLen*ratio)+Math.sin(baseA+1.57)*drift;
+        ex.lineTo(nx,ny);
+        pts.push({x:nx,y:ny});
       }
-      var bAlpha=0.15+Math.sin(eyeT*4+bolt)*0.1;
-      ex.strokeStyle='rgba(100,180,255,'+(bAlpha*eyeOpen)+')';
-      ex.lineWidth=1.5+Math.random();
-      ex.shadowColor='rgba(80,160,255,'+(0.6*eyeOpen)+')';
-      ex.shadowBlur=15;
+      
+      // Crystal color — pull from a wide asymmetric palette
+      var cIdx=(shard*7)%6;
+      var alpha=(0.08+Math.sin(eyeT*2+shard)*0.04)*eyeOpen;
+      if(cIdx===0)ex.strokeStyle='rgba(180,230,255,'+alpha+')';// baby blue
+      else if(cIdx===1)ex.strokeStyle='rgba(255,220,130,'+alpha+')';// gold
+      else if(cIdx===2)ex.strokeStyle='rgba(200,140,255,'+alpha+')';// violet
+      else if(cIdx===3)ex.strokeStyle='rgba(255,180,200,'+alpha+')';// pink
+      else if(cIdx===4)ex.strokeStyle='rgba(130,255,220,'+alpha+')';// cyan-green
+      else ex.strokeStyle='rgba(255,255,255,'+alpha+')';// white
+      
+      ex.lineWidth=1+((shard*3)%4)*0.4;
+      ex.shadowColor=ex.strokeStyle.replace(alpha+'',Math.min(alpha*3,0.5)+'');
+      ex.shadowBlur=8;
       ex.stroke();
       ex.shadowBlur=0;
-    }
-    
-    // White-hot divine rays — the main radiance
-    for(var i=0;i<40;i++){
-      var a=(i/40)*Math.PI*2+eyeT*0.25;
-      var rayLen=maxR*(0.4+Math.sin(eyeT*1.8+i*0.9)*0.35);
-      var rayW=1.5+Math.sin(eyeT*2+i)*1;
-      ex.beginPath();
-      ex.moveTo(cx,cy);
-      ex.lineTo(cx+Math.cos(a)*rayLen,cy+Math.sin(a)*rayLen);
-      // Alternate white, baby blue, gold
-      var rc=i%3;
-      if(rc===0)ex.strokeStyle='rgba(255,255,255,'+(0.1*eyeOpen+Math.sin(eyeT*3+i)*0.05*eyeOpen)+')';
-      else if(rc===1)ex.strokeStyle='rgba(140,210,255,'+(0.08*eyeOpen+Math.sin(eyeT*2.5+i)*0.04*eyeOpen)+')';
-      else ex.strokeStyle='rgba(255,220,140,'+(0.08*eyeOpen+Math.sin(eyeT*2+i)*0.04*eyeOpen)+')';
-      ex.lineWidth=rayW;
-      ex.stroke();
-    }
-    
-    // Baby blue aurora waves
-    for(var wave=0;wave<5;wave++){
-      var waveR=maxR*(0.2+wave*0.15);
-      ex.beginPath();
-      for(var p=0;p<=60;p++){
-        var a=(p/60)*Math.PI*2;
-        var wobble=Math.sin(eyeT*2+p*0.3+wave*2)*waveR*0.08;
-        var px=cx+Math.cos(a)*(waveR+wobble);
-        var py=cy+Math.sin(a)*(waveR+wobble);
-        if(p===0)ex.moveTo(px,py);else ex.lineTo(px,py);
+      
+      // Crystal branches — asymmetric forks off the main spine
+      if(shard%3===0&&pts.length>1){
+        for(var b=0;b<pts.length-1;b++){
+          if((b+shard)%2!==0)continue;
+          var bp=pts[b];
+          var branchA=baseA+((shard%2===0)?0.6:-0.5)+Math.sin(eyeT+shard+b)*0.3;
+          var branchLen=shardLen*0.25*(1-b/pts.length);
+          ex.beginPath();
+          ex.moveTo(bp.x,bp.y);
+          ex.lineTo(bp.x+Math.cos(branchA)*branchLen+Math.sin(eyeT*3+b)*5,
+                    bp.y+Math.sin(branchA)*branchLen+Math.cos(eyeT*3+b)*5);
+          ex.strokeStyle='rgba(180,220,255,'+(0.05*eyeOpen)+')';
+          ex.lineWidth=0.7;
+          ex.stroke();
+        }
       }
-      ex.closePath();
-      var wHue=wave%2===0?'rgba(130,200,255,':'rgba(180,220,255,';
-      ex.strokeStyle=wHue+(0.06*eyeOpen+Math.sin(eyeT+wave)*0.03*eyeOpen)+')';
-      ex.lineWidth=1;
-      ex.stroke();
+      
+      // Crystal tip glow — bright point at end of some shards
+      if(shard%4===0&&pts.length>0){
+        var tip=pts[pts.length-1];
+        var tipPulse=Math.abs(Math.sin(eyeT*3+shard*1.7));
+        ex.beginPath();
+        ex.arc(tip.x,tip.y,1.5+tipPulse*2,0,Math.PI*2);
+        ex.fillStyle='rgba(200,235,255,'+(0.3*eyeOpen*tipPulse)+')';
+        ex.shadowColor='rgba(150,210,255,0.7)';ex.shadowBlur=8;
+        ex.fill();ex.shadowBlur=0;
+      }
     }
     
-    // Bright white sparks floating inside
-    for(var sp=0;sp<20;sp++){
-      var sa=eyeT*0.5+sp*0.314;
-      var sr=maxR*(0.1+((sp*7+Math.floor(eyeT*2))%20)/20*0.7);
-      var sx=cx+Math.cos(sa)*sr+Math.sin(eyeT*3+sp)*8;
-      var sy=cy+Math.sin(sa)*sr+Math.cos(eyeT*2+sp)*8;
-      var ss=1+Math.sin(eyeT*4+sp)*1.5;
+    // Electric crackling between nearby crystal tips
+    for(var e=0;e<6;e++){
+      var ea1=(e*seed*3+eyeT*30)*(Math.PI/180);
+      var ea2=ea1+0.3+Math.sin(eyeT*4+e)*0.2;
+      var er1=maxR*(0.3+Math.sin(eyeT+e)*0.15);
+      var er2=maxR*(0.35+Math.cos(eyeT*1.3+e)*0.15);
+      ex.beginPath();
+      var ex1=cx+Math.cos(ea1)*er1,ey1=cy+Math.sin(ea1)*er1;
+      var ex2=cx+Math.cos(ea2)*er2,ey2=cy+Math.sin(ea2)*er2;
+      ex.moveTo(ex1,ey1);
+      // Jagged arc path
+      var midX=(ex1+ex2)/2+Math.sin(eyeT*6+e)*15;
+      var midY=(ey1+ey2)/2+Math.cos(eyeT*6+e)*15;
+      ex.lineTo(midX,midY);
+      ex.lineTo(ex2,ey2);
+      ex.strokeStyle='rgba(100,180,255,'+(0.15*eyeOpen*Math.abs(Math.sin(eyeT*5+e)))+')';
+      ex.lineWidth=1;
+      ex.shadowColor='rgba(80,160,255,0.6)';ex.shadowBlur=6;
+      ex.stroke();ex.shadowBlur=0;
+    }
+    
+    // Floating knowledge particles — asymmetric sizes and orbits
+    for(var sp=0;sp<25;sp++){
+      var sa=eyeT*0.4+sp*0.251+Math.sin(sp*1.7)*0.5;
+      var sr=maxR*(0.08+((sp*11)%25)/25*0.75);
+      var sx=cx+Math.cos(sa)*sr+Math.sin(eyeT*2.3+sp*1.3)*12;
+      var sy=cy+Math.sin(sa)*sr+Math.cos(eyeT*1.7+sp*0.9)*12;
+      var ss=0.5+((sp*7)%5)*0.6+Math.sin(eyeT*3+sp)*0.8;
       if(ss>0.3){
         ex.beginPath();ex.arc(sx,sy,ss,0,Math.PI*2);
-        ex.fillStyle='rgba(200,230,255,'+(0.4*eyeOpen*Math.abs(Math.sin(eyeT*3+sp)))+')';
-        ex.shadowColor='rgba(100,180,255,0.6)';ex.shadowBlur=6;
+        var spC=sp%4;
+        if(spC===0)ex.fillStyle='rgba(200,235,255,'+(0.5*eyeOpen*Math.abs(Math.sin(eyeT*3+sp)))+')';
+        else if(spC===1)ex.fillStyle='rgba(255,220,150,'+(0.4*eyeOpen*Math.abs(Math.sin(eyeT*2.5+sp)))+')';
+        else if(spC===2)ex.fillStyle='rgba(200,150,255,'+(0.4*eyeOpen*Math.abs(Math.sin(eyeT*2.8+sp)))+')';
+        else ex.fillStyle='rgba(150,255,220,'+(0.35*eyeOpen*Math.abs(Math.sin(eyeT*2.2+sp)))+')';
+        ex.shadowColor='rgba(150,200,255,0.5)';ex.shadowBlur=4;
         ex.fill();ex.shadowBlur=0;
       }
     }
