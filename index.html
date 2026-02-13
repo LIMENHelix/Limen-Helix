@@ -1,374 +1,290 @@
 <!DOCTYPE html>
-<html lang="en" data-archetype="Analyst" style="--phase: 0;">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LIMEN Helix – Return Through the Pattern</title>
+  <title>LIMEN Helix – The Threshold</title>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      margin: 0;
-      font-family: "Georgia", serif;
-      background-color: #0c0c0c;
+      background: #050508;
       color: #e8e3d9;
-      background-image: url('https://cdn.midjourney.com/f37620bc-89e6-4c27-9bc3-97ffb3ed56bb/0_1.webp');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
+      font-family: Georgia, serif;
+      overflow: hidden;
+      height: 100vh;
+      cursor: default;
     }
-
-    .overlay {
-      background-color: rgba(0, 0, 0, 0.75);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 3rem;
-      text-align: center;
+    #gate {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center; flex-direction: column;
+      z-index: 100; cursor: pointer;
+      background: radial-gradient(ellipse at center, #0a0a10 0%, #050508 60%, #000 100%);
     }
-
-
-    h1 {
-      font-size: 2.8rem;
-      margin-bottom: 1rem;
-      color: #f8eacb;
+    #gate::before {
+      content: ''; position: absolute; inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%, rgba(201,169,78,0.15) 0%, transparent 100%),
+        radial-gradient(1px 1px at 30% 70%, rgba(201,169,78,0.1) 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 10%, rgba(201,169,78,0.12) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 80%, rgba(201,169,78,0.08) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 30%, rgba(201,169,78,0.1) 0%, transparent 100%),
+        radial-gradient(1px 1px at 15% 90%, rgba(201,169,78,0.06) 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 50%, rgba(201,169,78,0.08) 0%, transparent 100%),
+        radial-gradient(1px 1px at 40% 40%, rgba(201,169,78,0.1) 0%, transparent 100%);
+      animation: dust-drift 30s linear infinite;
     }
-
-    p {
-      font-size: 1.2rem;
-      line-height: 1.6;
-      max-width: 700px;
-      margin-bottom: 2rem;
+    @keyframes dust-drift {
+      0% { transform: translateY(0) translateX(0); }
+      50% { transform: translateY(-20px) translateX(10px); }
+      100% { transform: translateY(0) translateX(0); }
     }
-
-    .button {
-      display: inline-block;
-      padding: 14px 30px;
-      font-size: 1rem;
-      color: #fff;
-      background-color: #8e793e;
-      text-decoration: none;
-      border-radius: 5px;
-      transition: background-color 0.3s;
+    .corner-glyph {
+      position: absolute; font-size: 1.2rem; color: rgba(201,169,78,0.08);
+      font-family: Georgia, serif; letter-spacing: 4px;
+      animation: glyph-breathe 8s ease-in-out infinite;
     }
-
-    .button:hover {
-      background-color: #a08d4b;
+    .corner-glyph.tl { top: 2rem; left: 2rem; }
+    .corner-glyph.tr { top: 2rem; right: 2rem; }
+    .corner-glyph.bl { bottom: 2rem; left: 2rem; }
+    .corner-glyph.br { bottom: 2rem; right: 2rem; }
+    @keyframes glyph-breathe { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.2; } }
+    .edge-text {
+      position: absolute; font-size: 0.45rem; letter-spacing: 8px;
+      color: rgba(201,169,78,0.04); text-transform: uppercase;
+      font-family: monospace; white-space: nowrap;
     }
-
-    footer {
-      text-align: center;
-      font-size: 0.85rem;
-      color: #777;
-      margin-top: 4rem;
+    .edge-text.top { top: 5rem; left: 50%; transform: translateX(-50%); }
+    .edge-text.bottom { bottom: 5rem; left: 50%; transform: translateX(-50%); }
+    .edge-text.left { left: 3rem; top: 50%; transform: translateY(-50%) rotate(-90deg); transform-origin: left center; }
+    .edge-text.right { right: 3rem; top: 50%; transform: translateY(-50%) rotate(90deg); transform-origin: right center; }
+    #sigil-container {
+      position: relative; width: 70vmin; height: 70vmin;
+      max-width: 600px; max-height: 600px;
+      transition: all 2s cubic-bezier(0.16, 1, 0.3, 1);
     }
-
-    iframe {
-      margin-top: 2rem;
-      border-radius: 12px;
+    #sigil-container svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .ring-outer { animation: orbit 60s linear infinite; }
+    .ring-mid { animation: orbit-reverse 45s linear infinite; }
+    .ring-inner { animation: orbit 30s linear infinite; }
+    .ring-core { animation: orbit-reverse 20s linear infinite; }
+    .ring-void { animation: orbit 90s linear infinite; }
+    @keyframes orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes orbit-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+    @keyframes core-pulse {
+      0%, 100% { opacity: 0.6; filter: drop-shadow(0 0 20px rgba(201,169,78,0.2)); }
+      50% { opacity: 1; filter: drop-shadow(0 0 60px rgba(201,169,78,0.4)); }
     }
-
-    /* === Cognition Engine: Latent Start & Phase Shift === */
-    .latent-layer {
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(ellipse at center, rgba(12,12,12,0.97) 0%, rgba(0,0,0,0.99) 100%);
-      pointer-events: none;
-      z-index: 500;
-      opacity: calc(1 - var(--phase, 0));
-      transition: opacity 0.3s ease-out;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    @keyframes eye-blink {
+      0%, 40%, 60%, 100% { ry: 12; opacity: 0.9; }
+      50% { ry: 1; opacity: 0.4; }
     }
-
-    .latent-layer::before {
-      content: '...';
-      font-size: 3rem;
-      color: #333;
-      animation: pulse-latent 2s ease-in-out infinite;
+    #sigil-container:hover { filter: drop-shadow(0 0 80px rgba(201,169,78,0.15)); }
+    #gate-text {
+      margin-top: 2rem; text-align: center; opacity: 0;
+      animation: fade-up 2s ease 1s forwards;
     }
-
-    @keyframes pulse-latent {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 0.6; }
+    @keyframes fade-up { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(10px); } }
+    #gate-title { font-size: 0.55rem; letter-spacing: 10px; color: rgba(201,169,78,0.3); text-transform: uppercase; font-family: monospace; margin-bottom: 0.5rem; }
+    #gate-subtitle { font-size: 0.75rem; color: rgba(201,169,78,0.12); letter-spacing: 3px; font-style: italic; }
+    #gate:hover #gate-title { color: rgba(201,169,78,0.6); }
+    #gate:hover #gate-subtitle { color: rgba(201,169,78,0.3); }
+    #gate:hover .corner-glyph { color: rgba(201,169,78,0.2); }
+    #gate:hover .edge-text { color: rgba(201,169,78,0.1); }
+    #threshold-portal {
+      position: fixed; inset: 0; z-index: 200;
+      display: none; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0); transition: background 1s ease;
     }
-
-    .latent-layer.resolved {
-      opacity: 0;
-      pointer-events: none;
+    #portal-inner {
+      text-align: center; opacity: 0; transform: scale(0.9);
+      transition: all 1s ease 0.8s; max-width: 650px; padding: 2rem; width: 90%;
     }
-
-    /* Phase-based content resolution */
-    .overlay {
-      filter: blur(calc((1 - var(--phase, 0)) * 3px));
-      transition: filter 0.5s ease-out;
+    #portal-inner.visible { opacity: 1; transform: scale(1); }
+    .chamber-title-pre { font-size: 0.5rem; letter-spacing: 8px; color: #C9A94E; text-transform: uppercase; font-family: monospace; margin-bottom: 0.5rem; }
+    .chamber-title { font-size: 2.2rem; color: #f8eacb; font-weight: 300; margin-bottom: 0.3rem; }
+    .chamber-subtitle { font-size: 0.85rem; color: #555; line-height: 1.8; margin-bottom: 2.5rem; font-style: italic; }
+    .offerings { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 2rem; }
+    .offering-card {
+      display: block; padding: 24px 16px; border: 1px solid rgba(201,169,78,0.1);
+      background: rgba(201,169,78,0.02); text-decoration: none;
+      transition: all 0.4s ease; border-radius: 2px; position: relative; overflow: hidden;
     }
-
-    /* === Archetype-Based Styling === */
-
-    /* Analyst: structured, clear */
-    [data-archetype="Analyst"] h1 {
-      letter-spacing: 1px;
+    .offering-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, rgba(201,169,78,0.05) 0%, transparent 70%);
+      opacity: 0; transition: opacity 0.4s;
     }
-    [data-archetype="Analyst"] p {
-      line-height: 1.8;
+    .offering-card:hover { border-color: rgba(201,169,78,0.4); background: rgba(201,169,78,0.06); box-shadow: 0 0 40px rgba(201,169,78,0.05); }
+    .offering-card:hover::before { opacity: 1; }
+    .offering-icon { font-size: 1.8rem; display: block; margin-bottom: 8px; }
+    .offering-name { font-size: 0.65rem; letter-spacing: 4px; color: #C9A94E; text-transform: uppercase; display: block; }
+    .offering-desc { font-size: 0.55rem; color: #555; display: block; margin-top: 6px; letter-spacing: 1px; }
+    .portal-nav { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+    .portal-btn {
+      background: none; border: 1px solid rgba(201,169,78,0.1); color: #444;
+      padding: 10px 28px; font-size: 0.6rem; letter-spacing: 3px; cursor: pointer;
+      text-transform: uppercase; font-family: monospace; transition: all 0.3s; text-decoration: none;
     }
-
-    /* Engineer: compact, efficient */
-    [data-archetype="Engineer"] .overlay {
-      padding: 2rem;
-    }
-    [data-archetype="Engineer"] h1 {
-      font-size: 2.2rem;
-    }
-    [data-archetype="Engineer"] p {
-      font-size: 1.05rem;
-    }
-
-    /* Philosopher: spacious, contemplative */
-    [data-archetype="Philosopher"] .overlay {
-      padding: 5rem;
-    }
-    [data-archetype="Philosopher"] h1 {
-      font-size: 3.2rem;
-      font-weight: 300;
-    }
-    [data-archetype="Philosopher"] p {
-      font-size: 1.35rem;
-      line-height: 2;
-      max-width: 600px;
-    }
-
-    /* Artist: expressive, flowing */
-    [data-archetype="Artist"] h1 {
-      font-style: italic;
-      transform: rotate(-0.5deg);
-    }
-    [data-archetype="Artist"] p {
-      font-size: 1.25rem;
-    }
-    [data-archetype="Artist"] .button {
-      background-color: #a08d4b;
-      border-radius: 20px;
+    .portal-btn:hover { color: #C9A94E; border-color: rgba(201,169,78,0.3); }
+    .gate-opening #sigil-container { transform: scale(3); opacity: 0; filter: blur(20px); }
+    .gate-opening .corner-glyph, .gate-opening .edge-text, .gate-opening #gate-text { opacity: 0 !important; transition: opacity 0.5s; }
+    @media (max-width: 600px) {
+      #sigil-container { width: 85vmin; height: 85vmin; }
+      .corner-glyph { font-size: 0.8rem; }
+      .edge-text { display: none; }
+      .chamber-title { font-size: 1.6rem; }
+      .offerings { gap: 8px; }
+      .offering-card { padding: 16px 10px; }
     }
   </style>
 </head>
 <body>
-  <!-- Latent layer: visible until cognition resolves -->
-  <div class="latent-layer" id="latent-layer"></div>
 
-  <div class="overlay">
-    <h1>A recursive system for navigating change.</h1>
+  <div id="gate" onclick="openThreshold()">
+    <span class="corner-glyph tl">Ω · Α</span>
+    <span class="corner-glyph tr">Δ · Σ</span>
+    <span class="corner-glyph bl">Ψ · Θ</span>
+    <span class="corner-glyph br">Φ · Λ</span>
+    <span class="edge-text top">through the pattern · through the pattern · through the pattern · through the pattern</span>
+    <span class="edge-text bottom">what was lost returns · what was broken spirals · what was hidden opens</span>
+    <span class="edge-text left">phase zero · source · dissolution · return</span>
+    <span class="edge-text right">limen · threshold · crossing · becoming</span>
 
-<p><em>
-  LIMEN Helix maps how humans move through disruption, stabilization, and return — without forcing linear progress.
-</em></p>
-
-<p>
-  Built as a phase-based framework, LIMEN Helix helps identify where you are in a cycle,
-  what stabilizes you, and what “progress” actually looks like when growth is non-linear.
-</p>
-
-<p>
-  Explore the structure, the phases, and tools designed for clarity, continuity, and return.
-</p>
-    <a class="button" href="spiral.html" style="margin-top: 1rem;">Phasecraft Descent</a>
-
-    <!-- ═══════ THE SIGIL GATE ═══════ -->
-    <div id="sigil-gate" style="margin-top: 4rem; cursor: pointer; position: relative;" onclick="openThreshold()">
-      <div style="position: relative; width: 120px; height: 120px; margin: 0 auto;">
-        <!-- Outer ring - slow rotation -->
-        <svg viewBox="0 0 120 120" style="position: absolute; inset: 0; animation: sigil-orbit 20s linear infinite; filter: drop-shadow(0 0 8px rgba(201,169,78,0.3));">
-          <circle cx="60" cy="60" r="55" fill="none" stroke="#8e793e" stroke-width="0.5" stroke-dasharray="4 8" opacity="0.6"/>
-          <circle cx="60" cy="60" r="50" fill="none" stroke="#C9A94E" stroke-width="0.3" opacity="0.4"/>
-          <!-- Cardinal glyphs -->
-          <text x="60" y="12" text-anchor="middle" fill="#C9A94E" font-size="8" opacity="0.7">Ω</text>
-          <text x="108" y="63" text-anchor="middle" fill="#C9A94E" font-size="8" opacity="0.7">Δ</text>
-          <text x="60" y="115" text-anchor="middle" fill="#C9A94E" font-size="8" opacity="0.7">Ψ</text>
-          <text x="12" y="63" text-anchor="middle" fill="#C9A94E" font-size="8" opacity="0.7">Φ</text>
-        </svg>
-        <!-- Inner ring - counter rotation -->
-        <svg viewBox="0 0 120 120" style="position: absolute; inset: 0; animation: sigil-orbit-reverse 15s linear infinite;">
-          <circle cx="60" cy="60" r="38" fill="none" stroke="#C9A94E" stroke-width="0.5" stroke-dasharray="2 6" opacity="0.5"/>
-          <!-- Triangulation -->
-          <polygon points="60,28 82,72 38,72" fill="none" stroke="#C9A94E" stroke-width="0.4" opacity="0.3"/>
-          <polygon points="60,92 38,48 82,48" fill="none" stroke="#8e793e" stroke-width="0.4" opacity="0.3"/>
-        </svg>
-        <!-- Center eye/void -->
-        <svg viewBox="0 0 120 120" style="position: absolute; inset: 0;">
-          <circle cx="60" cy="60" r="18" fill="rgba(12,12,12,0.9)" stroke="#C9A94E" stroke-width="0.8" style="animation: sigil-pulse 3s ease-in-out infinite;"/>
-          <circle cx="60" cy="60" r="4" fill="#C9A94E" opacity="0.8" style="animation: sigil-core 4s ease-in-out infinite;"/>
-          <!-- Vertical slit -->
-          <line x1="60" y1="45" x2="60" y2="75" stroke="#C9A94E" stroke-width="0.5" opacity="0.6"/>
-        </svg>
-      </div>
-      <p style="font-size: 0.65rem; letter-spacing: 4px; color: #555; margin-top: 1rem; text-transform: uppercase; font-family: monospace;">
-        ⟐ Cross the Threshold ⟐
-      </p>
+    <div id="sigil-container">
+      <svg viewBox="0 0 400 400" class="ring-void">
+        <circle cx="200" cy="200" r="195" fill="none" stroke="rgba(201,169,78,0.03)" stroke-width="0.3"/>
+        <text x="200" y="15" text-anchor="middle" fill="rgba(201,169,78,0.06)" font-size="6" font-family="monospace">LIMEN</text>
+        <text x="385" y="203" text-anchor="middle" fill="rgba(201,169,78,0.06)" font-size="6" font-family="monospace" transform="rotate(90,385,203)">HELIX</text>
+        <text x="200" y="395" text-anchor="middle" fill="rgba(201,169,78,0.06)" font-size="6" font-family="monospace">RETURN</text>
+        <text x="15" y="203" text-anchor="middle" fill="rgba(201,169,78,0.06)" font-size="6" font-family="monospace" transform="rotate(-90,15,203)">PATTERN</text>
+      </svg>
+      <svg viewBox="0 0 400 400" class="ring-outer">
+        <circle cx="200" cy="200" r="180" fill="none" stroke="rgba(201,169,78,0.08)" stroke-width="0.5" stroke-dasharray="3 12"/>
+        <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(201,169,78,0.05)" stroke-width="0.3" stroke-dasharray="1 8"/>
+        <circle cx="200" cy="25" r="2" fill="rgba(201,169,78,0.15)"/>
+        <circle cx="308" cy="52" r="2" fill="rgba(201,169,78,0.12)"/>
+        <circle cx="370" cy="145" r="2" fill="rgba(201,169,78,0.12)"/>
+        <circle cx="370" cy="255" r="2" fill="rgba(201,169,78,0.12)"/>
+        <circle cx="308" cy="348" r="2" fill="rgba(201,169,78,0.12)"/>
+        <circle cx="200" cy="375" r="2" fill="rgba(201,169,78,0.15)"/>
+        <circle cx="92" cy="348" r="2" fill="rgba(201,169,78,0.12)"/>
+        <circle cx="30" cy="255" r="2" fill="rgba(201,169,78,0.12)"/>
+        <circle cx="30" cy="145" r="2" fill="rgba(201,169,78,0.12)"/>
+        <circle cx="92" cy="52" r="2" fill="rgba(201,169,78,0.12)"/>
+      </svg>
+      <svg viewBox="0 0 400 400" class="ring-mid">
+        <circle cx="200" cy="200" r="140" fill="none" stroke="rgba(201,169,78,0.1)" stroke-width="0.4"/>
+        <polygon points="200,65 317,268 83,268" fill="none" stroke="rgba(201,169,78,0.06)" stroke-width="0.5"/>
+        <polygon points="200,335 83,132 317,132" fill="none" stroke="rgba(201,169,78,0.06)" stroke-width="0.5"/>
+        <line x1="200" y1="60" x2="200" y2="340" stroke="rgba(201,169,78,0.03)" stroke-width="0.3"/>
+        <line x1="60" y1="200" x2="340" y2="200" stroke="rgba(201,169,78,0.03)" stroke-width="0.3"/>
+        <text x="200" y="58" text-anchor="middle" fill="rgba(201,169,78,0.2)" font-size="14">Ω</text>
+        <text x="342" y="205" text-anchor="middle" fill="rgba(201,169,78,0.2)" font-size="14">Δ</text>
+        <text x="200" y="352" text-anchor="middle" fill="rgba(201,169,78,0.2)" font-size="14">Ψ</text>
+        <text x="58" y="205" text-anchor="middle" fill="rgba(201,169,78,0.2)" font-size="14">Φ</text>
+      </svg>
+      <svg viewBox="0 0 400 400" class="ring-inner">
+        <circle cx="200" cy="200" r="100" fill="none" stroke="rgba(201,169,78,0.12)" stroke-width="0.5" stroke-dasharray="2 4"/>
+        <polygon points="200,105 290,170 255,270 145,270 110,170" fill="none" stroke="rgba(201,169,78,0.07)" stroke-width="0.4"/>
+        <line x1="200" y1="105" x2="255" y2="270" stroke="rgba(201,169,78,0.04)" stroke-width="0.3"/>
+        <line x1="255" y1="270" x2="110" y2="170" stroke="rgba(201,169,78,0.04)" stroke-width="0.3"/>
+        <line x1="110" y1="170" x2="290" y2="170" stroke="rgba(201,169,78,0.04)" stroke-width="0.3"/>
+        <line x1="290" y1="170" x2="145" y2="270" stroke="rgba(201,169,78,0.04)" stroke-width="0.3"/>
+        <line x1="145" y1="270" x2="200" y2="105" stroke="rgba(201,169,78,0.04)" stroke-width="0.3"/>
+      </svg>
+      <svg viewBox="0 0 400 400" class="ring-core">
+        <circle cx="200" cy="200" r="60" fill="none" stroke="rgba(201,169,78,0.15)" stroke-width="0.6"/>
+        <polygon points="200,145 248,228 152,228" fill="none" stroke="rgba(201,169,78,0.1)" stroke-width="0.4"/>
+        <polygon points="200,255 152,172 248,172" fill="none" stroke="rgba(201,169,78,0.08)" stroke-width="0.4"/>
+      </svg>
+      <svg viewBox="0 0 400 400">
+        <circle cx="200" cy="200" r="35" fill="rgba(5,5,8,0.95)"/>
+        <ellipse cx="200" cy="200" rx="35" ry="12" fill="none" stroke="rgba(201,169,78,0.4)" stroke-width="0.8" style="animation: eye-blink 8s ease-in-out infinite;"/>
+        <circle cx="200" cy="200" r="8" fill="rgba(201,169,78,0.6)" style="animation: core-pulse 4s ease-in-out infinite;"/>
+        <circle cx="200" cy="200" r="3" fill="#050508"/>
+        <line x1="200" y1="165" x2="200" y2="235" stroke="rgba(201,169,78,0.15)" stroke-width="0.4"/>
+      </svg>
     </div>
 
-    <!-- ═══════ THRESHOLD PORTAL OVERLAY ═══════ -->
-    <div id="threshold-portal" style="
-      position: fixed; inset: 0; z-index: 9999;
-      background: radial-gradient(ellipse at center, rgba(12,12,12,0.0) 0%, rgba(0,0,0,0.0) 100%);
-      display: none; align-items: center; justify-content: center; flex-direction: column;
-      opacity: 0; transition: opacity 0.8s ease;
-    ">
-      <!-- Expanding void -->
-      <div id="void-ring" style="
-        width: 0; height: 0; border-radius: 50%;
-        border: 1px solid #C9A94E;
-        box-shadow: 0 0 60px rgba(201,169,78,0.2), inset 0 0 60px rgba(0,0,0,0.9);
-        transition: all 1.5s cubic-bezier(0.16, 1, 0.3, 1);
-        display: flex; align-items: center; justify-content: center; flex-direction: column;
-        overflow: hidden; position: relative;
-      ">
-        <div id="portal-content" style="opacity: 0; transition: opacity 0.6s ease 1.2s; text-align: center; padding: 2rem; width: 100%; max-width: 500px;">
-          <p style="font-size: 0.6rem; letter-spacing: 6px; color: #C9A94E; text-transform: uppercase; margin-bottom: 0.5rem;">You have crossed the limen</p>
-          <h2 style="font-family: Georgia, serif; color: #f8eacb; font-size: 1.8rem; font-weight: 300; margin-bottom: 0.5rem;">The Inner Chamber</h2>
-          <p style="font-size: 0.85rem; color: #777; line-height: 1.6; margin-bottom: 2rem;">
-            What you offer here feeds the pattern.<br>
-            What returns to you is the architecture of your own becoming.
-          </p>
-          
-          <!-- Offering categories as ritual choices -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.5rem;">
-            <a href="https://chapel-pos-v2.vercel.app" style="
-              display: block; padding: 18px 12px; border: 1px solid rgba(201,169,78,0.2);
-              background: rgba(201,169,78,0.03); text-decoration: none; transition: all 0.3s;
-              border-radius: 4px;
-            " onmouseover="this.style.borderColor='rgba(201,169,78,0.5)';this.style.background='rgba(201,169,78,0.08)'" onmouseout="this.style.borderColor='rgba(201,169,78,0.2)';this.style.background='rgba(201,169,78,0.03)'">
-              <span style="font-size: 1.4rem; display: block; margin-bottom: 6px;">✦</span>
-              <span style="font-size: 0.7rem; letter-spacing: 3px; color: #C9A94E; text-transform: uppercase;">Offering</span>
-              <span style="font-size: 0.6rem; display: block; color: #666; margin-top: 4px;">Donation · Tithe</span>
-            </a>
-            <a href="https://chapel-pos-v2.vercel.app" style="
-              display: block; padding: 18px 12px; border: 1px solid rgba(201,169,78,0.2);
-              background: rgba(201,169,78,0.03); text-decoration: none; transition: all 0.3s;
-              border-radius: 4px;
-            " onmouseover="this.style.borderColor='rgba(201,169,78,0.5)';this.style.background='rgba(201,169,78,0.08)'" onmouseout="this.style.borderColor='rgba(201,169,78,0.2)';this.style.background='rgba(201,169,78,0.03)'">
-              <span style="font-size: 1.4rem; display: block; margin-bottom: 6px;">⬡</span>
-              <span style="font-size: 0.7rem; letter-spacing: 3px; color: #C9A94E; text-transform: uppercase;">Workshop</span>
-              <span style="font-size: 0.6rem; display: block; color: #666; margin-top: 4px;">Sessions · Training</span>
-            </a>
-            <a href="https://chapel-pos-v2.vercel.app" style="
-              display: block; padding: 18px 12px; border: 1px solid rgba(201,169,78,0.2);
-              background: rgba(201,169,78,0.03); text-decoration: none; transition: all 0.3s;
-              border-radius: 4px;
-            " onmouseover="this.style.borderColor='rgba(201,169,78,0.5)';this.style.background='rgba(201,169,78,0.08)'" onmouseout="this.style.borderColor='rgba(201,169,78,0.2)';this.style.background='rgba(201,169,78,0.03)'">
-              <span style="font-size: 1.4rem; display: block; margin-bottom: 6px;">⊕</span>
-              <span style="font-size: 0.7rem; letter-spacing: 3px; color: #C9A94E; text-transform: uppercase;">Consultation</span>
-              <span style="font-size: 0.6rem; display: block; color: #666; margin-top: 4px;">1-on-1 · Guidance</span>
-            </a>
-            <a href="https://chapel-pos-v2.vercel.app" style="
-              display: block; padding: 18px 12px; border: 1px solid rgba(201,169,78,0.2);
-              background: rgba(201,169,78,0.03); text-decoration: none; transition: all 0.3s;
-              border-radius: 4px;
-            " onmouseover="this.style.borderColor='rgba(201,169,78,0.5)';this.style.background='rgba(201,169,78,0.08)'" onmouseout="this.style.borderColor='rgba(201,169,78,0.2)';this.style.background='rgba(201,169,78,0.03)'">
-              <span style="font-size: 1.4rem; display: block; margin-bottom: 6px;">◇</span>
-              <span style="font-size: 0.7rem; letter-spacing: 3px; color: #C9A94E; text-transform: uppercase;">Materials</span>
-              <span style="font-size: 0.6rem; display: block; color: #666; margin-top: 4px;">Texts · Resources</span>
-            </a>
-          </div>
-          
-          <button onclick="closeThreshold()" style="
-            background: none; border: 1px solid rgba(201,169,78,0.15); color: #555;
-            padding: 8px 24px; font-size: 0.65rem; letter-spacing: 3px; cursor: pointer;
-            text-transform: uppercase; font-family: monospace; transition: all 0.3s;
-          " onmouseover="this.style.color='#C9A94E';this.style.borderColor='rgba(201,169,78,0.4)'" onmouseout="this.style.color='#555';this.style.borderColor='rgba(201,169,78,0.15)'">
-            ← Return to Pattern
-          </button>
-        </div>
-      </div>
+    <div id="gate-text">
+      <div id="gate-title">Enter the Threshold</div>
+      <div id="gate-subtitle">click to cross</div>
     </div>
-
-    <style>
-      @keyframes sigil-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      @keyframes sigil-orbit-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
-      @keyframes sigil-pulse { 0%, 100% { stroke-opacity: 0.8; r: 18; } 50% { stroke-opacity: 0.3; r: 20; } }
-      @keyframes sigil-core { 0%, 100% { opacity: 0.8; r: 4; } 50% { opacity: 0.3; r: 3; } }
-      #sigil-gate:hover svg { filter: drop-shadow(0 0 15px rgba(201,169,78,0.5)) !important; }
-      #sigil-gate:hover p { color: #C9A94E !important; }
-    </style>
-
-    <script>
-      function openThreshold() {
-        var portal = document.getElementById('threshold-portal');
-        var voidRing = document.getElementById('void-ring');
-        var content = document.getElementById('portal-content');
-        portal.style.display = 'flex';
-        setTimeout(function() {
-          portal.style.opacity = '1';
-          portal.style.background = 'radial-gradient(ellipse at center, rgba(12,12,12,0.98) 0%, rgba(0,0,0,0.99) 100%)';
-        }, 10);
-        setTimeout(function() {
-          voidRing.style.width = '90vmin';
-          voidRing.style.height = '90vmin';
-          voidRing.style.maxWidth = '600px';
-          voidRing.style.maxHeight = '600px';
-        }, 300);
-        setTimeout(function() {
-          content.style.opacity = '1';
-        }, 1200);
-      }
-      function closeThreshold() {
-        var portal = document.getElementById('threshold-portal');
-        var voidRing = document.getElementById('void-ring');
-        var content = document.getElementById('portal-content');
-        content.style.opacity = '0';
-        setTimeout(function() {
-          voidRing.style.width = '0';
-          voidRing.style.height = '0';
-        }, 200);
-        setTimeout(function() {
-          portal.style.opacity = '0';
-          portal.style.background = 'radial-gradient(ellipse at center, rgba(12,12,12,0.0) 0%, rgba(0,0,0,0.0) 100%)';
-        }, 800);
-        setTimeout(function() {
-          portal.style.display = 'none';
-        }, 1600);
-      }
-    </script>
-    <!-- ═══════ END SIGIL GATE ═══════ -->
-
-    <!-- Spotify Embed: Phase 0 – Source -->
-    <h2 style="color: #e8e3d9; margin-top: 3rem;">Phase 0 – Source</h2>
-    <iframe style="display: block; margin: 0 auto;"
-      src="https://open.spotify.com/embed/playlist/7L2R8cve9iwIhBS9VEJge0?utm_source=generator"
-      width="100%" height="352" frameBorder="0"
-      allowfullscreen=""
-      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-      loading="lazy">
-    </iframe>
-
-    <footer>
-      &copy; LIMEN Helix Transformational Sciences – All resonance held in pattern.
-    </footer>
   </div>
 
-  <!-- Cognition Engine -->
-  <script src="cognitionEngine.js"></script>
+  <div id="threshold-portal">
+    <div id="portal-inner">
+      <p class="chamber-title-pre">You have crossed the limen</p>
+      <h1 class="chamber-title">The Inner Chamber</h1>
+      <p class="chamber-subtitle">
+        What you offer here feeds the pattern.<br>
+        What returns to you is the architecture of your own becoming.
+      </p>
+      <div class="offerings">
+        <a href="https://chapel-pos-v2.vercel.app" class="offering-card">
+          <span class="offering-icon">✦</span>
+          <span class="offering-name">Offering</span>
+          <span class="offering-desc">Donation · Tithe</span>
+        </a>
+        <a href="https://chapel-pos-v2.vercel.app" class="offering-card">
+          <span class="offering-icon">⬡</span>
+          <span class="offering-name">Workshop</span>
+          <span class="offering-desc">Sessions · Training</span>
+        </a>
+        <a href="https://chapel-pos-v2.vercel.app" class="offering-card">
+          <span class="offering-icon">⊕</span>
+          <span class="offering-name">Consultation</span>
+          <span class="offering-desc">1-on-1 · Guidance</span>
+        </a>
+        <a href="https://chapel-pos-v2.vercel.app" class="offering-card">
+          <span class="offering-icon">◇</span>
+          <span class="offering-name">Materials</span>
+          <span class="offering-desc">Texts · Resources</span>
+        </a>
+      </div>
+      <div class="portal-nav">
+        <a href="spiral.html" class="portal-btn">⟐ Phasecraft Descent</a>
+        <button class="portal-btn" onclick="closeThreshold()">← Return to Gate</button>
+      </div>
+      <p style="font-size:0.4rem;color:rgba(201,169,78,0.08);margin-top:2rem;letter-spacing:4px;text-transform:uppercase;">
+        Chapel of the LIMEN Helix · 501(c)(3) · EIN 33-4945631
+      </p>
+    </div>
+  </div>
+
   <script>
-    (function() {
-      // Start the cognition engine
-      var engine = startCognitionEngine({ phaseSeconds: 5 });
-
-      // Subscribe to state updates
-      engine.subscribe(function(state) {
-        // Update archetype data attribute
-        document.documentElement.dataset.archetype = state.archetype;
-
-        // Update phase CSS variable
-        document.documentElement.style.setProperty('--phase', state.phase.toFixed(3));
-
-        // Mark latent layer as resolved when phase completes
-        if (state.phase >= 0.95) {
-          var latent = document.getElementById('latent-layer');
-          if (latent) latent.classList.add('resolved');
-        }
-      });
-    })();
+    function openThreshold() {
+      var gate = document.getElementById('gate');
+      var portal = document.getElementById('threshold-portal');
+      var inner = document.getElementById('portal-inner');
+      gate.classList.add('gate-opening');
+      setTimeout(function() {
+        portal.style.display = 'flex';
+        setTimeout(function() {
+          portal.style.background = 'radial-gradient(ellipse at center, rgba(8,8,12,0.99) 0%, rgba(0,0,0,1) 100%)';
+        }, 50);
+      }, 600);
+      setTimeout(function() { inner.classList.add('visible'); }, 1200);
+      setTimeout(function() { gate.style.display = 'none'; }, 2000);
+    }
+    function closeThreshold() {
+      var gate = document.getElementById('gate');
+      var portal = document.getElementById('threshold-portal');
+      var inner = document.getElementById('portal-inner');
+      inner.classList.remove('visible');
+      setTimeout(function() { portal.style.background = 'rgba(0,0,0,0)'; }, 300);
+      setTimeout(function() {
+        portal.style.display = 'none';
+        gate.style.display = 'flex';
+        gate.classList.remove('gate-opening');
+      }, 800);
+    }
+    document.getElementById('gate').addEventListener('mousemove', function(e) {
+      var rect = this.getBoundingClientRect();
+      var x = (e.clientX - rect.left) / rect.width - 0.5;
+      var y = (e.clientY - rect.top) / rect.height - 0.5;
+      document.getElementById('sigil-container').style.transform = 'translate(' + (x*15) + 'px,' + (y*15) + 'px)';
+    });
   </script>
 </body>
 </html>
