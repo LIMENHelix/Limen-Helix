@@ -1,180 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LIMEN Helix – The Threshold</title>
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{background:#030305;overflow:hidden;height:100vh;width:100vw;font-family:Georgia,serif}
-    #gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:100;cursor:pointer;background:radial-gradient(ellipse at center,#0d0815 0%,#060310 40%,#020108 100%)}
-    #gate::before{content:'';position:absolute;inset:-20%;width:140%;height:140%;background:radial-gradient(ellipse at 30% 20%,rgba(120,40,200,0.08) 0%,transparent 50%),radial-gradient(ellipse at 70% 80%,rgba(200,120,40,0.06) 0%,transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(201,169,78,0.04) 0%,transparent 40%),radial-gradient(ellipse at 20% 70%,rgba(40,120,200,0.05) 0%,transparent 45%),radial-gradient(ellipse at 80% 30%,rgba(200,40,80,0.04) 0%,transparent 45%);animation:nebula 25s ease-in-out infinite alternate}
-    @keyframes nebula{0%{transform:scale(1) rotate(0deg)}50%{transform:scale(1.05) rotate(2deg)}100%{transform:scale(1) rotate(-1deg)}}
-    #gate::after{content:'';position:absolute;inset:-50%;width:200%;height:200%;background-image:radial-gradient(2px 2px at 10% 20%,rgba(201,169,78,0.4) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 25% 65%,rgba(180,120,255,0.3) 0%,transparent 100%),radial-gradient(2px 2px at 45% 15%,rgba(255,180,80,0.35) 0%,transparent 100%),radial-gradient(1px 1px at 65% 75%,rgba(80,200,255,0.25) 0%,transparent 100%),radial-gradient(2px 2px at 80% 25%,rgba(201,169,78,0.3) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 15% 85%,rgba(255,100,150,0.2) 0%,transparent 100%),radial-gradient(1px 1px at 90% 55%,rgba(150,255,200,0.2) 0%,transparent 100%),radial-gradient(2.5px 2.5px at 55% 35%,rgba(201,169,78,0.5) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 35% 90%,rgba(200,100,255,0.25) 0%,transparent 100%),radial-gradient(2px 2px at 75% 10%,rgba(255,200,100,0.3) 0%,transparent 100%);animation:stardrift 50s linear infinite}
-    @keyframes stardrift{0%{transform:translate(0,0)}25%{transform:translate(-15px,-20px)}50%{transform:translate(10px,-35px)}75%{transform:translate(20px,-15px)}100%{transform:translate(0,0)}}
-    .cg{position:absolute;font-size:1.2rem;color:rgba(201,169,78,0.15);letter-spacing:4px;animation:gb 6s ease-in-out infinite;z-index:2}
-    .cg.tl{top:1.5rem;left:1.5rem}.cg.tr{top:1.5rem;right:1.5rem;animation-delay:1.5s}.cg.bl{bottom:1.5rem;left:1.5rem;animation-delay:3s}.cg.br{bottom:1.5rem;right:1.5rem;animation-delay:4.5s}
-    @keyframes gb{0%,100%{opacity:.15;text-shadow:0 0 10px rgba(201,169,78,0)}50%{opacity:.5;text-shadow:0 0 20px rgba(201,169,78,0.3)}}
-    .ew{position:absolute;font-size:.45rem;letter-spacing:6px;color:rgba(201,169,78,0.06);text-transform:uppercase;font-family:monospace;white-space:nowrap;z-index:2}
-    .ew.t{top:4rem;left:50%;transform:translateX(-50%)}.ew.b{bottom:4rem;left:50%;transform:translateX(-50%)}.ew.l{left:2.5rem;top:50%;transform:translateY(-50%) rotate(-90deg);transform-origin:left center}.ew.r{right:2.5rem;top:50%;transform:translateY(-50%) rotate(90deg);transform-origin:right center}
-    #kscope{position:relative;width:82vmin;height:82vmin;max-width:750px;max-height:750px;transition:all 2.5s cubic-bezier(0.16,1,0.3,1);filter:drop-shadow(0 0 30px rgba(201,169,78,0.08))}
-    .kl{position:absolute;inset:0;width:100%;height:100%;transform-origin:center}
-    .kl:nth-child(1){animation:kr 100s linear infinite}.kl:nth-child(2){animation:krr 75s linear infinite}.kl:nth-child(3){animation:kr 55s linear infinite}.kl:nth-child(4){animation:krr 42s linear infinite}.kl:nth-child(5){animation:kr 33s linear infinite}.kl:nth-child(6){animation:krr 26s linear infinite}.kl:nth-child(7){animation:kr 20s linear infinite}.kl:nth-child(8){animation:krr 16s linear infinite}.kl:nth-child(9){animation:kr 12s linear infinite}.kl:nth-child(10){animation:krr 9s linear infinite}.kl:nth-child(11){animation:kr 7s linear infinite}.kl:nth-child(12){animation:kp 5s ease-in-out infinite}
-    @keyframes kr{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-    @keyframes krr{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
-    @keyframes kp{0%,100%{filter:drop-shadow(0 0 8px rgba(201,169,78,0.2))}50%{filter:drop-shadow(0 0 40px rgba(201,169,78,0.6))}}
-    #kscope:hover{filter:drop-shadow(0 0 60px rgba(201,169,78,0.2)) drop-shadow(0 0 120px rgba(120,80,200,0.1))}
-    #gt{margin-top:1.5rem;text-align:center;opacity:0;animation:fu 2s ease 1s forwards;z-index:2}
-    @keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    #gt1{font-size:.55rem;letter-spacing:10px;color:rgba(201,169,78,0.35);text-transform:uppercase;font-family:monospace;margin-bottom:.4rem}
-    #gt2{font-size:.7rem;color:rgba(201,169,78,0.15);letter-spacing:3px;font-style:italic}
-    #gate:hover #gt1{color:rgba(201,169,78,0.7);text-shadow:0 0 20px rgba(201,169,78,0.3)}
-    #gate:hover #gt2{color:rgba(201,169,78,0.35)}
-    #gate:hover .cg{color:rgba(201,169,78,0.4)}
-    #gate:hover .ew{color:rgba(201,169,78,0.12)}
-    #portal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0);transition:background 1.2s ease}
-    #vr{width:0;height:0;border-radius:50%;background:radial-gradient(ellipse at center,rgba(10,6,20,0.98) 0%,rgba(3,3,5,0.99) 100%);box-shadow:0 0 100px rgba(201,169,78,0.1),0 0 200px rgba(120,80,200,0.05),inset 0 0 80px rgba(0,0,0,0.95);transition:all 2s cubic-bezier(0.16,1,0.3,1);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-    #vr::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid transparent;background:conic-gradient(from 0deg,rgba(201,169,78,0.4),rgba(120,80,200,0.2),rgba(201,169,78,0.1),rgba(255,150,80,0.2),rgba(201,169,78,0.3),rgba(80,180,255,0.15),rgba(201,169,78,0.4)) border-box;-webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:rs 15s linear infinite}
-    #vr::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid transparent;background:conic-gradient(from 180deg,rgba(201,169,78,0.15),transparent,rgba(120,80,200,0.1),transparent,rgba(201,169,78,0.15)) border-box;-webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:rs 25s linear infinite reverse}
-    @keyframes rs{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-    #pc{opacity:0;transform:scale(0.85);transition:all 1s ease;text-align:center;padding:2rem;width:100%;max-width:520px}
-    #pc.vis{opacity:1;transform:scale(1)}
-    .ctp{font-size:.45rem;letter-spacing:8px;color:#C9A94E;text-transform:uppercase;font-family:monospace;margin-bottom:.5rem}
-    .ctt{font-size:2rem;color:#f8eacb;font-weight:300;margin-bottom:.3rem}
-    .cts{font-size:.8rem;color:#555;line-height:1.8;margin-bottom:2rem;font-style:italic}
-    .og{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem}
-    .oc{display:block;padding:20px 14px;border:1px solid rgba(201,169,78,0.12);background:rgba(201,169,78,0.02);text-decoration:none;transition:all .4s;position:relative;overflow:hidden}
-    .oc::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(201,169,78,0.06) 0%,transparent 70%);opacity:0;transition:opacity .4s}
-    .oc:hover{border-color:rgba(201,169,78,0.5);background:rgba(201,169,78,0.06);box-shadow:0 0 40px rgba(201,169,78,0.06)}
-    .oc:hover::before{opacity:1}
-    .oi{font-size:1.6rem;display:block;margin-bottom:6px}.on{font-size:.6rem;letter-spacing:4px;color:#C9A94E;text-transform:uppercase;display:block}.od{font-size:.5rem;color:#555;display:block;margin-top:5px;letter-spacing:1px}
-    .pn{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:1rem}
-    .pb{background:none;border:1px solid rgba(201,169,78,0.1);color:#444;padding:9px 24px;font-size:.55rem;letter-spacing:3px;cursor:pointer;text-transform:uppercase;font-family:monospace;transition:all .3s;text-decoration:none}
-    .pb:hover{color:#C9A94E;border-color:rgba(201,169,78,0.3)}
-    .gate-opening #kscope{transform:scale(5) rotate(360deg);opacity:0;filter:blur(40px)}
-    .gate-opening .cg,.gate-opening .ew,.gate-opening #gt{opacity:0!important;transition:opacity .3s}
-    @media(max-width:600px){#kscope{width:92vmin;height:92vmin}.cg{font-size:.8rem}.ew{display:none}.ctt{font-size:1.5rem}.og{gap:6px}.oc{padding:14px 10px}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIMEN Helix – The Threshold</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;overflow:hidden;height:100vh;width:100vw;font-family:Georgia,serif}
+
+/* Matrix rain canvas - behind everything */
+#matrix{position:fixed;inset:0;z-index:1}
+
+/* Kaleidoscope canvas - on top of matrix */
+#kaleidoscope{position:fixed;inset:0;z-index:2}
+
+/* Gate overlay */
+#gate{
+  position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;cursor:pointer;
+}
+
+/* Vignette over everything */
+#gate::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,0.4) 70%,rgba(0,0,0,0.8) 100%);
+  pointer-events:none;z-index:1;
+}
+
+/* Corner glyphs */
+.cg{position:absolute;font-size:1.4rem;color:rgba(201,169,78,0.3);letter-spacing:4px;z-index:3;
+  animation:gb 5s ease-in-out infinite;text-shadow:0 0 15px rgba(201,169,78,0.2)}
+.cg.tl{top:1.5rem;left:1.5rem}.cg.tr{top:1.5rem;right:1.5rem;animation-delay:1.2s}
+.cg.bl{bottom:1.5rem;left:1.5rem;animation-delay:2.5s}.cg.br{bottom:1.5rem;right:1.5rem;animation-delay:3.7s}
+@keyframes gb{0%,100%{opacity:.3;text-shadow:0 0 15px rgba(201,169,78,0.2)}50%{opacity:.8;text-shadow:0 0 30px rgba(201,169,78,0.5)}}
+
+/* Center eye container */
+#eye-wrap{position:relative;z-index:3;width:200px;height:200px;display:flex;align-items:center;justify-content:center}
+#eye-wrap svg{width:100%;height:100%;filter:drop-shadow(0 0 30px rgba(201,169,78,0.3))}
+
+/* Gate text */
+#gt{text-align:center;z-index:3;opacity:0;animation:fu 2s ease 1s forwards}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+#gt1{font-size:.6rem;letter-spacing:12px;color:rgba(201,169,78,0.5);text-transform:uppercase;font-family:monospace;margin-bottom:.5rem;text-shadow:0 0 20px rgba(201,169,78,0.3)}
+#gt2{font-size:.75rem;color:rgba(201,169,78,0.2);letter-spacing:3px;font-style:italic}
+#gate:hover #gt1{color:rgba(201,169,78,0.9);text-shadow:0 0 30px rgba(201,169,78,0.5)}
+#gate:hover #gt2{color:rgba(201,169,78,0.5)}
+#gate:hover .cg{color:rgba(201,169,78,0.6)}
+#gate:hover #eye-wrap svg{filter:drop-shadow(0 0 60px rgba(201,169,78,0.5)) drop-shadow(0 0 100px rgba(120,80,200,0.2))}
+
+/* ═══ PORTAL ═══ */
+#portal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0);transition:background 1.2s ease}
+#vr{
+  width:0;height:0;border-radius:50%;
+  background:radial-gradient(ellipse at center,rgba(8,5,18,0.97) 0%,rgba(2,1,5,0.99) 100%);
+  box-shadow:0 0 120px rgba(201,169,78,0.12),0 0 250px rgba(120,80,200,0.06);
+  transition:all 2s cubic-bezier(0.16,1,0.3,1);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;
+}
+#vr::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid transparent;background:conic-gradient(from 0deg,rgba(201,169,78,0.5),rgba(120,80,200,0.3),rgba(255,50,150,0.2),rgba(80,180,255,0.3),rgba(201,169,78,0.5)) border-box;-webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:rs 12s linear infinite}
+#vr::after{content:'';position:absolute;inset:-8px;border-radius:50%;border:1px solid transparent;background:conic-gradient(from 180deg,rgba(255,100,200,0.2),transparent,rgba(80,255,180,0.15),transparent,rgba(255,180,80,0.2)) border-box;-webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:rs 20s linear infinite reverse}
+@keyframes rs{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+#pc{opacity:0;transform:scale(0.85);transition:all 1s ease;text-align:center;padding:1.5rem;width:100%;max-width:500px}
+#pc.vis{opacity:1;transform:scale(1)}
+.ctp{font-size:.45rem;letter-spacing:8px;color:#C9A94E;text-transform:uppercase;font-family:monospace;margin-bottom:.5rem}
+.ctt{font-size:1.9rem;color:#f8eacb;font-weight:300;margin-bottom:.3rem}
+.cts{font-size:.78rem;color:#555;line-height:1.8;margin-bottom:1.8rem;font-style:italic}
+.og{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.2rem}
+.oc{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:22px 14px;border:1px solid rgba(201,169,78,0.15);
+  background:rgba(201,169,78,0.02);text-decoration:none;cursor:pointer;
+  transition:all .4s;position:relative;overflow:hidden;border-radius:3px;
+}
+.oc:hover{border-color:rgba(201,169,78,0.5);background:rgba(201,169,78,0.08);box-shadow:0 0 40px rgba(201,169,78,0.08),0 0 80px rgba(120,80,200,0.04)}
+.oi{font-size:1.8rem;margin-bottom:8px;display:block}
+.on{font-size:.6rem;letter-spacing:4px;color:#C9A94E;text-transform:uppercase;display:block}
+.od{font-size:.5rem;color:#555;margin-top:5px;letter-spacing:1px;display:block}
+.pb{
+  display:inline-block;background:none;border:1px solid rgba(201,169,78,0.12);color:#444;
+  padding:10px 28px;font-size:.55rem;letter-spacing:3px;cursor:pointer;
+  text-transform:uppercase;font-family:monospace;transition:all .3s;text-decoration:none;margin-top:1rem;
+}
+.pb:hover{color:#C9A94E;border-color:rgba(201,169,78,0.35)}
+
+.gate-opening{opacity:0!important;transition:opacity 1s!important}
+@media(max-width:600px){#eye-wrap{width:150px;height:150px}.cg{font-size:1rem}.ctt{font-size:1.5rem}.og{gap:6px}.oc{padding:16px 10px}}
+</style>
 </head>
 <body>
+
+<canvas id="matrix"></canvas>
+<canvas id="kaleidoscope"></canvas>
+
 <div id="gate" onclick="openThreshold()">
   <span class="cg tl">Ω · Α</span><span class="cg tr">Δ · Σ</span>
   <span class="cg bl">Ψ · Θ</span><span class="cg br">Φ · Λ</span>
-  <span class="ew t">through the pattern · through the pattern · through the pattern</span>
-  <span class="ew b">what was lost returns · what was broken spirals · what was hidden opens</span>
-  <span class="ew l">phase zero · source · dissolution · return</span>
-  <span class="ew r">limen · threshold · crossing · becoming</span>
-
-  <div id="kscope">
-    <svg viewBox="0 0 400 400" class="kl">
-      <circle cx="200" cy="200" r="196" fill="none" stroke="rgba(201,169,78,0.06)" stroke-width=".5"/>
-      <circle cx="200" cy="200" r="192" fill="none" stroke="rgba(160,100,255,0.04)" stroke-width=".3" stroke-dasharray="2 20"/>
-      <text x="200" y="10" text-anchor="middle" fill="rgba(201,169,78,0.1)" font-size="5" font-family="monospace">L I M E N</text>
-      <text x="200" y="396" text-anchor="middle" fill="rgba(201,169,78,0.1)" font-size="5" font-family="monospace">R E T U R N</text>
-      <text x="10" y="202" text-anchor="middle" fill="rgba(201,169,78,0.1)" font-size="5" font-family="monospace" transform="rotate(-90,10,202)">P A T T E R N</text>
-      <text x="390" y="202" text-anchor="middle" fill="rgba(201,169,78,0.1)" font-size="5" font-family="monospace" transform="rotate(90,390,202)">H E L I X</text>
-    </svg>
-
-    <svg viewBox="0 0 400 400" class="kl">
-      <circle cx="200" cy="200" r="182" fill="none" stroke="rgba(201,169,78,0.12)" stroke-width=".6" stroke-dasharray="3 8"/>
-      <polygon points="200,20 230,105 320,70 278,158 378,200 278,242 320,330 230,295 200,380 170,295 80,330 122,242 22,200 122,158 80,70 170,105" fill="none" stroke="rgba(201,169,78,0.1)" stroke-width=".8"/>
-      <polygon points="200,20 230,105 320,70 278,158 378,200 278,242 320,330 230,295 200,380 170,295 80,330 122,242 22,200 122,158 80,70 170,105" fill="none" stroke="rgba(160,100,255,0.05)" stroke-width="2"/>
-    </svg>
-
-    <svg viewBox="0 0 400 400" class="kl">
-      <polygon points="200,35 343,118 343,282 200,365 57,282 57,118" fill="none" stroke="rgba(255,180,80,0.1)" stroke-width="1"/>
-      <polygon points="200,60 322,132 322,268 200,340 78,268 78,132" fill="none" stroke="rgba(201,169,78,0.08)" stroke-width=".6"/>
-      <polygon points="200,85 300,145 300,255 200,315 100,255 100,145" fill="none" stroke="rgba(80,180,255,0.06)" stroke-width=".5"/>
-      <line x1="200" y1="35" x2="200" y2="365" stroke="rgba(201,169,78,0.05)" stroke-width=".4"/>
-      <line x1="57" y1="118" x2="343" y2="282" stroke="rgba(201,169,78,0.05)" stroke-width=".4"/>
-      <line x1="343" y1="118" x2="57" y2="282" stroke="rgba(201,169,78,0.05)" stroke-width=".4"/>
-    </svg>
-
-    <svg viewBox="0 0 400 400" class="kl">
-      <circle cx="200" cy="200" r="145" fill="none" stroke="rgba(201,169,78,0.15)" stroke-width=".5"/>
-      <polygon points="200,60 322,275 78,275" fill="none" stroke="rgba(201,169,78,0.15)" stroke-width="1"/>
-      <polygon points="200,340 78,125 322,125" fill="none" stroke="rgba(160,100,255,0.1)" stroke-width="1"/>
-      <text x="200" y="48" text-anchor="middle" fill="rgba(201,169,78,0.35)" font-size="16">Ω</text>
-      <text x="338" y="206" text-anchor="middle" fill="rgba(255,180,80,0.25)" font-size="16">Δ</text>
-      <text x="200" y="360" text-anchor="middle" fill="rgba(80,180,255,0.25)" font-size="16">Ψ</text>
-      <text x="62" y="206" text-anchor="middle" fill="rgba(160,100,255,0.25)" font-size="16">Φ</text>
-    </svg>
-
-    <svg viewBox="0 0 400 400" class="kl">
-      <polygon points="200,75 270,130 325,200 270,270 200,325 130,270 75,200 130,130" fill="none" stroke="rgba(255,120,60,0.1)" stroke-width=".8"/>
-      <line x1="200" y1="75" x2="200" y2="325" stroke="rgba(255,150,80,0.06)" stroke-width=".4"/>
-      <line x1="75" y1="200" x2="325" y2="200" stroke="rgba(255,150,80,0.06)" stroke-width=".4"/>
-      <line x1="130" y1="130" x2="270" y2="270" stroke="rgba(201,169,78,0.05)" stroke-width=".4"/>
-      <line x1="270" y1="130" x2="130" y2="270" stroke="rgba(201,169,78,0.05)" stroke-width=".4"/>
-    </svg>
-
-    <svg viewBox="0 0 400 400" class="kl">
-      <circle cx="200" cy="200" r="115" fill="none" stroke="rgba(80,180,255,0.08)" stroke-width=".5"/>
-      <polygon points="200,88 305,165 265,285 135,285 95,165" fill="none" stroke="rgba(80,180,255,0.1)" stroke-width=".8"/>
-      <line x1="200" y1="88" x2="265" y2="285" stroke="rgba(80,180,255,0.07)" stroke-width=".5"/>
-      <line x1="265" y1="285" x2="95" y2="165" stroke="rgba(80,180,255,0.07)" stroke-width=".5"/>
-      <line x1="95" y1="165" x2="305" y2="165" stroke="rgba(80,180,255,0.07)" stroke-width=".5"/>
-      <line x1="305" y1="165" x2="135" y2="285" stroke="rgba(80,180,255,0.07)" stroke-width=".5"/>
-      <line x1="135" y1="285" x2="200" y2="88" stroke="rgba(80,180,255,0.07)" stroke-width=".5"/>
-    </svg>
-
-    <svg viewBox="0 0 400 400" class="kl">
-      <polygon points="200,105 282,255 118,255" fill="none" stroke="rgba(255,80,180,0.1)" stroke-width=".8"/>
-      <polygon points="200,265 132,148 268,148" fill="none" stroke="rgba(201,169,78,0.1)" stroke-width=".8"/>
-      <polygon points="200,125 265,240 135,240" fill="none" stroke="rgba(255,80,180,0.06)" stroke-width=".5"/>
-      <polygon points="200,250 145,160 255,160" fill="none" stroke="rgba(201,169,78,0.06)" stroke-width=".5"/>
-    </svg>
-
-    <svg viewBox="0 0 400 400" class="kl">
-      <circle cx="200" cy="200" r="85" fill="none" stroke="rgba(201,169,78,0.2)" stroke-width=".8"/>
-      <circle cx="200" cy="200" r="80" fill="none" stroke="rgba(160,100,255,0.06)" stroke-width=".3" stroke-dasharray="2 4"/>
-      <circle cx="200" cy="115" r="3" fill="rgba(201,169,78,0.5)"><animate attributeName="opacity" values=".5;1;.5" dur="3s" repeatCount="indefinite"/></circle>
-      <circle cx="251" cy="131" r="2.5" fill="rgba(255,180,80,0.4)"><animate attributeName="opacity" values=".4;.9;.4" dur="3.5s" repeatCount="indefinite"/></circle>
-      <circle cx="280" cy="175" r="2.5" fill="rgba(255,120,60,0.4)"><animate attributeName="opacity" values=".4;.9;.4" dur="4s" repeatCount="indefinite"/></circle>
-      <circle cx="280" cy="225" r="2.5" fill="rgba(255,80,180,0.4)"><animate attributeName="opacity" values=".4;.9;.4" dur="3.2s" repeatCount="indefinite"/></circle>
-      <circle cx="251" cy="269" r="2.5" fill="rgba(160,100,255,0.4)"><animate attributeName="opacity" values=".4;.9;.4" dur="3.8s" repeatCount="indefinite"/></circle>
-      <circle cx="200" cy="285" r="3" fill="rgba(80,180,255,0.5)"><animate attributeName="opacity" values=".5;1;.5" dur="3s" begin="1.5s" repeatCount="indefinite"/></circle>
-      <circle cx="149" cy="269" r="2.5" fill="rgba(80,255,180,0.4)"><animate attributeName="opacity" values=".4;.9;.4" dur="3.6s" repeatCount="indefinite"/></circle>
-      <circle cx="120" cy="225" r="2.5" fill="rgba(180,255,80,0.4)"><animate attributeName="opacity" values=".4;.9;.4" dur="4.2s" repeatCount="indefinite"/></circle>
-      <circle cx="120" cy="175" r="2.5" fill="rgba(255,255,80,0.4)"><animate attributeName="opacity" values=".4;.9;.4" dur="3.3s" repeatCount="indefinite"/></circle>
-      <circle cx="149" cy="131" r="2.5" fill="rgba(255,200,80,0.4)"><animate attributeName="opacity" values=".4;.9;.4" dur="3.9s" repeatCount="indefinite"/></circle>
-    </svg>
-
-    <svg viewBox="0 0 400 400" class="kl">
-      <circle cx="200" cy="200" r="60" fill="none" stroke="rgba(201,169,78,0.25)" stroke-width=".8"/>
-      <polygon points="200,143 250,230 150,230" fill="none" stroke="rgba(255,150,80,0.15)" stroke-width=".6"/>
-      <polygon points="200,257 150,170 250,170" fill="none" stroke="rgba(160,100,255,0.12)" stroke-width=".6"/>
-    </svg>
-
-    <svg viewBox="0 0 400 400" class="kl">
-      <circle cx="200" cy="200" r="42" fill="none" stroke="rgba(201,169,78,0.3)" stroke-width=".6"/>
-      <circle cx="200" cy="158" r="3" fill="rgba(201,169,78,0.6)"><animate attributeName="r" values="3;5;3" dur="2s" repeatCount="indefinite"/></circle>
-      <circle cx="236" cy="221" r="3" fill="rgba(255,150,80,0.5)"><animate attributeName="r" values="3;5;3" dur="2.5s" repeatCount="indefinite"/></circle>
-      <circle cx="164" cy="221" r="3" fill="rgba(160,100,255,0.5)"><animate attributeName="r" values="3;5;3" dur="2.2s" repeatCount="indefinite"/></circle>
-    </svg>
-
-    <svg viewBox="0 0 400 400" class="kl">
-      <circle cx="200" cy="200" r="28" fill="none" stroke="rgba(201,169,78,0.35)" stroke-width=".5" stroke-dasharray="4 4"/>
-      <line x1="200" y1="172" x2="200" y2="228" stroke="rgba(201,169,78,0.2)" stroke-width=".4"/>
-      <line x1="172" y1="200" x2="228" y2="200" stroke="rgba(201,169,78,0.2)" stroke-width=".4"/>
-      <line x1="180" y1="180" x2="220" y2="220" stroke="rgba(201,169,78,0.12)" stroke-width=".3"/>
-      <line x1="220" y1="180" x2="180" y2="220" stroke="rgba(201,169,78,0.12)" stroke-width=".3"/>
-    </svg>
-
-    <svg viewBox="0 0 400 400" class="kl">
-      <defs><radialGradient id="eg"><stop offset="0%" stop-color="rgba(201,169,78,0.2)"/><stop offset="100%" stop-color="rgba(3,3,5,0.98)"/></radialGradient></defs>
-      <circle cx="200" cy="200" r="20" fill="url(#eg)"/>
-      <ellipse cx="200" cy="200" rx="20" ry="8" fill="none" stroke="rgba(201,169,78,0.7)" stroke-width="1">
-        <animate attributeName="ry" values="8;1.5;8" dur="7s" repeatCount="indefinite"/>
-      </ellipse>
-      <circle cx="200" cy="200" r="6" fill="rgba(201,169,78,0.8)">
-        <animate attributeName="r" values="6;4;6" dur="3s" repeatCount="indefinite"/>
-        <animate attributeName="fill" values="rgba(201,169,78,0.8);rgba(255,150,80,0.9);rgba(160,100,255,0.7);rgba(80,180,255,0.8);rgba(201,169,78,0.8)" dur="12s" repeatCount="indefinite"/>
+  <div id="eye-wrap">
+    <svg viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(201,169,78,0.15)" stroke-width=".5">
+        <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="30s" repeatCount="indefinite"/>
       </circle>
-      <circle cx="200" cy="200" r="2" fill="#030305"/>
+      <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(160,100,255,0.1)" stroke-width=".4" stroke-dasharray="3 5">
+        <animateTransform attributeName="transform" type="rotate" from="360 100 100" to="0 100 100" dur="20s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="100" cy="100" r="50" fill="none" stroke="rgba(201,169,78,0.2)" stroke-width=".5">
+        <animateTransform attributeName="transform" type="rotate" from="0 100 100" to="360 100 100" dur="15s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="100" cy="100" r="30" fill="rgba(0,0,0,0.8)"/>
+      <ellipse cx="100" cy="100" rx="30" ry="10" fill="none" stroke="rgba(201,169,78,0.8)" stroke-width="1.2">
+        <animate attributeName="ry" values="10;2;10" dur="6s" repeatCount="indefinite"/>
+      </ellipse>
+      <circle cx="100" cy="100" r="8" fill="rgba(201,169,78,0.9)">
+        <animate attributeName="r" values="8;5;8" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="fill" values="rgba(201,169,78,0.9);rgba(255,100,200,0.8);rgba(80,180,255,0.9);rgba(201,169,78,0.9)" dur="8s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="100" cy="100" r="3" fill="#000"/>
     </svg>
   </div>
-
   <div id="gt">
     <div id="gt1">Enter the Threshold</div>
     <div id="gt2">click to cross</div>
@@ -188,101 +131,211 @@
       <h1 class="ctt">The Inner Chamber</h1>
       <p class="cts">What you offer here feeds the pattern.<br>What returns to you is the architecture of your own becoming.</p>
       <div class="og">
-        <a href="https://chapel-pos-v2.vercel.app" class="oc"><span class="oi">✦</span><span class="on">Offering</span><span class="od">Donation · Tithe</span></a>
-        <a href="https://chapel-pos-v2.vercel.app" class="oc"><span class="oi">⬡</span><span class="on">Workshop</span><span class="od">Sessions · Training</span></a>
-        <a href="https://chapel-pos-v2.vercel.app" class="oc"><span class="oi">⊕</span><span class="on">Consultation</span><span class="od">1-on-1 · Guidance</span></a>
-        <a href="https://chapel-pos-v2.vercel.app" class="oc"><span class="oi">◇</span><span class="on">Materials</span><span class="od">Texts · Resources</span></a>
+        <a href="https://chapel-pos-v2.vercel.app" target="_blank" class="oc">
+          <span class="oi">✦</span><span class="on">Offering</span><span class="od">Donation · Tithe</span>
+        </a>
+        <a href="https://chapel-pos-v2.vercel.app" target="_blank" class="oc">
+          <span class="oi">⬡</span><span class="on">Workshop</span><span class="od">Sessions · Training</span>
+        </a>
+        <a href="https://chapel-pos-v2.vercel.app" target="_blank" class="oc">
+          <span class="oi">⊕</span><span class="on">Consultation</span><span class="od">1-on-1 · Guidance</span>
+        </a>
+        <a href="https://chapel-pos-v2.vercel.app" target="_blank" class="oc">
+          <span class="oi">◇</span><span class="on">Materials</span><span class="od">Texts · Resources</span>
+        </a>
       </div>
-      <div class="pn">
-        <a href="spiral.html" class="pb">⟐ Phasecraft Descent</a>
-        <button class="pb" onclick="closeThreshold()">← Return to Gate</button>
-      </div>
-      <p style="font-size:.35rem;color:rgba(201,169,78,0.06);margin-top:1.5rem;letter-spacing:4px;text-transform:uppercase">Chapel of the LIMEN Helix · 501(c)(3) · EIN 33-4945631</p>
+      <button class="pb" onclick="closeThreshold()">← Return to Gate</button>
+      <p style="font-size:.35rem;color:rgba(201,169,78,0.06);margin-top:1.2rem;letter-spacing:4px;text-transform:uppercase">Chapel of the LIMEN Helix · 501(c)(3) · EIN 33-4945631</p>
     </div>
   </div>
 </div>
 
-<canvas id="fractalBg" style="position:fixed;inset:0;z-index:99;pointer-events:none;opacity:0.12"></canvas>
-
 <script>
-// Fractal background canvas
-var c=document.getElementById('fractalBg'),ctx=c.getContext('2d');
-c.width=window.innerWidth;c.height=window.innerHeight;
-window.addEventListener('resize',function(){c.width=window.innerWidth;c.height=window.innerHeight});
+// ═══════════════════════════════════════
+// MATRIX RAIN
+// ═══════════════════════════════════════
+var mc=document.getElementById('matrix'),mx=mc.getContext('2d');
+mc.width=window.innerWidth;mc.height=window.innerHeight;
+
+var chars='ΩΔΨΦΛΣΘΑΒΓΕΖΗΙΚΜΝΞΟΠΡΤΥΧアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン01234567890∞∑∏∫√∂≈≠≡∈∉⊂⊃∪∩';
+var charArr=chars.split('');
+var fontSize=14;
+var cols=Math.floor(mc.width/fontSize);
+var drops=[];
+for(var i=0;i<cols;i++)drops[i]=Math.random()*-100;
+
+function drawMatrix(){
+  mx.fillStyle='rgba(0,0,0,0.06)';
+  mx.fillRect(0,0,mc.width,mc.height);
+  
+  for(var i=0;i<drops.length;i++){
+    var char=charArr[Math.floor(Math.random()*charArr.length)];
+    var x=i*fontSize;
+    var y=drops[i]*fontSize;
+    
+    // Color variety - gold, purple, blue, pink, green
+    var colorChoice=Math.random();
+    if(colorChoice<0.3){
+      mx.fillStyle='rgba(201,169,78,'+(0.4+Math.random()*0.6)+')';
+      mx.shadowColor='rgba(201,169,78,0.5)';
+    }else if(colorChoice<0.5){
+      mx.fillStyle='rgba(160,100,255,'+(0.3+Math.random()*0.5)+')';
+      mx.shadowColor='rgba(160,100,255,0.4)';
+    }else if(colorChoice<0.65){
+      mx.fillStyle='rgba(80,180,255,'+(0.3+Math.random()*0.5)+')';
+      mx.shadowColor='rgba(80,180,255,0.4)';
+    }else if(colorChoice<0.8){
+      mx.fillStyle='rgba(255,80,180,'+(0.3+Math.random()*0.5)+')';
+      mx.shadowColor='rgba(255,80,180,0.4)';
+    }else{
+      mx.fillStyle='rgba(80,255,150,'+(0.3+Math.random()*0.5)+')';
+      mx.shadowColor='rgba(80,255,150,0.4)';
+    }
+    
+    mx.shadowBlur=Math.random()*8;
+    mx.font=fontSize+'px monospace';
+    mx.fillText(char,x,y);
+    mx.shadowBlur=0;
+    
+    if(y>mc.height&&Math.random()>0.975)drops[i]=0;
+    drops[i]+=0.5+Math.random()*0.5;
+  }
+  requestAnimationFrame(drawMatrix);
+}
+drawMatrix();
+
+// ═══════════════════════════════════════
+// KALEIDOSCOPE FRACTALS
+// ═══════════════════════════════════════
+var kc=document.getElementById('kaleidoscope'),kx=kc.getContext('2d');
+kc.width=window.innerWidth;kc.height=window.innerHeight;
 
 var t=0;
-function drawFractal(){
-  ctx.clearRect(0,0,c.width,c.height);
-  var cx=c.width/2,cy=c.height/2,s=Math.min(c.width,c.height)*0.45;
+function drawKaleidoscope(){
+  kx.clearRect(0,0,kc.width,kc.height);
+  var cx=kc.width/2,cy=kc.height/2,maxR=Math.min(kc.width,kc.height)*0.48;
   
-  // Draw rotating fractal spirals
-  for(var arm=0;arm<8;arm++){
-    var baseAngle=(arm/8)*Math.PI*2+t*0.2;
-    ctx.beginPath();
-    for(var i=0;i<200;i++){
-      var ratio=i/200;
-      var angle=baseAngle+ratio*Math.PI*4+Math.sin(t*0.5+ratio*3)*0.5;
-      var radius=ratio*s;
-      var x=cx+Math.cos(angle)*radius;
-      var y=cy+Math.sin(angle)*radius;
-      if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  // Spiraling fractal arms
+  for(var arm=0;arm<12;arm++){
+    var baseA=(arm/12)*Math.PI*2+t*0.15;
+    kx.beginPath();
+    for(var i=0;i<300;i++){
+      var ratio=i/300;
+      var a=baseA+ratio*Math.PI*6+Math.sin(t*0.3+ratio*4)*0.8;
+      var r=ratio*maxR;
+      var wobble=Math.sin(t*2+ratio*10+arm)*r*0.02;
+      var x=cx+Math.cos(a)*(r+wobble);
+      var y=cy+Math.sin(a)*(r+wobble);
+      if(i===0)kx.moveTo(x,y);else kx.lineTo(x,y);
     }
-    var hue=(arm*45+t*20)%360;
-    ctx.strokeStyle='hsla('+hue+',60%,55%,'+(.06+Math.sin(t+arm)*0.03)+')';
-    ctx.lineWidth=0.8;
-    ctx.stroke();
+    var hue=(arm*30+t*25)%360;
+    kx.strokeStyle='hsla('+hue+',80%,60%,'+(0.04+Math.sin(t*0.5+arm)*0.02)+')';
+    kx.lineWidth=1.2;
+    kx.stroke();
   }
   
-  // Inner mandala rings
-  for(var r=0;r<6;r++){
-    var ringR=s*(0.15+r*0.12);
-    var pts=6+r*2;
-    ctx.beginPath();
-    for(var p=0;p<=pts;p++){
-      var a=(p/pts)*Math.PI*2+t*(r%2===0?0.3:-0.3)+r*0.5;
-      var wobble=Math.sin(t*2+p+r)*ringR*0.03;
-      var x=cx+Math.cos(a)*(ringR+wobble);
-      var y=cy+Math.sin(a)*(ringR+wobble);
-      if(p===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  // Rotating polygon mandala layers
+  for(var layer=0;layer<8;layer++){
+    var lr=maxR*(0.1+layer*0.11);
+    var sides=3+layer;
+    var rot=t*(layer%2===0?0.2:-0.2)+layer*0.4;
+    
+    kx.beginPath();
+    for(var s=0;s<=sides;s++){
+      var a=(s/sides)*Math.PI*2+rot;
+      var pulse=Math.sin(t*1.5+layer+s)*lr*0.04;
+      var x=cx+Math.cos(a)*(lr+pulse);
+      var y=cy+Math.sin(a)*(lr+pulse);
+      if(s===0)kx.moveTo(x,y);else kx.lineTo(x,y);
     }
-    ctx.closePath();
-    var hue2=(r*60+t*15+180)%360;
-    ctx.strokeStyle='hsla('+hue2+',50%,50%,'+(.04+Math.sin(t*0.7+r)*0.02)+')';
-    ctx.lineWidth=0.5;
-    ctx.stroke();
+    kx.closePath();
+    var hue2=(layer*45+t*20+120)%360;
+    kx.strokeStyle='hsla('+hue2+',70%,55%,'+(0.06+Math.sin(t+layer)*0.03)+')';
+    kx.lineWidth=1+layer*0.15;
+    kx.stroke();
+    
+    // Connect vertices to center
+    for(var s=0;s<sides;s++){
+      var a=(s/sides)*Math.PI*2+rot;
+      kx.beginPath();
+      kx.moveTo(cx,cy);
+      kx.lineTo(cx+Math.cos(a)*lr,cy+Math.sin(a)*lr);
+      kx.strokeStyle='hsla('+((hue2+180)%360)+',60%,50%,0.02)';
+      kx.lineWidth=0.5;
+      kx.stroke();
+    }
   }
   
-  t+=0.008;
-  requestAnimationFrame(drawFractal);
+  // Pulsing concentric rings
+  for(var ring=0;ring<15;ring++){
+    var rr=maxR*(ring/15)+Math.sin(t*2+ring)*10;
+    kx.beginPath();
+    kx.arc(cx,cy,Math.abs(rr),0,Math.PI*2);
+    var hue3=(ring*24+t*30)%360;
+    kx.strokeStyle='hsla('+hue3+',90%,65%,'+(0.02+Math.sin(t*3+ring*0.5)*0.015)+')';
+    kx.lineWidth=0.6;
+    kx.stroke();
+  }
+  
+  // Sacred geometry burst lines
+  for(var ray=0;ray<24;ray++){
+    var a=(ray/24)*Math.PI*2+t*0.1;
+    kx.beginPath();
+    kx.moveTo(cx+Math.cos(a)*maxR*0.05,cy+Math.sin(a)*maxR*0.05);
+    kx.lineTo(cx+Math.cos(a)*maxR,cy+Math.sin(a)*maxR);
+    var hue4=(ray*15+t*35)%360;
+    kx.strokeStyle='hsla('+hue4+',70%,50%,0.015)';
+    kx.lineWidth=0.4;
+    kx.stroke();
+  }
+  
+  t+=0.012;
+  requestAnimationFrame(drawKaleidoscope);
 }
-drawFractal();
+drawKaleidoscope();
 
-// Portal functions
+// Resize
+window.addEventListener('resize',function(){
+  mc.width=kc.width=window.innerWidth;
+  mc.height=kc.height=window.innerHeight;
+  cols=Math.floor(mc.width/fontSize);
+  drops=[];for(var i=0;i<cols;i++)drops[i]=Math.random()*-100;
+});
+
+// ═══════════════════════════════════════
+// PORTAL CONTROLS
+// ═══════════════════════════════════════
 function openThreshold(){
-  var g=document.getElementById('gate'),p=document.getElementById('portal'),vr=document.getElementById('vr'),pc=document.getElementById('pc');
+  var g=document.getElementById('gate'),p=document.getElementById('portal'),
+      vr=document.getElementById('vr'),pc=document.getElementById('pc');
   g.classList.add('gate-opening');
-  document.getElementById('fractalBg').style.transition='opacity 1s';
-  document.getElementById('fractalBg').style.opacity='0';
-  setTimeout(function(){p.style.display='flex';setTimeout(function(){p.style.background='rgba(3,3,5,0.97)'},50)},500);
-  setTimeout(function(){vr.style.width='88vmin';vr.style.height='88vmin';vr.style.maxWidth='650px';vr.style.maxHeight='650px'},800);
-  setTimeout(function(){pc.classList.add('vis')},1800);
-  setTimeout(function(){g.style.display='none'},2500);
+  setTimeout(function(){
+    p.style.display='flex';
+    setTimeout(function(){p.style.background='rgba(0,0,0,0.95)'},50);
+  },600);
+  setTimeout(function(){
+    vr.style.width='90vmin';vr.style.height='90vmin';
+    vr.style.maxWidth='680px';vr.style.maxHeight='680px';
+  },900);
+  setTimeout(function(){pc.classList.add('vis')},1900);
+  setTimeout(function(){g.style.display='none'},2000);
 }
+
 function closeThreshold(){
-  var g=document.getElementById('gate'),p=document.getElementById('portal'),vr=document.getElementById('vr'),pc=document.getElementById('pc');
+  var g=document.getElementById('gate'),p=document.getElementById('portal'),
+      vr=document.getElementById('vr'),pc=document.getElementById('pc');
   pc.classList.remove('vis');
   setTimeout(function(){vr.style.width='0';vr.style.height='0'},300);
   setTimeout(function(){p.style.background='rgba(0,0,0,0)'},1000);
   setTimeout(function(){
     p.style.display='none';g.style.display='flex';g.classList.remove('gate-opening');
-    document.getElementById('fractalBg').style.opacity='0.12';
   },1400);
 }
 
-// Parallax
+// Parallax on eye
 document.getElementById('gate').addEventListener('mousemove',function(e){
   var r=this.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
-  document.getElementById('kscope').style.transform='translate('+x*25+'px,'+y*25+'px)';
+  document.getElementById('eye-wrap').style.transform='translate('+x*30+'px,'+y*30+'px)';
 });
 </script>
 </body>
