@@ -28,8 +28,8 @@ body{background:#000;overflow:hidden;height:100vh;width:100vw;font-family:Georgi
 #gt{text-align:center;z-index:3;margin-top:2.5rem;background:radial-gradient(ellipse at center,rgba(0,0,0,0.85) 0%,rgba(0,0,0,0.6) 60%,transparent 100%);padding:1.5rem 3rem;border-radius:8px}
 #gt1{font-size:.7rem;letter-spacing:12px;color:rgba(201,169,78,0.7);text-transform:uppercase;font-family:monospace;margin-bottom:.6rem;text-shadow:0 0 25px rgba(201,169,78,0.4)}
 #gt2{font-size:.85rem;color:rgba(201,169,78,0.3);letter-spacing:4px;font-style:italic;text-shadow:0 0 15px rgba(201,169,78,0.2)}
-#gt3{font-size:.45rem;letter-spacing:6px;color:rgba(255,80,60,0.25);text-transform:uppercase;font-family:monospace;margin-top:1.2rem;animation:warn 3s ease-in-out infinite}
-@keyframes warn{0%,100%{opacity:.25;color:rgba(255,80,60,0.25)}50%{opacity:.6;color:rgba(255,80,60,0.5)}}
+#gt3{font-size:.55rem;letter-spacing:5px;color:rgba(255,80,60,0.4);text-transform:uppercase;font-family:monospace;margin-top:1.2rem;font-weight:bold;animation:warn 3s ease-in-out infinite;text-shadow:0 0 10px rgba(255,40,20,0.3)}
+@keyframes warn{0%,100%{opacity:.4;text-shadow:0 0 10px rgba(255,40,20,0.3)}50%{opacity:.9;text-shadow:0 0 25px rgba(255,40,20,0.6)}}
 #gate:hover #gt1{color:rgba(201,169,78,1);text-shadow:0 0 35px rgba(201,169,78,0.6)}
 #gate:hover #gt2{color:rgba(201,169,78,0.5)}
 #gate:hover #gt3{color:rgba(255,80,60,0.6)}
@@ -165,10 +165,9 @@ function drawEye(){
   
   var eyeW=w*0.42;
   var eyeH=h*0.4*eyeOpen;
-  var lidH=h*0.42;
   
   if(eyeOpen>0.03){
-    // Clip to eye shape so nothing leaks outside
+    // Clip to eye shape
     ex.save();
     ex.beginPath();
     ex.moveTo(cx-eyeW,cy);
@@ -177,112 +176,175 @@ function drawEye(){
     ex.closePath();
     ex.clip();
     
-    // GOD'S EYE — blazing radiant iris fills the whole eye
-    var maxIrisR=Math.max(eyeW,eyeH)*1.2;
+    var maxR=Math.max(eyeW,eyeH)*1.3;
     
-    // Outer divine glow — massive
-    var outerGlow=ex.createRadialGradient(cx,cy,0,cx,cy,maxIrisR);
-    outerGlow.addColorStop(0,'rgba(255,255,240,'+(1.0*eyeOpen)+')');
-    outerGlow.addColorStop(0.08,'rgba(255,240,200,'+(0.95*eyeOpen)+')');
-    outerGlow.addColorStop(0.15,'rgba(255,210,120,'+(0.85*eyeOpen)+')');
-    outerGlow.addColorStop(0.3,'rgba(220,160,50,'+(0.7*eyeOpen)+')');
-    outerGlow.addColorStop(0.5,'rgba(180,100,20,'+(0.5*eyeOpen)+')');
-    outerGlow.addColorStop(0.7,'rgba(120,50,10,'+(0.3*eyeOpen)+')');
-    outerGlow.addColorStop(1,'rgba(40,15,5,'+(0.1*eyeOpen)+')');
-    ex.fillStyle=outerGlow;
+    // BASE: Deep cosmic blue-black
+    var baseGrad=ex.createRadialGradient(cx,cy,0,cx,cy,maxR);
+    baseGrad.addColorStop(0,'rgba(255,255,255,'+(1.0*eyeOpen)+')');
+    baseGrad.addColorStop(0.05,'rgba(200,230,255,'+(0.95*eyeOpen)+')');
+    baseGrad.addColorStop(0.1,'rgba(140,200,255,'+(0.9*eyeOpen)+')');
+    baseGrad.addColorStop(0.2,'rgba(80,160,255,'+(0.8*eyeOpen)+')');
+    baseGrad.addColorStop(0.35,'rgba(255,210,100,'+(0.6*eyeOpen)+')');
+    baseGrad.addColorStop(0.5,'rgba(200,80,200,'+(0.4*eyeOpen)+')');
+    baseGrad.addColorStop(0.7,'rgba(60,30,120,'+(0.3*eyeOpen)+')');
+    baseGrad.addColorStop(1,'rgba(10,5,30,'+(0.15*eyeOpen)+')');
+    ex.fillStyle=baseGrad;
     ex.fillRect(0,0,w,h);
     
-    // Radiating light beams from center
-    for(var i=0;i<32;i++){
-      var a=(i/32)*Math.PI*2+eyeT*0.3;
-      var beamLen=maxIrisR*(0.5+Math.sin(eyeT*2+i*0.7)*0.3);
+    // Electric blue lightning bolts
+    for(var bolt=0;bolt<8;bolt++){
+      var ba=(bolt/8)*Math.PI*2+eyeT*0.4+Math.sin(eyeT+bolt)*0.3;
+      ex.beginPath();
+      var bx=cx,by=cy;
+      ex.moveTo(bx,by);
+      var bLen=maxR*(0.3+Math.random()*0.5);
+      for(var seg=0;seg<12;seg++){
+        var ratio=seg/12;
+        bx=cx+Math.cos(ba)*(bLen*ratio)+Math.sin(eyeT*8+bolt*3+seg*2)*(15-ratio*10);
+        by=cy+Math.sin(ba)*(bLen*ratio)+Math.cos(eyeT*6+bolt*2+seg*3)*(15-ratio*10);
+        ex.lineTo(bx,by);
+      }
+      var bAlpha=0.15+Math.sin(eyeT*4+bolt)*0.1;
+      ex.strokeStyle='rgba(100,180,255,'+(bAlpha*eyeOpen)+')';
+      ex.lineWidth=1.5+Math.random();
+      ex.shadowColor='rgba(80,160,255,'+(0.6*eyeOpen)+')';
+      ex.shadowBlur=15;
+      ex.stroke();
+      ex.shadowBlur=0;
+    }
+    
+    // White-hot divine rays — the main radiance
+    for(var i=0;i<40;i++){
+      var a=(i/40)*Math.PI*2+eyeT*0.25;
+      var rayLen=maxR*(0.4+Math.sin(eyeT*1.8+i*0.9)*0.35);
+      var rayW=1.5+Math.sin(eyeT*2+i)*1;
       ex.beginPath();
       ex.moveTo(cx,cy);
-      ex.lineTo(cx+Math.cos(a)*beamLen,cy+Math.sin(a)*beamLen);
-      ex.strokeStyle='rgba(255,220,140,'+(0.08*eyeOpen+Math.sin(eyeT*3+i)*0.04*eyeOpen)+')';
-      ex.lineWidth=2+Math.sin(eyeT+i)*1;
+      ex.lineTo(cx+Math.cos(a)*rayLen,cy+Math.sin(a)*rayLen);
+      // Alternate white, baby blue, gold
+      var rc=i%3;
+      if(rc===0)ex.strokeStyle='rgba(255,255,255,'+(0.1*eyeOpen+Math.sin(eyeT*3+i)*0.05*eyeOpen)+')';
+      else if(rc===1)ex.strokeStyle='rgba(140,210,255,'+(0.08*eyeOpen+Math.sin(eyeT*2.5+i)*0.04*eyeOpen)+')';
+      else ex.strokeStyle='rgba(255,220,140,'+(0.08*eyeOpen+Math.sin(eyeT*2+i)*0.04*eyeOpen)+')';
+      ex.lineWidth=rayW;
       ex.stroke();
     }
     
-    // Secondary finer rays
-    for(var i=0;i<64;i++){
-      var a=(i/64)*Math.PI*2-eyeT*0.2;
-      var beamLen=maxIrisR*(0.3+Math.sin(eyeT*1.5+i)*0.2);
+    // Baby blue aurora waves
+    for(var wave=0;wave<5;wave++){
+      var waveR=maxR*(0.2+wave*0.15);
       ex.beginPath();
-      ex.moveTo(cx+Math.cos(a)*10,cy+Math.sin(a)*10);
-      ex.lineTo(cx+Math.cos(a)*beamLen,cy+Math.sin(a)*beamLen);
-      ex.strokeStyle='rgba(255,200,100,'+(0.04*eyeOpen)+')';
-      ex.lineWidth=0.5;
+      for(var p=0;p<=60;p++){
+        var a=(p/60)*Math.PI*2;
+        var wobble=Math.sin(eyeT*2+p*0.3+wave*2)*waveR*0.08;
+        var px=cx+Math.cos(a)*(waveR+wobble);
+        var py=cy+Math.sin(a)*(waveR+wobble);
+        if(p===0)ex.moveTo(px,py);else ex.lineTo(px,py);
+      }
+      ex.closePath();
+      var wHue=wave%2===0?'rgba(130,200,255,':'rgba(180,220,255,';
+      ex.strokeStyle=wHue+(0.06*eyeOpen+Math.sin(eyeT+wave)*0.03*eyeOpen)+')';
+      ex.lineWidth=1;
       ex.stroke();
     }
     
-    // Iris ring texture
+    // Bright white sparks floating inside
+    for(var sp=0;sp<20;sp++){
+      var sa=eyeT*0.5+sp*0.314;
+      var sr=maxR*(0.1+((sp*7+Math.floor(eyeT*2))%20)/20*0.7);
+      var sx=cx+Math.cos(sa)*sr+Math.sin(eyeT*3+sp)*8;
+      var sy=cy+Math.sin(sa)*sr+Math.cos(eyeT*2+sp)*8;
+      var ss=1+Math.sin(eyeT*4+sp)*1.5;
+      if(ss>0.3){
+        ex.beginPath();ex.arc(sx,sy,ss,0,Math.PI*2);
+        ex.fillStyle='rgba(200,230,255,'+(0.4*eyeOpen*Math.abs(Math.sin(eyeT*3+sp)))+')';
+        ex.shadowColor='rgba(100,180,255,0.6)';ex.shadowBlur=6;
+        ex.fill();ex.shadowBlur=0;
+      }
+    }
+    
+    // Iris ring detail — golden threads
     var irisR=eyeH*0.55;
     if(irisR>3){
       for(var i=0;i<24;i++){
         var a=(i/24)*Math.PI*2+eyeT*0.5;
         ex.beginPath();
-        ex.moveTo(cx+Math.cos(a)*irisR*0.25,cy+Math.sin(a)*irisR*0.25);
-        ex.lineTo(cx+Math.cos(a)*irisR*1.3,cy+Math.sin(a)*irisR*1.3);
-        ex.strokeStyle='rgba(180,130,40,'+(0.2*eyeOpen)+')';
-        ex.lineWidth=1.5;
+        ex.moveTo(cx+Math.cos(a)*irisR*0.2,cy+Math.sin(a)*irisR*0.2);
+        ex.lineTo(cx+Math.cos(a)*irisR*1.4,cy+Math.sin(a)*irisR*1.4);
+        ex.strokeStyle='rgba(201,169,78,'+(0.12*eyeOpen)+')';
+        ex.lineWidth=1;
         ex.stroke();
       }
     }
     
-    // Pupil — the void you enter
+    // PUPIL — the abyss, the portal into forbidden knowledge
     var pupilR=Math.max(eyeH*0.18,3);
-    var pupilGrad=ex.createRadialGradient(cx,cy,0,cx,cy,pupilR*1.5);
-    pupilGrad.addColorStop(0,'rgba(0,0,0,'+(0.98*eyeOpen)+')');
-    pupilGrad.addColorStop(0.6,'rgba(10,5,20,'+(0.9*eyeOpen)+')');
-    pupilGrad.addColorStop(1,'rgba(40,20,10,'+(0.3*eyeOpen)+')');
-    ex.beginPath();
-    ex.arc(cx,cy,pupilR*1.3,0,Math.PI*2);
-    ex.fillStyle=pupilGrad;
+    // Pupil corona — electric blue ring around void
+    ex.beginPath();ex.arc(cx,cy,pupilR*2,0,Math.PI*2);
+    var coronaGrad=ex.createRadialGradient(cx,cy,pupilR*0.8,cx,cy,pupilR*2.2);
+    coronaGrad.addColorStop(0,'rgba(0,0,0,'+(0.95*eyeOpen)+')');
+    coronaGrad.addColorStop(0.5,'rgba(20,40,80,'+(0.5*eyeOpen)+')');
+    coronaGrad.addColorStop(0.8,'rgba(60,120,200,'+(0.2*eyeOpen)+')');
+    coronaGrad.addColorStop(1,'rgba(100,180,255,'+(0.05*eyeOpen)+')');
+    ex.fillStyle=coronaGrad;
     ex.fill();
     
-    // Pupil inner void
-    ex.beginPath();
-    ex.arc(cx,cy,pupilR,0,Math.PI*2);
+    // The void
+    ex.beginPath();ex.arc(cx,cy,pupilR,0,Math.PI*2);
     ex.fillStyle='rgba(0,0,0,'+(0.99*eyeOpen)+')';
     ex.fill();
     
-    // Divine light reflections
-    ex.beginPath();
-    ex.arc(cx-pupilR*0.5,cy-pupilR*0.4,pupilR*0.2,0,Math.PI*2);
-    ex.fillStyle='rgba(255,255,255,'+(0.5*eyeOpen)+')';
-    ex.fill();
-    ex.beginPath();
-    ex.arc(cx+pupilR*0.3,cy+pupilR*0.2,pupilR*0.1,0,Math.PI*2);
-    ex.fillStyle='rgba(255,255,240,'+(0.3*eyeOpen)+')';
-    ex.fill();
+    // Tiny electric arcs around pupil edge
+    for(var arc=0;arc<12;arc++){
+      var aa=(arc/12)*Math.PI*2+eyeT*2;
+      ex.beginPath();
+      ex.moveTo(cx+Math.cos(aa)*pupilR,cy+Math.sin(aa)*pupilR);
+      ex.lineTo(cx+Math.cos(aa+0.15)*(pupilR*1.6+Math.sin(eyeT*8+arc)*5),cy+Math.sin(aa+0.15)*(pupilR*1.6+Math.sin(eyeT*8+arc)*5));
+      ex.strokeStyle='rgba(120,200,255,'+(0.3*eyeOpen*Math.abs(Math.sin(eyeT*5+arc)))+')';
+      ex.lineWidth=1;
+      ex.shadowColor='rgba(80,160,255,0.8)';ex.shadowBlur=5;
+      ex.stroke();ex.shadowBlur=0;
+    }
+    
+    // Divine light reflections in pupil
+    ex.beginPath();ex.arc(cx-pupilR*0.4,cy-pupilR*0.35,pupilR*0.22,0,Math.PI*2);
+    ex.fillStyle='rgba(200,230,255,'+(0.6*eyeOpen)+')';ex.fill();
+    ex.beginPath();ex.arc(cx+pupilR*0.25,cy+pupilR*0.15,pupilR*0.1,0,Math.PI*2);
+    ex.fillStyle='rgba(255,255,255,'+(0.35*eyeOpen)+')';ex.fill();
     
     ex.restore();// release clip
     
-    // Eye outline — bright gold, OUTSIDE the clip
+    // Eye outline — bright gold with blue-white glow
     ex.beginPath();
     ex.moveTo(cx-eyeW,cy);
     ex.bezierCurveTo(cx-eyeW*0.6,cy-eyeH,cx+eyeW*0.6,cy-eyeH,cx+eyeW,cy);
     ex.bezierCurveTo(cx+eyeW*0.6,cy+eyeH,cx-eyeW*0.6,cy+eyeH,cx-eyeW,cy);
     ex.closePath();
-    ex.strokeStyle='rgba(201,169,78,'+(0.4+eyeOpen*0.6)+')';
+    ex.strokeStyle='rgba(201,169,78,'+(0.5+eyeOpen*0.5)+')';
     ex.lineWidth=2+eyeOpen*2;
-    ex.shadowColor='rgba(255,200,100,'+(0.5*eyeOpen)+')';
-    ex.shadowBlur=30+eyeOpen*40;
+    ex.shadowColor='rgba(140,200,255,'+(0.6*eyeOpen)+')';
+    ex.shadowBlur=40+eyeOpen*50;
+    ex.stroke();
+    ex.shadowBlur=0;
+    // Second glow pass — gold
+    ex.strokeStyle='rgba(255,220,140,'+(0.2*eyeOpen)+')';
+    ex.lineWidth=1;
+    ex.shadowColor='rgba(255,200,100,'+(0.4*eyeOpen)+')';
+    ex.shadowBlur=20;
     ex.stroke();
     ex.shadowBlur=0;
   }
   
-  // Closed lid line — only when mostly closed, NO black box
+  // Closed lid line — just the golden slit
   if(eyeOpen<0.7){
     var lidAlpha=(1-eyeOpen/0.7);
     ex.beginPath();
     ex.moveTo(cx-eyeW,cy);
-    ex.bezierCurveTo(cx-eyeW*0.5,cy-lidH*0.08*lidAlpha,cx+eyeW*0.5,cy-lidH*0.08*lidAlpha,cx+eyeW,cy);
+    ex.bezierCurveTo(cx-eyeW*0.5,cy-eyeW*0.03*lidAlpha,cx+eyeW*0.5,cy-eyeW*0.03*lidAlpha,cx+eyeW,cy);
     ex.strokeStyle='rgba(201,169,78,'+(0.5*lidAlpha)+')';
     ex.lineWidth=2.5;
-    ex.shadowColor='rgba(201,169,78,'+(0.4*lidAlpha)+')';
-    ex.shadowBlur=20;
+    ex.shadowColor='rgba(140,200,255,'+(0.3*lidAlpha)+')';
+    ex.shadowBlur=25;
     ex.stroke();
     ex.shadowBlur=0;
   }
