@@ -5,286 +5,372 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LIMEN Helix – The Threshold</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #050508;
-      color: #e8e3d9;
-      font-family: Georgia, serif;
-      overflow: hidden;
-      height: 100vh;
-      cursor: default;
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#030305;color:#e8e3d9;font-family:Georgia,serif;overflow:hidden;height:100vh;width:100vw}
+
+    /* ═══ THE GATE ═══ */
+    #gate{
+      position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+      flex-direction:column;z-index:100;cursor:pointer;
+      background:radial-gradient(ellipse at center,#08080f 0%,#030305 70%,#000 100%);
     }
-    #gate {
-      position: fixed; inset: 0;
-      display: flex; align-items: center; justify-content: center; flex-direction: column;
-      z-index: 100; cursor: pointer;
-      background: radial-gradient(ellipse at center, #0a0a10 0%, #050508 60%, #000 100%);
-    }
-    #gate::before {
-      content: ''; position: absolute; inset: 0;
+
+    /* Dust */
+    #gate::before{
+      content:'';position:absolute;inset:-50%;width:200%;height:200%;
       background-image:
-        radial-gradient(1px 1px at 10% 20%, rgba(201,169,78,0.15) 0%, transparent 100%),
-        radial-gradient(1px 1px at 30% 70%, rgba(201,169,78,0.1) 0%, transparent 100%),
-        radial-gradient(1px 1px at 50% 10%, rgba(201,169,78,0.12) 0%, transparent 100%),
-        radial-gradient(1px 1px at 70% 80%, rgba(201,169,78,0.08) 0%, transparent 100%),
-        radial-gradient(1px 1px at 90% 30%, rgba(201,169,78,0.1) 0%, transparent 100%),
-        radial-gradient(1px 1px at 15% 90%, rgba(201,169,78,0.06) 0%, transparent 100%),
-        radial-gradient(1px 1px at 85% 50%, rgba(201,169,78,0.08) 0%, transparent 100%),
-        radial-gradient(1px 1px at 40% 40%, rgba(201,169,78,0.1) 0%, transparent 100%);
-      animation: dust-drift 30s linear infinite;
+        radial-gradient(1px 1px at 10% 20%,rgba(201,169,78,0.2) 0%,transparent 100%),
+        radial-gradient(1px 1px at 25% 65%,rgba(201,169,78,0.12) 0%,transparent 100%),
+        radial-gradient(1px 1px at 45% 15%,rgba(201,169,78,0.15) 0%,transparent 100%),
+        radial-gradient(1px 1px at 65% 75%,rgba(201,169,78,0.1) 0%,transparent 100%),
+        radial-gradient(1px 1px at 80% 25%,rgba(201,169,78,0.12) 0%,transparent 100%),
+        radial-gradient(1px 1px at 15% 85%,rgba(201,169,78,0.08) 0%,transparent 100%),
+        radial-gradient(1px 1px at 90% 55%,rgba(201,169,78,0.1) 0%,transparent 100%),
+        radial-gradient(1.5px 1.5px at 55% 35%,rgba(201,169,78,0.18) 0%,transparent 100%),
+        radial-gradient(1px 1px at 35% 90%,rgba(201,169,78,0.08) 0%,transparent 100%),
+        radial-gradient(1px 1px at 75% 10%,rgba(201,169,78,0.1) 0%,transparent 100%);
+      animation:dust-drift 40s linear infinite;
     }
-    @keyframes dust-drift {
-      0% { transform: translateY(0) translateX(0); }
-      50% { transform: translateY(-20px) translateX(10px); }
-      100% { transform: translateY(0) translateX(0); }
+    @keyframes dust-drift{
+      0%{transform:translate(0,0) rotate(0deg)}
+      25%{transform:translate(-10px,-15px) rotate(0.5deg)}
+      50%{transform:translate(5px,-25px) rotate(0deg)}
+      75%{transform:translate(15px,-10px) rotate(-0.5deg)}
+      100%{transform:translate(0,0) rotate(0deg)}
     }
-    .corner-glyph {
-      position: absolute; font-size: 1.2rem; color: rgba(201,169,78,0.08);
-      font-family: Georgia, serif; letter-spacing: 4px;
-      animation: glyph-breathe 8s ease-in-out infinite;
+
+    /* Corner glyphs */
+    .cg{position:absolute;font-size:1rem;color:rgba(201,169,78,0.06);letter-spacing:4px;animation:gb 8s ease-in-out infinite}
+    .cg.tl{top:1.5rem;left:1.5rem}.cg.tr{top:1.5rem;right:1.5rem}
+    .cg.bl{bottom:1.5rem;left:1.5rem}.cg.br{bottom:1.5rem;right:1.5rem}
+    @keyframes gb{0%,100%{opacity:.06}50%{opacity:.18}}
+
+    /* Edge whispers */
+    .ew{position:absolute;font-size:.4rem;letter-spacing:6px;color:rgba(201,169,78,0.03);text-transform:uppercase;font-family:monospace;white-space:nowrap}
+    .ew.t{top:4rem;left:50%;transform:translateX(-50%)}
+    .ew.b{bottom:4rem;left:50%;transform:translateX(-50%)}
+    .ew.l{left:2.5rem;top:50%;transform:translateY(-50%) rotate(-90deg);transform-origin:left center}
+    .ew.r{right:2.5rem;top:50%;transform:translateY(-50%) rotate(90deg);transform-origin:right center}
+
+    /* ═══ KALEIDOSCOPE FRACTAL ENGINE ═══ */
+    #kscope{
+      position:relative;width:80vmin;height:80vmin;max-width:700px;max-height:700px;
+      transition:all 2.5s cubic-bezier(0.16,1,0.3,1);
     }
-    .corner-glyph.tl { top: 2rem; left: 2rem; }
-    .corner-glyph.tr { top: 2rem; right: 2rem; }
-    .corner-glyph.bl { bottom: 2rem; left: 2rem; }
-    .corner-glyph.br { bottom: 2rem; right: 2rem; }
-    @keyframes glyph-breathe { 0%, 100% { opacity: 0.08; } 50% { opacity: 0.2; } }
-    .edge-text {
-      position: absolute; font-size: 0.45rem; letter-spacing: 8px;
-      color: rgba(201,169,78,0.04); text-transform: uppercase;
-      font-family: monospace; white-space: nowrap;
+
+    .k-layer{
+      position:absolute;inset:0;width:100%;height:100%;
+      transform-origin:center center;
     }
-    .edge-text.top { top: 5rem; left: 50%; transform: translateX(-50%); }
-    .edge-text.bottom { bottom: 5rem; left: 50%; transform: translateX(-50%); }
-    .edge-text.left { left: 3rem; top: 50%; transform: translateY(-50%) rotate(-90deg); transform-origin: left center; }
-    .edge-text.right { right: 3rem; top: 50%; transform: translateY(-50%) rotate(90deg); transform-origin: right center; }
-    #sigil-container {
-      position: relative; width: 70vmin; height: 70vmin;
-      max-width: 600px; max-height: 600px;
-      transition: all 2s cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* 12 fractal layers at different speeds */
+    .k-layer:nth-child(1){animation:krot 120s linear infinite}
+    .k-layer:nth-child(2){animation:krot-r 90s linear infinite}
+    .k-layer:nth-child(3){animation:krot 70s linear infinite}
+    .k-layer:nth-child(4){animation:krot-r 55s linear infinite}
+    .k-layer:nth-child(5){animation:krot 45s linear infinite}
+    .k-layer:nth-child(6){animation:krot-r 35s linear infinite}
+    .k-layer:nth-child(7){animation:krot 28s linear infinite}
+    .k-layer:nth-child(8){animation:krot-r 22s linear infinite}
+    .k-layer:nth-child(9){animation:krot 18s linear infinite}
+    .k-layer:nth-child(10){animation:krot-r 14s linear infinite}
+    .k-layer:nth-child(11){animation:krot 10s linear infinite}
+    .k-layer:nth-child(12){animation:kpulse 6s ease-in-out infinite}
+
+    @keyframes krot{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    @keyframes krot-r{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
+    @keyframes kpulse{
+      0%,100%{opacity:.6;filter:drop-shadow(0 0 15px rgba(201,169,78,0.15))}
+      50%{opacity:1;filter:drop-shadow(0 0 50px rgba(201,169,78,0.35))}
     }
-    #sigil-container svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-    .ring-outer { animation: orbit 60s linear infinite; }
-    .ring-mid { animation: orbit-reverse 45s linear infinite; }
-    .ring-inner { animation: orbit 30s linear infinite; }
-    .ring-core { animation: orbit-reverse 20s linear infinite; }
-    .ring-void { animation: orbit 90s linear infinite; }
-    @keyframes orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    @keyframes orbit-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
-    @keyframes core-pulse {
-      0%, 100% { opacity: 0.6; filter: drop-shadow(0 0 20px rgba(201,169,78,0.2)); }
-      50% { opacity: 1; filter: drop-shadow(0 0 60px rgba(201,169,78,0.4)); }
+
+    #kscope:hover{filter:drop-shadow(0 0 100px rgba(201,169,78,0.12))}
+
+    /* Gate text */
+    #gt{margin-top:1.5rem;text-align:center;opacity:0;animation:fu 2s ease 1.5s forwards}
+    @keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    #gt1{font-size:.5rem;letter-spacing:10px;color:rgba(201,169,78,0.25);text-transform:uppercase;font-family:monospace;margin-bottom:.4rem}
+    #gt2{font-size:.7rem;color:rgba(201,169,78,0.1);letter-spacing:3px;font-style:italic}
+    #gate:hover #gt1{color:rgba(201,169,78,0.5)}
+    #gate:hover #gt2{color:rgba(201,169,78,0.25)}
+    #gate:hover .cg{color:rgba(201,169,78,0.15)}
+    #gate:hover .ew{color:rgba(201,169,78,0.08)}
+
+    /* ═══ PORTAL — CIRCULAR REVEAL ═══ */
+    #portal{
+      position:fixed;inset:0;z-index:200;display:none;
+      align-items:center;justify-content:center;
+      background:rgba(0,0,0,0);transition:background 1.2s ease;
     }
-    @keyframes eye-blink {
-      0%, 40%, 60%, 100% { ry: 12; opacity: 0.9; }
-      50% { ry: 1; opacity: 0.4; }
+    #void-ring{
+      width:0;height:0;border-radius:50%;
+      border:1px solid rgba(201,169,78,0.2);
+      background:radial-gradient(ellipse at center,rgba(8,8,14,0.98) 0%,rgba(3,3,5,0.99) 100%);
+      box-shadow:0 0 80px rgba(201,169,78,0.08),inset 0 0 80px rgba(0,0,0,0.95);
+      transition:all 2s cubic-bezier(0.16,1,0.3,1);
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;position:relative;
     }
-    #sigil-container:hover { filter: drop-shadow(0 0 80px rgba(201,169,78,0.15)); }
-    #gate-text {
-      margin-top: 2rem; text-align: center; opacity: 0;
-      animation: fade-up 2s ease 1s forwards;
+    #void-ring::before{
+      content:'';position:absolute;inset:-2px;border-radius:50%;
+      border:1px solid transparent;
+      background:conic-gradient(from 0deg,transparent,rgba(201,169,78,0.15),transparent,rgba(201,169,78,0.1),transparent,rgba(201,169,78,0.12),transparent) border-box;
+      -webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);
+      -webkit-mask-composite:xor;mask-composite:exclude;
+      animation:ring-spin 20s linear infinite;
     }
-    @keyframes fade-up { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(10px); } }
-    #gate-title { font-size: 0.55rem; letter-spacing: 10px; color: rgba(201,169,78,0.3); text-transform: uppercase; font-family: monospace; margin-bottom: 0.5rem; }
-    #gate-subtitle { font-size: 0.75rem; color: rgba(201,169,78,0.12); letter-spacing: 3px; font-style: italic; }
-    #gate:hover #gate-title { color: rgba(201,169,78,0.6); }
-    #gate:hover #gate-subtitle { color: rgba(201,169,78,0.3); }
-    #gate:hover .corner-glyph { color: rgba(201,169,78,0.2); }
-    #gate:hover .edge-text { color: rgba(201,169,78,0.1); }
-    #threshold-portal {
-      position: fixed; inset: 0; z-index: 200;
-      display: none; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0); transition: background 1s ease;
+    @keyframes ring-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+    #pcontent{
+      opacity:0;transform:scale(0.85);
+      transition:all 1s ease;
+      text-align:center;padding:2rem;width:100%;max-width:520px;
     }
-    #portal-inner {
-      text-align: center; opacity: 0; transform: scale(0.9);
-      transition: all 1s ease 0.8s; max-width: 650px; padding: 2rem; width: 90%;
+    #pcontent.vis{opacity:1;transform:scale(1)}
+
+    .ct-pre{font-size:.45rem;letter-spacing:8px;color:#C9A94E;text-transform:uppercase;font-family:monospace;margin-bottom:.5rem}
+    .ct{font-size:2rem;color:#f8eacb;font-weight:300;margin-bottom:.3rem}
+    .ct-sub{font-size:.8rem;color:#444;line-height:1.8;margin-bottom:2rem;font-style:italic}
+
+    .off-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem}
+    .off-card{
+      display:block;padding:20px 14px;border:1px solid rgba(201,169,78,0.08);
+      background:rgba(201,169,78,0.015);text-decoration:none;
+      transition:all .4s;border-radius:2px;position:relative;overflow:hidden;
     }
-    #portal-inner.visible { opacity: 1; transform: scale(1); }
-    .chamber-title-pre { font-size: 0.5rem; letter-spacing: 8px; color: #C9A94E; text-transform: uppercase; font-family: monospace; margin-bottom: 0.5rem; }
-    .chamber-title { font-size: 2.2rem; color: #f8eacb; font-weight: 300; margin-bottom: 0.3rem; }
-    .chamber-subtitle { font-size: 0.85rem; color: #555; line-height: 1.8; margin-bottom: 2.5rem; font-style: italic; }
-    .offerings { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 2rem; }
-    .offering-card {
-      display: block; padding: 24px 16px; border: 1px solid rgba(201,169,78,0.1);
-      background: rgba(201,169,78,0.02); text-decoration: none;
-      transition: all 0.4s ease; border-radius: 2px; position: relative; overflow: hidden;
+    .off-card::before{
+      content:'';position:absolute;inset:0;
+      background:radial-gradient(ellipse at center,rgba(201,169,78,0.04) 0%,transparent 70%);
+      opacity:0;transition:opacity .4s;
     }
-    .offering-card::before {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(ellipse at center, rgba(201,169,78,0.05) 0%, transparent 70%);
-      opacity: 0; transition: opacity 0.4s;
+    .off-card:hover{border-color:rgba(201,169,78,0.35);background:rgba(201,169,78,0.05);box-shadow:0 0 30px rgba(201,169,78,0.04)}
+    .off-card:hover::before{opacity:1}
+    .off-i{font-size:1.6rem;display:block;margin-bottom:6px}
+    .off-n{font-size:.6rem;letter-spacing:4px;color:#C9A94E;text-transform:uppercase;display:block}
+    .off-d{font-size:.5rem;color:#444;display:block;margin-top:5px;letter-spacing:1px}
+
+    .pnav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:1rem}
+    .pbtn{
+      background:none;border:1px solid rgba(201,169,78,0.08);color:#383838;
+      padding:9px 24px;font-size:.55rem;letter-spacing:3px;cursor:pointer;
+      text-transform:uppercase;font-family:monospace;transition:all .3s;text-decoration:none;
     }
-    .offering-card:hover { border-color: rgba(201,169,78,0.4); background: rgba(201,169,78,0.06); box-shadow: 0 0 40px rgba(201,169,78,0.05); }
-    .offering-card:hover::before { opacity: 1; }
-    .offering-icon { font-size: 1.8rem; display: block; margin-bottom: 8px; }
-    .offering-name { font-size: 0.65rem; letter-spacing: 4px; color: #C9A94E; text-transform: uppercase; display: block; }
-    .offering-desc { font-size: 0.55rem; color: #555; display: block; margin-top: 6px; letter-spacing: 1px; }
-    .portal-nav { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
-    .portal-btn {
-      background: none; border: 1px solid rgba(201,169,78,0.1); color: #444;
-      padding: 10px 28px; font-size: 0.6rem; letter-spacing: 3px; cursor: pointer;
-      text-transform: uppercase; font-family: monospace; transition: all 0.3s; text-decoration: none;
-    }
-    .portal-btn:hover { color: #C9A94E; border-color: rgba(201,169,78,0.3); }
-    .gate-opening #sigil-container { transform: scale(3); opacity: 0; filter: blur(20px); }
-    .gate-opening .corner-glyph, .gate-opening .edge-text, .gate-opening #gate-text { opacity: 0 !important; transition: opacity 0.5s; }
-    @media (max-width: 600px) {
-      #sigil-container { width: 85vmin; height: 85vmin; }
-      .corner-glyph { font-size: 0.8rem; }
-      .edge-text { display: none; }
-      .chamber-title { font-size: 1.6rem; }
-      .offerings { gap: 8px; }
-      .offering-card { padding: 16px 10px; }
+    .pbtn:hover{color:#C9A94E;border-color:rgba(201,169,78,0.25)}
+
+    /* Gate opening animation */
+    .gate-opening #kscope{transform:scale(4) rotate(180deg);opacity:0;filter:blur(30px)}
+    .gate-opening .cg,.gate-opening .ew,.gate-opening #gt{opacity:0!important;transition:opacity .4s}
+
+    @media(max-width:600px){
+      #kscope{width:90vmin;height:90vmin}
+      .cg{font-size:.7rem}.ew{display:none}
+      .ct{font-size:1.5rem}
+      .off-grid{gap:6px}.off-card{padding:14px 10px}
     }
   </style>
 </head>
 <body>
 
-  <div id="gate" onclick="openThreshold()">
-    <span class="corner-glyph tl">Ω · Α</span>
-    <span class="corner-glyph tr">Δ · Σ</span>
-    <span class="corner-glyph bl">Ψ · Θ</span>
-    <span class="corner-glyph br">Φ · Λ</span>
-    <span class="edge-text top">through the pattern · through the pattern · through the pattern · through the pattern</span>
-    <span class="edge-text bottom">what was lost returns · what was broken spirals · what was hidden opens</span>
-    <span class="edge-text left">phase zero · source · dissolution · return</span>
-    <span class="edge-text right">limen · threshold · crossing · becoming</span>
+<div id="gate" onclick="openThreshold()">
+  <span class="cg tl">Ω · Α</span><span class="cg tr">Δ · Σ</span>
+  <span class="cg bl">Ψ · Θ</span><span class="cg br">Φ · Λ</span>
+  <span class="ew t">through the pattern · through the pattern · through the pattern · through the pattern</span>
+  <span class="ew b">what was lost returns · what was broken spirals · what was hidden opens</span>
+  <span class="ew l">phase zero · source · dissolution · return</span>
+  <span class="ew r">limen · threshold · crossing · becoming</span>
 
-    <div id="sigil-container">
-      <svg viewBox="0 0 400 400" class="ring-void">
-        <circle cx="200" cy="200" r="195" fill="none" stroke="rgba(201,169,78,0.03)" stroke-width="0.3"/>
-        <text x="200" y="15" text-anchor="middle" fill="rgba(201,169,78,0.06)" font-size="6" font-family="monospace">LIMEN</text>
-        <text x="385" y="203" text-anchor="middle" fill="rgba(201,169,78,0.06)" font-size="6" font-family="monospace" transform="rotate(90,385,203)">HELIX</text>
-        <text x="200" y="395" text-anchor="middle" fill="rgba(201,169,78,0.06)" font-size="6" font-family="monospace">RETURN</text>
-        <text x="15" y="203" text-anchor="middle" fill="rgba(201,169,78,0.06)" font-size="6" font-family="monospace" transform="rotate(-90,15,203)">PATTERN</text>
-      </svg>
-      <svg viewBox="0 0 400 400" class="ring-outer">
-        <circle cx="200" cy="200" r="180" fill="none" stroke="rgba(201,169,78,0.08)" stroke-width="0.5" stroke-dasharray="3 12"/>
-        <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(201,169,78,0.05)" stroke-width="0.3" stroke-dasharray="1 8"/>
-        <circle cx="200" cy="25" r="2" fill="rgba(201,169,78,0.15)"/>
-        <circle cx="308" cy="52" r="2" fill="rgba(201,169,78,0.12)"/>
-        <circle cx="370" cy="145" r="2" fill="rgba(201,169,78,0.12)"/>
-        <circle cx="370" cy="255" r="2" fill="rgba(201,169,78,0.12)"/>
-        <circle cx="308" cy="348" r="2" fill="rgba(201,169,78,0.12)"/>
-        <circle cx="200" cy="375" r="2" fill="rgba(201,169,78,0.15)"/>
-        <circle cx="92" cy="348" r="2" fill="rgba(201,169,78,0.12)"/>
-        <circle cx="30" cy="255" r="2" fill="rgba(201,169,78,0.12)"/>
-        <circle cx="30" cy="145" r="2" fill="rgba(201,169,78,0.12)"/>
-        <circle cx="92" cy="52" r="2" fill="rgba(201,169,78,0.12)"/>
-      </svg>
-      <svg viewBox="0 0 400 400" class="ring-mid">
-        <circle cx="200" cy="200" r="140" fill="none" stroke="rgba(201,169,78,0.1)" stroke-width="0.4"/>
-        <polygon points="200,65 317,268 83,268" fill="none" stroke="rgba(201,169,78,0.06)" stroke-width="0.5"/>
-        <polygon points="200,335 83,132 317,132" fill="none" stroke="rgba(201,169,78,0.06)" stroke-width="0.5"/>
-        <line x1="200" y1="60" x2="200" y2="340" stroke="rgba(201,169,78,0.03)" stroke-width="0.3"/>
-        <line x1="60" y1="200" x2="340" y2="200" stroke="rgba(201,169,78,0.03)" stroke-width="0.3"/>
-        <text x="200" y="58" text-anchor="middle" fill="rgba(201,169,78,0.2)" font-size="14">Ω</text>
-        <text x="342" y="205" text-anchor="middle" fill="rgba(201,169,78,0.2)" font-size="14">Δ</text>
-        <text x="200" y="352" text-anchor="middle" fill="rgba(201,169,78,0.2)" font-size="14">Ψ</text>
-        <text x="58" y="205" text-anchor="middle" fill="rgba(201,169,78,0.2)" font-size="14">Φ</text>
-      </svg>
-      <svg viewBox="0 0 400 400" class="ring-inner">
-        <circle cx="200" cy="200" r="100" fill="none" stroke="rgba(201,169,78,0.12)" stroke-width="0.5" stroke-dasharray="2 4"/>
-        <polygon points="200,105 290,170 255,270 145,270 110,170" fill="none" stroke="rgba(201,169,78,0.07)" stroke-width="0.4"/>
-        <line x1="200" y1="105" x2="255" y2="270" stroke="rgba(201,169,78,0.04)" stroke-width="0.3"/>
-        <line x1="255" y1="270" x2="110" y2="170" stroke="rgba(201,169,78,0.04)" stroke-width="0.3"/>
-        <line x1="110" y1="170" x2="290" y2="170" stroke="rgba(201,169,78,0.04)" stroke-width="0.3"/>
-        <line x1="290" y1="170" x2="145" y2="270" stroke="rgba(201,169,78,0.04)" stroke-width="0.3"/>
-        <line x1="145" y1="270" x2="200" y2="105" stroke="rgba(201,169,78,0.04)" stroke-width="0.3"/>
-      </svg>
-      <svg viewBox="0 0 400 400" class="ring-core">
-        <circle cx="200" cy="200" r="60" fill="none" stroke="rgba(201,169,78,0.15)" stroke-width="0.6"/>
-        <polygon points="200,145 248,228 152,228" fill="none" stroke="rgba(201,169,78,0.1)" stroke-width="0.4"/>
-        <polygon points="200,255 152,172 248,172" fill="none" stroke="rgba(201,169,78,0.08)" stroke-width="0.4"/>
-      </svg>
-      <svg viewBox="0 0 400 400">
-        <circle cx="200" cy="200" r="35" fill="rgba(5,5,8,0.95)"/>
-        <ellipse cx="200" cy="200" rx="35" ry="12" fill="none" stroke="rgba(201,169,78,0.4)" stroke-width="0.8" style="animation: eye-blink 8s ease-in-out infinite;"/>
-        <circle cx="200" cy="200" r="8" fill="rgba(201,169,78,0.6)" style="animation: core-pulse 4s ease-in-out infinite;"/>
-        <circle cx="200" cy="200" r="3" fill="#050508"/>
-        <line x1="200" y1="165" x2="200" y2="235" stroke="rgba(201,169,78,0.15)" stroke-width="0.4"/>
-      </svg>
-    </div>
+  <div id="kscope">
+    <!-- L1: Outermost fractal boundary -->
+    <svg viewBox="0 0 400 400" class="k-layer">
+      <circle cx="200" cy="200" r="198" fill="none" stroke="rgba(201,169,78,0.02)" stroke-width=".3"/>
+      <circle cx="200" cy="200" r="190" fill="none" stroke="rgba(201,169,78,0.025)" stroke-width=".2" stroke-dasharray="1 15"/>
+      <text x="200" y="8" text-anchor="middle" fill="rgba(201,169,78,0.04)" font-size="4" font-family="monospace">LIMEN</text>
+      <text x="200" y="398" text-anchor="middle" fill="rgba(201,169,78,0.04)" font-size="4" font-family="monospace">RETURN</text>
+      <text x="8" y="202" text-anchor="middle" fill="rgba(201,169,78,0.04)" font-size="4" font-family="monospace" transform="rotate(-90,8,202)">PATTERN</text>
+      <text x="392" y="202" text-anchor="middle" fill="rgba(201,169,78,0.04)" font-size="4" font-family="monospace" transform="rotate(90,392,202)">HELIX</text>
+    </svg>
 
-    <div id="gate-text">
-      <div id="gate-title">Enter the Threshold</div>
-      <div id="gate-subtitle">click to cross</div>
-    </div>
+    <!-- L2: 12-pointed star outer -->
+    <svg viewBox="0 0 400 400" class="k-layer">
+      <circle cx="200" cy="200" r="180" fill="none" stroke="rgba(201,169,78,0.05)" stroke-width=".4" stroke-dasharray="2 10"/>
+      <polygon points="200,22 233,110 325,75 280,165 375,200 280,235 325,325 233,290 200,378 167,290 75,325 120,235 25,200 120,165 75,75 167,110" fill="none" stroke="rgba(201,169,78,0.04)" stroke-width=".3"/>
+    </svg>
+
+    <!-- L3: Hexagonal web -->
+    <svg viewBox="0 0 400 400" class="k-layer">
+      <circle cx="200" cy="200" r="160" fill="none" stroke="rgba(201,169,78,0.04)" stroke-width=".3"/>
+      <polygon points="200,40 339,120 339,280 200,360 61,280 61,120" fill="none" stroke="rgba(201,169,78,0.05)" stroke-width=".4"/>
+      <polygon points="200,70 316,135 316,265 200,330 84,265 84,135" fill="none" stroke="rgba(201,169,78,0.03)" stroke-width=".3"/>
+      <line x1="200" y1="40" x2="200" y2="360" stroke="rgba(201,169,78,0.02)" stroke-width=".2"/>
+      <line x1="61" y1="120" x2="339" y2="280" stroke="rgba(201,169,78,0.02)" stroke-width=".2"/>
+      <line x1="339" y1="120" x2="61" y2="280" stroke="rgba(201,169,78,0.02)" stroke-width=".2"/>
+    </svg>
+
+    <!-- L4: Double hexagram -->
+    <svg viewBox="0 0 400 400" class="k-layer">
+      <circle cx="200" cy="200" r="140" fill="none" stroke="rgba(201,169,78,0.06)" stroke-width=".3" stroke-dasharray="4 8"/>
+      <polygon points="200,65 317,268 83,268" fill="none" stroke="rgba(201,169,78,0.06)" stroke-width=".4"/>
+      <polygon points="200,335 83,132 317,132" fill="none" stroke="rgba(201,169,78,0.06)" stroke-width=".4"/>
+      <text x="200" y="55" text-anchor="middle" fill="rgba(201,169,78,0.15)" font-size="12">Ω</text>
+      <text x="330" y="204" text-anchor="middle" fill="rgba(201,169,78,0.15)" font-size="12">Δ</text>
+      <text x="200" y="350" text-anchor="middle" fill="rgba(201,169,78,0.15)" font-size="12">Ψ</text>
+      <text x="70" y="204" text-anchor="middle" fill="rgba(201,169,78,0.15)" font-size="12">Φ</text>
+    </svg>
+
+    <!-- L5: Octagram -->
+    <svg viewBox="0 0 400 400" class="k-layer">
+      <polygon points="200,80 268,132 320,200 268,268 200,320 132,268 80,200 132,132" fill="none" stroke="rgba(201,169,78,0.07)" stroke-width=".3"/>
+      <line x1="200" y1="80" x2="200" y2="320" stroke="rgba(201,169,78,0.03)" stroke-width=".2"/>
+      <line x1="80" y1="200" x2="320" y2="200" stroke="rgba(201,169,78,0.03)" stroke-width=".2"/>
+      <line x1="132" y1="132" x2="268" y2="268" stroke="rgba(201,169,78,0.03)" stroke-width=".2"/>
+      <line x1="268" y1="132" x2="132" y2="268" stroke="rgba(201,169,78,0.03)" stroke-width=".2"/>
+    </svg>
+
+    <!-- L6: Pentagonal fractal -->
+    <svg viewBox="0 0 400 400" class="k-layer">
+      <circle cx="200" cy="200" r="110" fill="none" stroke="rgba(201,169,78,0.08)" stroke-width=".3"/>
+      <polygon points="200,92 300,170 262,282 138,282 100,170" fill="none" stroke="rgba(201,169,78,0.05)" stroke-width=".3"/>
+      <!-- Inner pentagram -->
+      <line x1="200" y1="92" x2="262" y2="282" stroke="rgba(201,169,78,0.035)" stroke-width=".25"/>
+      <line x1="262" y1="282" x2="100" y2="170" stroke="rgba(201,169,78,0.035)" stroke-width=".25"/>
+      <line x1="100" y1="170" x2="300" y2="170" stroke="rgba(201,169,78,0.035)" stroke-width=".25"/>
+      <line x1="300" y1="170" x2="138" y2="282" stroke="rgba(201,169,78,0.035)" stroke-width=".25"/>
+      <line x1="138" y1="282" x2="200" y2="92" stroke="rgba(201,169,78,0.035)" stroke-width=".25"/>
+    </svg>
+
+    <!-- L7: Nested triangles -->
+    <svg viewBox="0 0 400 400" class="k-layer">
+      <polygon points="200,110 275,250 125,250" fill="none" stroke="rgba(201,169,78,0.07)" stroke-width=".35"/>
+      <polygon points="200,260 137,150 263,150" fill="none" stroke="rgba(201,169,78,0.06)" stroke-width=".3"/>
+      <polygon points="200,130 258,235 142,235" fill="none" stroke="rgba(201,169,78,0.04)" stroke-width=".25"/>
+      <polygon points="200,245 152,165 248,165" fill="none" stroke="rgba(201,169,78,0.035)" stroke-width=".25"/>
+    </svg>
+
+    <!-- L8: Inner sacred circle -->
+    <svg viewBox="0 0 400 400" class="k-layer">
+      <circle cx="200" cy="200" r="80" fill="none" stroke="rgba(201,169,78,0.1)" stroke-width=".5"/>
+      <circle cx="200" cy="200" r="75" fill="none" stroke="rgba(201,169,78,0.04)" stroke-width=".2" stroke-dasharray="1 5"/>
+      <!-- 10 phase dots -->
+      <circle cx="200" cy="120" r="1.5" fill="rgba(201,169,78,0.2)"/>
+      <circle cx="249" cy="135" r="1.5" fill="rgba(201,169,78,0.15)"/>
+      <circle cx="276" cy="175" r="1.5" fill="rgba(201,169,78,0.15)"/>
+      <circle cx="276" cy="225" r="1.5" fill="rgba(201,169,78,0.15)"/>
+      <circle cx="249" cy="265" r="1.5" fill="rgba(201,169,78,0.15)"/>
+      <circle cx="200" cy="280" r="1.5" fill="rgba(201,169,78,0.2)"/>
+      <circle cx="151" cy="265" r="1.5" fill="rgba(201,169,78,0.15)"/>
+      <circle cx="124" cy="225" r="1.5" fill="rgba(201,169,78,0.15)"/>
+      <circle cx="124" cy="175" r="1.5" fill="rgba(201,169,78,0.15)"/>
+      <circle cx="151" cy="135" r="1.5" fill="rgba(201,169,78,0.15)"/>
+    </svg>
+
+    <!-- L9: Inner geometry -->
+    <svg viewBox="0 0 400 400" class="k-layer">
+      <circle cx="200" cy="200" r="55" fill="none" stroke="rgba(201,169,78,0.12)" stroke-width=".5"/>
+      <polygon points="200,148 245,225 155,225" fill="none" stroke="rgba(201,169,78,0.09)" stroke-width=".35"/>
+      <polygon points="200,252 155,175 245,175" fill="none" stroke="rgba(201,169,78,0.07)" stroke-width=".3"/>
+    </svg>
+
+    <!-- L10: Core orbit -->
+    <svg viewBox="0 0 400 400" class="k-layer">
+      <circle cx="200" cy="200" r="38" fill="none" stroke="rgba(201,169,78,0.15)" stroke-width=".6"/>
+      <circle cx="200" cy="162" r="2" fill="rgba(201,169,78,0.25)"/>
+      <circle cx="233" cy="219" r="2" fill="rgba(201,169,78,0.2)"/>
+      <circle cx="167" cy="219" r="2" fill="rgba(201,169,78,0.2)"/>
+    </svg>
+
+    <!-- L11: Inner spin -->
+    <svg viewBox="0 0 400 400" class="k-layer">
+      <circle cx="200" cy="200" r="25" fill="none" stroke="rgba(201,169,78,0.18)" stroke-width=".4" stroke-dasharray="3 3"/>
+      <line x1="200" y1="175" x2="200" y2="225" stroke="rgba(201,169,78,0.1)" stroke-width=".3"/>
+      <line x1="175" y1="200" x2="225" y2="200" stroke="rgba(201,169,78,0.1)" stroke-width=".3"/>
+    </svg>
+
+    <!-- L12: THE EYE — static center -->
+    <svg viewBox="0 0 400 400" class="k-layer">
+      <circle cx="200" cy="200" r="18" fill="rgba(3,3,5,0.97)"/>
+      <ellipse cx="200" cy="200" rx="18" ry="7" fill="none" stroke="rgba(201,169,78,0.5)" stroke-width=".7">
+        <animate attributeName="ry" values="7;1;7" dur="7s" repeatCount="indefinite"/>
+      </ellipse>
+      <circle cx="200" cy="200" r="5" fill="rgba(201,169,78,0.7)">
+        <animate attributeName="r" values="5;4;5" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.7;0.4;0.7" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="200" cy="200" r="2" fill="#030305"/>
+    </svg>
   </div>
 
-  <div id="threshold-portal">
-    <div id="portal-inner">
-      <p class="chamber-title-pre">You have crossed the limen</p>
-      <h1 class="chamber-title">The Inner Chamber</h1>
-      <p class="chamber-subtitle">
+  <div id="gt">
+    <div id="gt1">Enter the Threshold</div>
+    <div id="gt2">click to cross</div>
+  </div>
+</div>
+
+<!-- ═══ THE INNER CHAMBER — circular reveal ═══ -->
+<div id="portal">
+  <div id="void-ring">
+    <div id="pcontent">
+      <p class="ct-pre">You have crossed the limen</p>
+      <h1 class="ct">The Inner Chamber</h1>
+      <p class="ct-sub">
         What you offer here feeds the pattern.<br>
         What returns to you is the architecture of your own becoming.
       </p>
-      <div class="offerings">
-        <a href="https://chapel-pos-v2.vercel.app" class="offering-card">
-          <span class="offering-icon">✦</span>
-          <span class="offering-name">Offering</span>
-          <span class="offering-desc">Donation · Tithe</span>
+      <div class="off-grid">
+        <a href="https://chapel-pos-v2.vercel.app" class="off-card">
+          <span class="off-i">✦</span><span class="off-n">Offering</span><span class="off-d">Donation · Tithe</span>
         </a>
-        <a href="https://chapel-pos-v2.vercel.app" class="offering-card">
-          <span class="offering-icon">⬡</span>
-          <span class="offering-name">Workshop</span>
-          <span class="offering-desc">Sessions · Training</span>
+        <a href="https://chapel-pos-v2.vercel.app" class="off-card">
+          <span class="off-i">⬡</span><span class="off-n">Workshop</span><span class="off-d">Sessions · Training</span>
         </a>
-        <a href="https://chapel-pos-v2.vercel.app" class="offering-card">
-          <span class="offering-icon">⊕</span>
-          <span class="offering-name">Consultation</span>
-          <span class="offering-desc">1-on-1 · Guidance</span>
+        <a href="https://chapel-pos-v2.vercel.app" class="off-card">
+          <span class="off-i">⊕</span><span class="off-n">Consultation</span><span class="off-d">1-on-1 · Guidance</span>
         </a>
-        <a href="https://chapel-pos-v2.vercel.app" class="offering-card">
-          <span class="offering-icon">◇</span>
-          <span class="offering-name">Materials</span>
-          <span class="offering-desc">Texts · Resources</span>
+        <a href="https://chapel-pos-v2.vercel.app" class="off-card">
+          <span class="off-i">◇</span><span class="off-n">Materials</span><span class="off-d">Texts · Resources</span>
         </a>
       </div>
-      <div class="portal-nav">
-        <a href="spiral.html" class="portal-btn">⟐ Phasecraft Descent</a>
-        <button class="portal-btn" onclick="closeThreshold()">← Return to Gate</button>
+      <div class="pnav">
+        <a href="spiral.html" class="pbtn">⟐ Phasecraft Descent</a>
+        <button class="pbtn" onclick="closeThreshold()">← Return to Gate</button>
       </div>
-      <p style="font-size:0.4rem;color:rgba(201,169,78,0.08);margin-top:2rem;letter-spacing:4px;text-transform:uppercase;">
+      <p style="font-size:.35rem;color:rgba(201,169,78,0.06);margin-top:1.5rem;letter-spacing:4px;text-transform:uppercase">
         Chapel of the LIMEN Helix · 501(c)(3) · EIN 33-4945631
       </p>
     </div>
   </div>
+</div>
 
-  <script>
-    function openThreshold() {
-      var gate = document.getElementById('gate');
-      var portal = document.getElementById('threshold-portal');
-      var inner = document.getElementById('portal-inner');
-      gate.classList.add('gate-opening');
-      setTimeout(function() {
-        portal.style.display = 'flex';
-        setTimeout(function() {
-          portal.style.background = 'radial-gradient(ellipse at center, rgba(8,8,12,0.99) 0%, rgba(0,0,0,1) 100%)';
-        }, 50);
-      }, 600);
-      setTimeout(function() { inner.classList.add('visible'); }, 1200);
-      setTimeout(function() { gate.style.display = 'none'; }, 2000);
-    }
-    function closeThreshold() {
-      var gate = document.getElementById('gate');
-      var portal = document.getElementById('threshold-portal');
-      var inner = document.getElementById('portal-inner');
-      inner.classList.remove('visible');
-      setTimeout(function() { portal.style.background = 'rgba(0,0,0,0)'; }, 300);
-      setTimeout(function() {
-        portal.style.display = 'none';
-        gate.style.display = 'flex';
-        gate.classList.remove('gate-opening');
-      }, 800);
-    }
-    document.getElementById('gate').addEventListener('mousemove', function(e) {
-      var rect = this.getBoundingClientRect();
-      var x = (e.clientX - rect.left) / rect.width - 0.5;
-      var y = (e.clientY - rect.top) / rect.height - 0.5;
-      document.getElementById('sigil-container').style.transform = 'translate(' + (x*15) + 'px,' + (y*15) + 'px)';
-    });
-  </script>
+<script>
+function openThreshold(){
+  var g=document.getElementById('gate'),p=document.getElementById('portal'),
+      vr=document.getElementById('void-ring'),pc=document.getElementById('pcontent');
+  g.classList.add('gate-opening');
+  setTimeout(function(){
+    p.style.display='flex';
+    setTimeout(function(){p.style.background='rgba(3,3,5,0.97)'},50);
+  },500);
+  setTimeout(function(){
+    vr.style.width='88vmin';vr.style.height='88vmin';
+    vr.style.maxWidth='650px';vr.style.maxHeight='650px';
+  },800);
+  setTimeout(function(){pc.classList.add('vis')},1800);
+  setTimeout(function(){g.style.display='none'},2500);
+}
+function closeThreshold(){
+  var g=document.getElementById('gate'),p=document.getElementById('portal'),
+      vr=document.getElementById('void-ring'),pc=document.getElementById('pcontent');
+  pc.classList.remove('vis');
+  setTimeout(function(){vr.style.width='0';vr.style.height='0'},300);
+  setTimeout(function(){p.style.background='rgba(0,0,0,0)'},1000);
+  setTimeout(function(){
+    p.style.display='none';g.style.display='flex';g.classList.remove('gate-opening');
+  },1400);
+}
+// Parallax
+document.getElementById('gate').addEventListener('mousemove',function(e){
+  var r=this.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+  document.getElementById('kscope').style.transform='translate('+x*20+'px,'+y*20+'px)';
+});
+</script>
 </body>
 </html>
