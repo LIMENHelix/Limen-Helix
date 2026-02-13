@@ -25,7 +25,7 @@ body{background:#000;overflow:hidden;height:100vh;width:100vw;font-family:Georgi
 #eyeCanvas{width:100%;height:100%}
 
 /* Text below eye */
-#gt{text-align:center;z-index:3;margin-top:2.5rem}
+#gt{text-align:center;z-index:3;margin-top:2.5rem;background:radial-gradient(ellipse at center,rgba(0,0,0,0.85) 0%,rgba(0,0,0,0.6) 60%,transparent 100%);padding:1.5rem 3rem;border-radius:8px}
 #gt1{font-size:.7rem;letter-spacing:12px;color:rgba(201,169,78,0.7);text-transform:uppercase;font-family:monospace;margin-bottom:.6rem;text-shadow:0 0 25px rgba(201,169,78,0.4)}
 #gt2{font-size:.85rem;color:rgba(201,169,78,0.3);letter-spacing:4px;font-style:italic;text-shadow:0 0 15px rgba(201,169,78,0.2)}
 #gt3{font-size:.45rem;letter-spacing:6px;color:rgba(255,80,60,0.25);text-transform:uppercase;font-family:monospace;margin-top:1.2rem;animation:warn 3s ease-in-out infinite}
@@ -163,108 +163,128 @@ function drawEye(){
   eyeOpen+=(eyeTarget-eyeOpen)*0.06;
   eyeT+=0.02;
   
-  var eyeW=w*0.42;// horizontal radius of eye shape
-  var eyeH=h*0.4*eyeOpen;// vertical radius — 0 when closed
-  var lidH=h*0.42;// lid always this tall for the shape
+  var eyeW=w*0.42;
+  var eyeH=h*0.4*eyeOpen;
+  var lidH=h*0.42;
   
-  // Outer glow
-  ex.save();
-  ex.shadowColor='rgba(201,169,78,'+(0.2+eyeOpen*0.3)+')';
-  ex.shadowBlur=40+eyeOpen*30;
-  
-  // Draw eye shape (almond)
-  ex.beginPath();
-  ex.moveTo(cx-eyeW,cy);
-  ex.bezierCurveTo(cx-eyeW*0.6,cy-eyeH,cx+eyeW*0.6,cy-eyeH,cx+eyeW,cy);
-  ex.bezierCurveTo(cx+eyeW*0.6,cy+eyeH,cx-eyeW*0.6,cy+eyeH,cx-eyeW,cy);
-  ex.closePath();
-  
-  // Fill the inside dark
-  ex.fillStyle='rgba(5,3,10,'+(0.7+eyeOpen*0.25)+')';
-  ex.fill();
-  
-  // Eye outline — bright gold
-  ex.strokeStyle='rgba(201,169,78,'+(0.3+eyeOpen*0.5)+')';
-  ex.lineWidth=2+eyeOpen*2;
-  ex.stroke();
-  ex.restore();
-  
-  if(eyeOpen>0.05){
-    // Iris
-    var irisR=eyeH*0.6;
-    if(irisR>2){
-      var iGrad=ex.createRadialGradient(cx,cy,0,cx,cy,irisR);
-      iGrad.addColorStop(0,'rgba(201,169,78,'+(0.9*eyeOpen)+')');
-      iGrad.addColorStop(0.4,'rgba(180,120,40,'+(0.7*eyeOpen)+')');
-      iGrad.addColorStop(0.7,'rgba(120,60,20,'+(0.5*eyeOpen)+')');
-      iGrad.addColorStop(1,'rgba(40,20,5,'+(0.3*eyeOpen)+')');
+  if(eyeOpen>0.03){
+    // Clip to eye shape so nothing leaks outside
+    ex.save();
+    ex.beginPath();
+    ex.moveTo(cx-eyeW,cy);
+    ex.bezierCurveTo(cx-eyeW*0.6,cy-eyeH,cx+eyeW*0.6,cy-eyeH,cx+eyeW,cy);
+    ex.bezierCurveTo(cx+eyeW*0.6,cy+eyeH,cx-eyeW*0.6,cy+eyeH,cx-eyeW,cy);
+    ex.closePath();
+    ex.clip();
+    
+    // GOD'S EYE — blazing radiant iris fills the whole eye
+    var maxIrisR=Math.max(eyeW,eyeH)*1.2;
+    
+    // Outer divine glow — massive
+    var outerGlow=ex.createRadialGradient(cx,cy,0,cx,cy,maxIrisR);
+    outerGlow.addColorStop(0,'rgba(255,255,240,'+(1.0*eyeOpen)+')');
+    outerGlow.addColorStop(0.08,'rgba(255,240,200,'+(0.95*eyeOpen)+')');
+    outerGlow.addColorStop(0.15,'rgba(255,210,120,'+(0.85*eyeOpen)+')');
+    outerGlow.addColorStop(0.3,'rgba(220,160,50,'+(0.7*eyeOpen)+')');
+    outerGlow.addColorStop(0.5,'rgba(180,100,20,'+(0.5*eyeOpen)+')');
+    outerGlow.addColorStop(0.7,'rgba(120,50,10,'+(0.3*eyeOpen)+')');
+    outerGlow.addColorStop(1,'rgba(40,15,5,'+(0.1*eyeOpen)+')');
+    ex.fillStyle=outerGlow;
+    ex.fillRect(0,0,w,h);
+    
+    // Radiating light beams from center
+    for(var i=0;i<32;i++){
+      var a=(i/32)*Math.PI*2+eyeT*0.3;
+      var beamLen=maxIrisR*(0.5+Math.sin(eyeT*2+i*0.7)*0.3);
       ex.beginPath();
-      ex.arc(cx,cy,irisR,0,Math.PI*2);
-      ex.fillStyle=iGrad;
-      ex.fill();
-      
-      // Iris detail lines
-      for(var i=0;i<16;i++){
-        var a=(i/16)*Math.PI*2+eyeT*0.5;
+      ex.moveTo(cx,cy);
+      ex.lineTo(cx+Math.cos(a)*beamLen,cy+Math.sin(a)*beamLen);
+      ex.strokeStyle='rgba(255,220,140,'+(0.08*eyeOpen+Math.sin(eyeT*3+i)*0.04*eyeOpen)+')';
+      ex.lineWidth=2+Math.sin(eyeT+i)*1;
+      ex.stroke();
+    }
+    
+    // Secondary finer rays
+    for(var i=0;i<64;i++){
+      var a=(i/64)*Math.PI*2-eyeT*0.2;
+      var beamLen=maxIrisR*(0.3+Math.sin(eyeT*1.5+i)*0.2);
+      ex.beginPath();
+      ex.moveTo(cx+Math.cos(a)*10,cy+Math.sin(a)*10);
+      ex.lineTo(cx+Math.cos(a)*beamLen,cy+Math.sin(a)*beamLen);
+      ex.strokeStyle='rgba(255,200,100,'+(0.04*eyeOpen)+')';
+      ex.lineWidth=0.5;
+      ex.stroke();
+    }
+    
+    // Iris ring texture
+    var irisR=eyeH*0.55;
+    if(irisR>3){
+      for(var i=0;i<24;i++){
+        var a=(i/24)*Math.PI*2+eyeT*0.5;
         ex.beginPath();
-        ex.moveTo(cx+Math.cos(a)*irisR*0.3,cy+Math.sin(a)*irisR*0.3);
-        ex.lineTo(cx+Math.cos(a)*irisR*0.95,cy+Math.sin(a)*irisR*0.95);
-        ex.strokeStyle='rgba(201,169,78,'+(0.15*eyeOpen)+')';
-        ex.lineWidth=1;
+        ex.moveTo(cx+Math.cos(a)*irisR*0.25,cy+Math.sin(a)*irisR*0.25);
+        ex.lineTo(cx+Math.cos(a)*irisR*1.3,cy+Math.sin(a)*irisR*1.3);
+        ex.strokeStyle='rgba(180,130,40,'+(0.2*eyeOpen)+')';
+        ex.lineWidth=1.5;
         ex.stroke();
       }
-      
-      // Pupil
-      var pupilR=irisR*0.35;
-      ex.beginPath();
-      ex.arc(cx,cy,pupilR,0,Math.PI*2);
-      ex.fillStyle='rgba(0,0,0,'+(0.95*eyeOpen)+')';
-      ex.fill();
-      
-      // Pupil light reflection
-      ex.beginPath();
-      ex.arc(cx-pupilR*0.3,cy-pupilR*0.3,pupilR*0.25,0,Math.PI*2);
-      ex.fillStyle='rgba(255,255,255,'+(0.3*eyeOpen)+')';
-      ex.fill();
     }
+    
+    // Pupil — the void you enter
+    var pupilR=Math.max(eyeH*0.18,3);
+    var pupilGrad=ex.createRadialGradient(cx,cy,0,cx,cy,pupilR*1.5);
+    pupilGrad.addColorStop(0,'rgba(0,0,0,'+(0.98*eyeOpen)+')');
+    pupilGrad.addColorStop(0.6,'rgba(10,5,20,'+(0.9*eyeOpen)+')');
+    pupilGrad.addColorStop(1,'rgba(40,20,10,'+(0.3*eyeOpen)+')');
+    ex.beginPath();
+    ex.arc(cx,cy,pupilR*1.3,0,Math.PI*2);
+    ex.fillStyle=pupilGrad;
+    ex.fill();
+    
+    // Pupil inner void
+    ex.beginPath();
+    ex.arc(cx,cy,pupilR,0,Math.PI*2);
+    ex.fillStyle='rgba(0,0,0,'+(0.99*eyeOpen)+')';
+    ex.fill();
+    
+    // Divine light reflections
+    ex.beginPath();
+    ex.arc(cx-pupilR*0.5,cy-pupilR*0.4,pupilR*0.2,0,Math.PI*2);
+    ex.fillStyle='rgba(255,255,255,'+(0.5*eyeOpen)+')';
+    ex.fill();
+    ex.beginPath();
+    ex.arc(cx+pupilR*0.3,cy+pupilR*0.2,pupilR*0.1,0,Math.PI*2);
+    ex.fillStyle='rgba(255,255,240,'+(0.3*eyeOpen)+')';
+    ex.fill();
+    
+    ex.restore();// release clip
+    
+    // Eye outline — bright gold, OUTSIDE the clip
+    ex.beginPath();
+    ex.moveTo(cx-eyeW,cy);
+    ex.bezierCurveTo(cx-eyeW*0.6,cy-eyeH,cx+eyeW*0.6,cy-eyeH,cx+eyeW,cy);
+    ex.bezierCurveTo(cx+eyeW*0.6,cy+eyeH,cx-eyeW*0.6,cy+eyeH,cx-eyeW,cy);
+    ex.closePath();
+    ex.strokeStyle='rgba(201,169,78,'+(0.4+eyeOpen*0.6)+')';
+    ex.lineWidth=2+eyeOpen*2;
+    ex.shadowColor='rgba(255,200,100,'+(0.5*eyeOpen)+')';
+    ex.shadowBlur=30+eyeOpen*40;
+    ex.stroke();
+    ex.shadowBlur=0;
   }
   
-  // Top and bottom lids (always drawn to create the closed look)
-  // These create the "closed" effect by covering the eye
-  var lidCover=1-eyeOpen;
-  if(lidCover>0.02){
-    // Top lid
+  // Closed lid line — only when mostly closed, NO black box
+  if(eyeOpen<0.7){
+    var lidAlpha=(1-eyeOpen/0.7);
     ex.beginPath();
-    ex.moveTo(cx-eyeW-10,cy);
-    ex.bezierCurveTo(cx-eyeW*0.6,cy-lidH,cx+eyeW*0.6,cy-lidH,cx+eyeW+10,cy);
-    ex.lineTo(cx+eyeW+10,cy-h);
-    ex.lineTo(cx-eyeW-10,cy-h);
-    ex.closePath();
-    ex.fillStyle='rgba(5,3,10,'+lidCover+')';
-    ex.fill();
-    
-    // Bottom lid
-    ex.beginPath();
-    ex.moveTo(cx-eyeW-10,cy);
-    ex.bezierCurveTo(cx-eyeW*0.6,cy+lidH,cx+eyeW*0.6,cy+lidH,cx+eyeW+10,cy);
-    ex.lineTo(cx+eyeW+10,cy+h);
-    ex.lineTo(cx-eyeW-10,cy+h);
-    ex.closePath();
-    ex.fillStyle='rgba(5,3,10,'+lidCover+')';
-    ex.fill();
-    
-    // Lid line (the "closed eye" line)
-    if(lidCover>0.3){
-      ex.beginPath();
-      ex.moveTo(cx-eyeW,cy);
-      ex.bezierCurveTo(cx-eyeW*0.5,cy-lidH*0.15*lidCover,cx+eyeW*0.5,cy-lidH*0.15*lidCover,cx+eyeW,cy);
-      ex.strokeStyle='rgba(201,169,78,'+(0.4*lidCover)+')';
-      ex.lineWidth=2;
-      ex.shadowColor='rgba(201,169,78,'+(0.3*lidCover)+')';
-      ex.shadowBlur=15;
-      ex.stroke();
-      ex.shadowBlur=0;
-    }
+    ex.moveTo(cx-eyeW,cy);
+    ex.bezierCurveTo(cx-eyeW*0.5,cy-lidH*0.08*lidAlpha,cx+eyeW*0.5,cy-lidH*0.08*lidAlpha,cx+eyeW,cy);
+    ex.strokeStyle='rgba(201,169,78,'+(0.5*lidAlpha)+')';
+    ex.lineWidth=2.5;
+    ex.shadowColor='rgba(201,169,78,'+(0.4*lidAlpha)+')';
+    ex.shadowBlur=20;
+    ex.stroke();
+    ex.shadowBlur=0;
   }
   
   requestAnimationFrame(drawEye);
