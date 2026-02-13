@@ -28,7 +28,7 @@ body{background:#000;overflow:hidden;height:100vh;width:100vw;font-family:Georgi
 /* Portal */
 #portal{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0);transition:background 1.2s ease}
 #portal *{position:relative;z-index:1}
-#portalRing{position:fixed;inset:0;z-index:9998;display:none;pointer-events:none}
+#portalRing{position:fixed;inset:0;z-index:9998;pointer-events:none}
 #vr{
   width:0;height:0;border-radius:50%;
   background:radial-gradient(ellipse at center,rgba(8,5,18,0.97) 0%,rgba(2,1,5,0.99) 100%);
@@ -91,36 +91,81 @@ body{background:#000;overflow:hidden;height:100vh;width:100vw;font-family:Georgi
 </div>
 
 <script>
-// ═══ GREEK-ONLY CHARACTERS ═══
-var chars='ΩΔΨΦΛΣΘΑΒΓΕΖΗΙΚΜΝΞΟΠΡΤΥΧωδψφλσθαβγεζηικμνξοπρτυχ∞∑∏∫√∂≈≡∈⊂⊃∪∩';
-var charArr=chars.split('');
+// ═══ GREEK WORDS — esoteric knowledge streams ═══
+var words=[
+  // LIMEN Helix & Phasecraft
+  'ΛΙΜΕΝ','ΕΛΙΞ','ΦΑΣΙΣ','ΚΑΤΩΦΛΙ','ΣΠΕΙΡΑ','ΕΠΙΣΤΡΟΦΗ','ΜΕΤΑΜΟΡΦΩΣΗ','ΑΝΑΓΕΝΝΗΣΗ',
+  'ΦΑΣΗ ΜΗΔΕΝ','ΠΗΓΗ','ΔΙΑΛΥΣΗ','ΑΝΑΔΥΣΗ','ΣΤΑΘΕΡΟΤΗΤΑ','ΕΝΣΩΜΑΤΩΣΗ','ΥΠΕΡΒΑΣΗ',
+  'ΚΥΚΛΟΣ','ΜΟΤΙΒΟ','ΕΛΙΚΑ','ΚΑΤΩΦΛΙ','ΤΕΛΕΤΟΥΡΓΙΑ','ΜΥΗΣΗ','ΑΠΟΚΑΛΥΨΗ',
+  // God & Divine
+  'ΘΕΟΣ','ΛΟΓΟΣ','ΠΝΕΥΜΑ','ΑΓΑΠΗ','ΔΗΜΙΟΥΡΓΟΣ','ΑΙΩΝΙΟΣ','ΦΩΤΕΙΝΟΣ','ΑΓΙΟΣ',
+  'ΘΕΙΑ ΤΑΞΗ','ΟΥΡΑΝΟΣ','ΠΑΝΤΟΓΝΩΣΤΗΣ','ΑΛΗΘΕΙΑ','ΣΟΦΙΑ','ΑΡΜΟΝΙΑ','ΘΕΙΑ ΒΟΥΛΗΣΗ',
+  'ΑΝΑΛΗΨΗ','ΧΑΡΙΣ','ΕΛΕΟΣ','ΛΥΤΡΩΣΗ','ΑΝΑΣΤΑΣΙΣ','ΜΕΤΑΣΤΟΙΧΕΙΩΣΗ',
+  // Satan & Shadow
+  'ΣΑΤΑΝ','ΕΩΣΦΟΡΟΣ','ΣΚΟΤΟΣ','ΠΤΩΣΗ','ΔΑΙΜΩΝ','ΠΕΙΡΑΣΜΟΣ','ΕΞΟΥΣΙΑ',
+  'ΣΚΙΑ','ΑΒΥΣΣΟΣ','ΧΑΟΣ','ΑΠΟΣΤΑΣΙΑ','ΠΛΑΝΗ','ΟΦΙΣ','ΨΕΥΔΟΣ','ΕΚΠΤΩΣΗ',
+  'ΚΟΛΑΣΗ','ΑΠΩΛΕΙΑ','ΠΑΡΑΒΑΣΗ','ΜΑΤΑΙΟΤΗΣ','ΚΟΣΜΟΣ ΣΚΙΩΝ',
+  // Conspiracy & Hidden Knowledge
+  'ΑΠΟΚΡΥΦΑ','ΓΝΩΣΗ','ΜΥΣΤΗΡΙΟ','ΣΥΝΩΜΟΣΙΑ','ΕΛΕΓΧΟΣ','ΠΡΟΠΑΓΑΝΔΑ',
+  'ΑΛΗΘΕΙΑ ΚΡΥΜΜΕΝΗ','ΣΚΙΩΔΗΣ ΚΥΒΕΡΝΗΣΗ','ΤΡΙΤΟ ΜΑΤΙ','ΠΥΡΑΜΙΔΑ',
+  'ΙΛΛΟΥΜΙΝΑΤΙ','ΜΑΣΩΝΙΑ','ΒΑΘΥ ΚΡΑΤΟΣ','ΚΡΥΦΗ ΓΝΩΣΗ','ΧΕΙΡΑΓΩΓΗΣΗ',
+  'ΠΑΡΑΚΟΛΟΥΘΗΣΗ','ΨΕΥΔΗΣ ΣΗΜΑΙΑ','ΜΗΤΡΑ','ΑΦΥΠΝΙΣΗ','ΚΟΚΚΙΝΟ ΧΑΠΙ',
+  // Physiology & Nervous System
+  'ΝΕΥΡΩΝΑΣ','ΣΥΝΑΨΗ','ΝΩΤΙΑΙΟΣ','ΕΓΚΕΦΑΛΟΣ','ΑΜΥΓΔΑΛΗ','ΙΠΠΟΚΑΜΠΟΣ',
+  'ΝΕΥΡΙΚΟ ΣΥΣΤΗΜΑ','ΣΥΜΠΑΘΗΤΙΚΟ','ΠΑΡΑΣΥΜΠΑΘΗΤΙΚΟ','ΠΟΛΥΑΣΦΑΛΤΙΚΟ',
+  'ΝΕΥΡΟΠΛΑΣΤΙΚΟΤΗΤΑ','ΝΤΟΠΑΜΙΝΗ','ΣΕΡΟΤΟΝΙΝΗ','ΚΟΡΤΙΖΟΛΗ','ΑΔΡΕΝΑΛΙΝΗ',
+  'ΩΚΥΤΟΚΙΝΗ','ΜΕΛΑΤΟΝΙΝΗ','ΕΝΔΟΡΦΙΝΗ','ΓΚΑΜΠΑ','ΓΛΟΥΤΑΜΙΝΗ',
+  'ΠΝΕΥΜΟΝΟΓΑΣΤΡΙΚΟ','ΑΥΤΟΝΟΜΟ','ΟΜΟΙΟΣΤΑΣΙΣ','ΤΕΛΟΜΕΡΗ','ΜΙΤΟΧΟΝΔΡΙΑ',
+  'ΕΠΙΓΕΝΕΤΙΚΗ','ΦΛΕΓΜΟΝΗ','ΙΝΤΕΡΛΕΥΚΙΝΗ','ΚΥΤΟΚΙΝΗ',
+  // Systems & Transformation
+  'ΕΝΤΡΟΠΙΑ','ΕΝΕΡΓΕΙΑ','ΣΥΧΝΟΤΗΤΑ','ΔΟΝΗΣΗ','ΚΒΑΝΤΙΚΟ','ΠΕΔΙΟ',
+  'ΤΟΡΟΕΙΔΕΣ','ΦΡΑΚΤΑΛ','ΧΡΥΣΗ ΤΟΜΗ','ΙΕΡΑ ΓΕΩΜΕΤΡΙΑ','ΜΕΡΚΑΜΠΑ',
+  'ΚΟΥΝΤΑΛΙΝΙ','ΤΣΑΚΡΑ','ΕΝΕΡΓΕΙΑΚΟ ΣΩΜΑ','ΑΙΘΕΡΙΚΟ','ΑΣΤΡΙΚΟ'
+];
+// Also keep individual Greek chars for variety
+var greekChars='ΩΔΨΦΛΣΘΑΒΓΕΖΗΙΚΜΝΞΟΠΡΤΥΧωδψφλσθαβγεζηικμνξοπρτυχ∞∑∏∫√∂'.split('');
 
-// ═══ MATRIX RAIN — 4x DENSITY, GREEK ONLY ═══
+// ═══ MATRIX RAIN — 4x DENSITY, GREEK WORDS ═══
 var mc=document.getElementById('matrix'),mx=mc.getContext('2d');
 mc.width=window.innerWidth;mc.height=window.innerHeight;
 var fontSize=12;
-var cols=Math.floor(mc.width/(fontSize*0.5));// 4x columns by halving spacing
-var drops=[];for(var i=0;i<cols;i++)drops[i]=Math.random()*-100;
+var cols=Math.floor(mc.width/(fontSize*0.5));
+var drops=[];
+var colWords=[];// each column gets a word to spell out
+var colCharIdx=[];// position in the current word
+for(var i=0;i<cols;i++){
+  drops[i]=Math.random()*-100;
+  colWords[i]=Math.random()<0.4?words[Math.floor(Math.random()*words.length)]:'';
+  colCharIdx[i]=0;
+}
 
 function drawMatrix(){
-  mx.fillStyle='rgba(0,0,0,0.04)';// slower fade = denser trails
+  mx.fillStyle='rgba(0,0,0,0.035)';// even slower fade for brighter persistent trails
   mx.fillRect(0,0,mc.width,mc.height);
   for(var i=0;i<drops.length;i++){
-    var ch=charArr[Math.floor(Math.random()*charArr.length)];
+    var ch;
+    if(colWords[i]&&colCharIdx[i]<colWords[i].length){
+      ch=colWords[i][colCharIdx[i]];
+      colCharIdx[i]++;
+    }else{
+      ch=greekChars[Math.floor(Math.random()*greekChars.length)];
+      // Chance to start a new word
+      if(Math.random()<0.02){colWords[i]=words[Math.floor(Math.random()*words.length)];colCharIdx[i]=0}
+    }
     var x=i*(fontSize*0.5);
     var y=drops[i]*fontSize;
     var c=Math.random();
-    if(c<0.35){mx.fillStyle='rgba(201,169,78,'+(0.5+Math.random()*0.5)+')';mx.shadowColor='rgba(201,169,78,0.6)'}
-    else if(c<0.55){mx.fillStyle='rgba(160,100,255,'+(0.4+Math.random()*0.5)+')';mx.shadowColor='rgba(160,100,255,0.5)'}
-    else if(c<0.7){mx.fillStyle='rgba(80,180,255,'+(0.4+Math.random()*0.5)+')';mx.shadowColor='rgba(80,180,255,0.5)'}
-    else if(c<0.85){mx.fillStyle='rgba(255,80,180,'+(0.4+Math.random()*0.5)+')';mx.shadowColor='rgba(255,80,180,0.5)'}
-    else{mx.fillStyle='rgba(255,160,40,'+(0.4+Math.random()*0.5)+')';mx.shadowColor='rgba(255,160,40,0.5)'}
-    mx.shadowBlur=6+Math.random()*6;
+    if(c<0.35){mx.fillStyle='rgba(201,169,78,'+(0.6+Math.random()*0.4)+')';mx.shadowColor='rgba(201,169,78,0.7)'}
+    else if(c<0.55){mx.fillStyle='rgba(160,100,255,'+(0.5+Math.random()*0.5)+')';mx.shadowColor='rgba(160,100,255,0.6)'}
+    else if(c<0.7){mx.fillStyle='rgba(80,180,255,'+(0.5+Math.random()*0.5)+')';mx.shadowColor='rgba(80,180,255,0.6)'}
+    else if(c<0.85){mx.fillStyle='rgba(255,80,180,'+(0.5+Math.random()*0.5)+')';mx.shadowColor='rgba(255,80,180,0.6)'}
+    else{mx.fillStyle='rgba(255,160,40,'+(0.5+Math.random()*0.5)+')';mx.shadowColor='rgba(255,160,40,0.6)'}
+    mx.shadowBlur=8+Math.random()*8;
     mx.font=(fontSize-2+Math.random()*4)+'px monospace';
     mx.fillText(ch,x,y);
     mx.shadowBlur=0;
-    if(y>mc.height&&Math.random()>0.98)drops[i]=0;
-    drops[i]+=0.4+Math.random()*0.6;
+    if(y>mc.height&&Math.random()>0.98){drops[i]=0;colWords[i]=Math.random()<0.4?words[Math.floor(Math.random()*words.length)]:'';colCharIdx[i]=0}
+    drops[i]+=0.25+Math.random()*0.35;// SLOWER — was 0.4+0.6, now 0.25+0.35
   }
   requestAnimationFrame(drawMatrix);
 }
@@ -161,116 +206,111 @@ function drawK(){
 }
 drawK();
 
-// ═══ PORTAL RING FIRE EFFECT ═══
+// ═══ PORTAL RING FIRE EFFECT — ALWAYS VISIBLE ═══
 var pc2=document.getElementById('portalRing'),px2=pc2.getContext('2d');
 pc2.width=window.innerWidth;pc2.height=window.innerHeight;
-var portalActive=false,portalRadius=0,portalTargetR=0,portalT=0;
+pc2.style.display='block';// Always visible
+var portalRadius=0,portalTargetR=0,portalT=0;
 
-// Particles that orbit and spark on the ring
+// Start with gate-size ring around the eye
+portalTargetR=Math.min(window.innerWidth,window.innerHeight)*0.16;
+
 var sparks=[];
-for(var i=0;i<200;i++){
+for(var i=0;i<300;i++){
   sparks.push({
     angle:Math.random()*Math.PI*2,
     speed:0.5+Math.random()*2,
-    dist:0.95+Math.random()*0.1,
+    dist:0.93+Math.random()*0.14,
     size:1+Math.random()*3,
     life:Math.random(),
-    hue:Math.floor(Math.random()*60)+15,// gold-orange range
+    hue:Math.floor(Math.random()*60)+15,
     drift:(Math.random()-0.5)*0.3
   });
 }
+var ringChars='ΩΔΨΦΛΣΘΑΒΓΕΖΗΙΚΜΝΞΟΠΡΤΥΧωδψφλσθ'.split('');
 
 function drawPortalRing(){
   px2.clearRect(0,0,pc2.width,pc2.height);
-  if(!portalActive){requestAnimationFrame(drawPortalRing);return}
   
   var cx=pc2.width/2,cy=pc2.height/2;
-  portalRadius+=(portalTargetR-portalRadius)*0.04;
+  portalRadius+=(portalTargetR-portalRadius)*0.03;
   portalT+=0.03;
   
-  if(portalRadius<5){requestAnimationFrame(drawPortalRing);return}
+  if(portalRadius<3){requestAnimationFrame(drawPortalRing);return}
   
-  // Main glowing ring
-  for(var r=0;r<4;r++){
-    var rr=portalRadius-r*3;
+  // Multiple glowing rings — BRIGHT
+  for(var r=0;r<6;r++){
+    var rr=portalRadius-r*2.5;
+    if(rr<1)continue;
     px2.beginPath();
     px2.arc(cx,cy,rr,0,Math.PI*2);
-    var alpha=0.15-r*0.03;
-    px2.strokeStyle='rgba(255,'+(160-r*20)+','+(40+r*10)+','+alpha+')';
-    px2.lineWidth=8-r*2;
-    px2.shadowColor='rgba(255,140,30,0.4)';
-    px2.shadowBlur=30-r*5;
+    var alpha=0.2-r*0.025;
+    px2.strokeStyle='rgba(255,'+(170-r*15)+','+(40+r*8)+','+alpha+')';
+    px2.lineWidth=10-r*1.5;
+    px2.shadowColor='rgba(255,140,30,0.5)';
+    px2.shadowBlur=35-r*4;
     px2.stroke();
     px2.shadowBlur=0;
   }
   
-  // Bright inner edge
+  // White-hot inner edge
   px2.beginPath();
   px2.arc(cx,cy,portalRadius,0,Math.PI*2);
-  px2.strokeStyle='rgba(255,220,150,0.3)';
-  px2.lineWidth=2;
-  px2.shadowColor='rgba(255,200,100,0.6)';
-  px2.shadowBlur=20;
+  px2.strokeStyle='rgba(255,230,170,0.4)';
+  px2.lineWidth=3;
+  px2.shadowColor='rgba(255,210,120,0.8)';
+  px2.shadowBlur=30;
   px2.stroke();
   px2.shadowBlur=0;
   
-  // Orbiting Greek runes on the ring
-  var runeCount=36;
+  // Orbiting Greek runes
+  var runeCount=48;
   for(var i=0;i<runeCount;i++){
-    var a=(i/runeCount)*Math.PI*2+portalT*0.8;
+    var a=(i/runeCount)*Math.PI*2+portalT*0.6;
     var rx=cx+Math.cos(a)*portalRadius;
     var ry=cy+Math.sin(a)*portalRadius;
-    var ch=charArr[i%charArr.length];
-    var pulse=0.3+Math.sin(portalT*3+i)*0.3;
+    var ch=ringChars[i%ringChars.length];
+    var pulse=0.4+Math.sin(portalT*3+i)*0.4;
     px2.save();
     px2.translate(rx,ry);
     px2.rotate(a+Math.PI/2);
-    px2.font='bold 11px monospace';
-    px2.fillStyle='rgba(255,200,80,'+pulse+')';
-    px2.shadowColor='rgba(255,150,30,0.8)';
-    px2.shadowBlur=10;
+    px2.font='bold 10px monospace';
+    px2.fillStyle='rgba(255,210,90,'+pulse+')';
+    px2.shadowColor='rgba(255,160,30,0.9)';
+    px2.shadowBlur=12;
     px2.textAlign='center';
     px2.fillText(ch,0,0);
     px2.restore();
   }
   
-  // Fire sparks orbiting the ring
+  // Fire sparks
   for(var i=0;i<sparks.length;i++){
     var s=sparks[i];
     s.angle+=s.speed*0.02;
     s.life-=0.003;
     s.dist+=s.drift*0.001;
-    if(s.life<=0){
-      s.angle=Math.random()*Math.PI*2;
-      s.life=0.5+Math.random()*0.5;
-      s.dist=0.95+Math.random()*0.1;
-    }
+    if(s.life<=0){s.angle=Math.random()*Math.PI*2;s.life=0.5+Math.random()*0.5;s.dist=0.93+Math.random()*0.14}
     var sx=cx+Math.cos(s.angle)*portalRadius*s.dist;
     var sy=cy+Math.sin(s.angle)*portalRadius*s.dist;
-    // Trail upward like fire
-    var trailX=sx+Math.sin(portalT*5+i)*3;
-    var trailY=sy-s.size*2*s.life;
-    
+    var trailX=sx+Math.sin(portalT*5+i)*4;
+    var trailY=sy-s.size*3*s.life;
     px2.beginPath();
     px2.arc(trailX,trailY,s.size*s.life,0,Math.PI*2);
-    var sparkAlpha=s.life*0.8;
-    px2.fillStyle='hsla('+s.hue+',100%,'+(50+s.life*30)+'%,'+sparkAlpha+')';
-    px2.shadowColor='hsla('+s.hue+',100%,60%,0.5)';
-    px2.shadowBlur=8;
+    px2.fillStyle='hsla('+s.hue+',100%,'+(50+s.life*30)+'%,'+(s.life*0.9)+')';
+    px2.shadowColor='hsla('+s.hue+',100%,60%,0.6)';
+    px2.shadowBlur=10;
     px2.fill();
     px2.shadowBlur=0;
   }
   
-  // Occasional bright flares
-  if(Math.random()<0.1){
+  // Bright flares — more frequent
+  if(Math.random()<0.15){
     var fa=Math.random()*Math.PI*2;
-    var fx=cx+Math.cos(fa)*portalRadius;
-    var fy=cy+Math.sin(fa)*portalRadius;
     px2.beginPath();
-    px2.arc(fx,fy,3+Math.random()*5,0,Math.PI*2);
-    px2.fillStyle='rgba(255,240,200,0.6)';
-    px2.shadowColor='rgba(255,200,100,0.9)';
-    px2.shadowBlur=25;
+    px2.arc(cx+Math.cos(fa)*portalRadius,cy+Math.sin(fa)*portalRadius,3+Math.random()*6,0,Math.PI*2);
+    px2.fillStyle='rgba(255,245,210,0.7)';
+    px2.shadowColor='rgba(255,220,120,1)';
+    px2.shadowBlur=30;
     px2.fill();
     px2.shadowBlur=0;
   }
@@ -284,7 +324,8 @@ window.addEventListener('resize',function(){
   mc.width=kc.width=pc2.width=window.innerWidth;
   mc.height=kc.height=pc2.height=window.innerHeight;
   cols=Math.floor(mc.width/(fontSize*0.5));
-  drops=[];for(var i=0;i<cols;i++)drops[i]=Math.random()*-100;
+  drops=[];colWords=[];colCharIdx=[];
+  for(var i=0;i<cols;i++){drops[i]=Math.random()*-100;colWords[i]=Math.random()<0.4?words[Math.floor(Math.random()*words.length)]:'';colCharIdx[i]=0}
 });
 
 // ═══ PORTAL CONTROLS ═══
@@ -293,16 +334,14 @@ function openThreshold(){
       vr=document.getElementById('vr'),pc=document.getElementById('pc');
   g.classList.add('gate-opening');
   
-  // Start fire ring
-  portalActive=true;
-  document.getElementById('portalRing').style.display='block';
+  // Expand fire ring to portal size
   var targetSize=Math.min(window.innerWidth,window.innerHeight)*0.44;
   if(targetSize>340)targetSize=340;
   portalTargetR=targetSize;
   
   setTimeout(function(){
     p.style.display='flex';
-    setTimeout(function(){p.style.background='rgba(0,0,0,0.85)'},50);
+    setTimeout(function(){p.style.background='rgba(0,0,0,0.8)'},50);
   },600);
   setTimeout(function(){
     vr.style.width='90vmin';vr.style.height='90vmin';
@@ -316,13 +355,12 @@ function closeThreshold(){
   var g=document.getElementById('gate'),p=document.getElementById('portal'),
       vr=document.getElementById('vr'),pc=document.getElementById('pc');
   pc.classList.remove('vis');
-  portalTargetR=0;
+  // Shrink ring back to gate size
+  portalTargetR=Math.min(window.innerWidth,window.innerHeight)*0.16;
   setTimeout(function(){vr.style.width='0';vr.style.height='0'},300);
   setTimeout(function(){p.style.background='rgba(0,0,0,0)'},1000);
   setTimeout(function(){
-    p.style.display='none';portalActive=false;
-    document.getElementById('portalRing').style.display='none';
-    portalRadius=0;
+    p.style.display='none';
     g.style.display='flex';g.classList.remove('gate-opening');
   },1400);
 }
