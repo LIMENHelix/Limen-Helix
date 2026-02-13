@@ -6,294 +6,170 @@
   <title>LIMEN Helix – The Threshold</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{background:#030305;color:#e8e3d9;font-family:Georgia,serif;overflow:hidden;height:100vh;width:100vw}
-
-    /* ═══ THE GATE ═══ */
-    #gate{
-      position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-      flex-direction:column;z-index:100;cursor:pointer;
-      background:radial-gradient(ellipse at center,#08080f 0%,#030305 70%,#000 100%);
-    }
-
-    /* Dust */
-    #gate::before{
-      content:'';position:absolute;inset:-50%;width:200%;height:200%;
-      background-image:
-        radial-gradient(1px 1px at 10% 20%,rgba(201,169,78,0.2) 0%,transparent 100%),
-        radial-gradient(1px 1px at 25% 65%,rgba(201,169,78,0.12) 0%,transparent 100%),
-        radial-gradient(1px 1px at 45% 15%,rgba(201,169,78,0.15) 0%,transparent 100%),
-        radial-gradient(1px 1px at 65% 75%,rgba(201,169,78,0.1) 0%,transparent 100%),
-        radial-gradient(1px 1px at 80% 25%,rgba(201,169,78,0.12) 0%,transparent 100%),
-        radial-gradient(1px 1px at 15% 85%,rgba(201,169,78,0.08) 0%,transparent 100%),
-        radial-gradient(1px 1px at 90% 55%,rgba(201,169,78,0.1) 0%,transparent 100%),
-        radial-gradient(1.5px 1.5px at 55% 35%,rgba(201,169,78,0.18) 0%,transparent 100%),
-        radial-gradient(1px 1px at 35% 90%,rgba(201,169,78,0.08) 0%,transparent 100%),
-        radial-gradient(1px 1px at 75% 10%,rgba(201,169,78,0.1) 0%,transparent 100%);
-      animation:dust-drift 40s linear infinite;
-    }
-    @keyframes dust-drift{
-      0%{transform:translate(0,0) rotate(0deg)}
-      25%{transform:translate(-10px,-15px) rotate(0.5deg)}
-      50%{transform:translate(5px,-25px) rotate(0deg)}
-      75%{transform:translate(15px,-10px) rotate(-0.5deg)}
-      100%{transform:translate(0,0) rotate(0deg)}
-    }
-
-    /* Corner glyphs */
-    .cg{position:absolute;font-size:1rem;color:rgba(201,169,78,0.06);letter-spacing:4px;animation:gb 8s ease-in-out infinite}
-    .cg.tl{top:1.5rem;left:1.5rem}.cg.tr{top:1.5rem;right:1.5rem}
-    .cg.bl{bottom:1.5rem;left:1.5rem}.cg.br{bottom:1.5rem;right:1.5rem}
-    @keyframes gb{0%,100%{opacity:.06}50%{opacity:.18}}
-
-    /* Edge whispers */
-    .ew{position:absolute;font-size:.4rem;letter-spacing:6px;color:rgba(201,169,78,0.03);text-transform:uppercase;font-family:monospace;white-space:nowrap}
-    .ew.t{top:4rem;left:50%;transform:translateX(-50%)}
-    .ew.b{bottom:4rem;left:50%;transform:translateX(-50%)}
-    .ew.l{left:2.5rem;top:50%;transform:translateY(-50%) rotate(-90deg);transform-origin:left center}
-    .ew.r{right:2.5rem;top:50%;transform:translateY(-50%) rotate(90deg);transform-origin:right center}
-
-    /* ═══ KALEIDOSCOPE FRACTAL ENGINE ═══ */
-    #kscope{
-      position:relative;width:80vmin;height:80vmin;max-width:700px;max-height:700px;
-      transition:all 2.5s cubic-bezier(0.16,1,0.3,1);
-    }
-
-    .k-layer{
-      position:absolute;inset:0;width:100%;height:100%;
-      transform-origin:center center;
-    }
-
-    /* 12 fractal layers at different speeds */
-    .k-layer:nth-child(1){animation:krot 120s linear infinite}
-    .k-layer:nth-child(2){animation:krot-r 90s linear infinite}
-    .k-layer:nth-child(3){animation:krot 70s linear infinite}
-    .k-layer:nth-child(4){animation:krot-r 55s linear infinite}
-    .k-layer:nth-child(5){animation:krot 45s linear infinite}
-    .k-layer:nth-child(6){animation:krot-r 35s linear infinite}
-    .k-layer:nth-child(7){animation:krot 28s linear infinite}
-    .k-layer:nth-child(8){animation:krot-r 22s linear infinite}
-    .k-layer:nth-child(9){animation:krot 18s linear infinite}
-    .k-layer:nth-child(10){animation:krot-r 14s linear infinite}
-    .k-layer:nth-child(11){animation:krot 10s linear infinite}
-    .k-layer:nth-child(12){animation:kpulse 6s ease-in-out infinite}
-
-    @keyframes krot{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-    @keyframes krot-r{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
-    @keyframes kpulse{
-      0%,100%{opacity:.6;filter:drop-shadow(0 0 15px rgba(201,169,78,0.15))}
-      50%{opacity:1;filter:drop-shadow(0 0 50px rgba(201,169,78,0.35))}
-    }
-
-    #kscope:hover{filter:drop-shadow(0 0 100px rgba(201,169,78,0.12))}
-
-    /* Gate text */
-    #gt{margin-top:1.5rem;text-align:center;opacity:0;animation:fu 2s ease 1.5s forwards}
+    body{background:#030305;overflow:hidden;height:100vh;width:100vw;font-family:Georgia,serif}
+    #gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:100;cursor:pointer;background:radial-gradient(ellipse at center,#0d0815 0%,#060310 40%,#020108 100%)}
+    #gate::before{content:'';position:absolute;inset:-20%;width:140%;height:140%;background:radial-gradient(ellipse at 30% 20%,rgba(120,40,200,0.08) 0%,transparent 50%),radial-gradient(ellipse at 70% 80%,rgba(200,120,40,0.06) 0%,transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(201,169,78,0.04) 0%,transparent 40%),radial-gradient(ellipse at 20% 70%,rgba(40,120,200,0.05) 0%,transparent 45%),radial-gradient(ellipse at 80% 30%,rgba(200,40,80,0.04) 0%,transparent 45%);animation:nebula 25s ease-in-out infinite alternate}
+    @keyframes nebula{0%{transform:scale(1) rotate(0deg)}50%{transform:scale(1.05) rotate(2deg)}100%{transform:scale(1) rotate(-1deg)}}
+    #gate::after{content:'';position:absolute;inset:-50%;width:200%;height:200%;background-image:radial-gradient(2px 2px at 10% 20%,rgba(201,169,78,0.4) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 25% 65%,rgba(180,120,255,0.3) 0%,transparent 100%),radial-gradient(2px 2px at 45% 15%,rgba(255,180,80,0.35) 0%,transparent 100%),radial-gradient(1px 1px at 65% 75%,rgba(80,200,255,0.25) 0%,transparent 100%),radial-gradient(2px 2px at 80% 25%,rgba(201,169,78,0.3) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 15% 85%,rgba(255,100,150,0.2) 0%,transparent 100%),radial-gradient(1px 1px at 90% 55%,rgba(150,255,200,0.2) 0%,transparent 100%),radial-gradient(2.5px 2.5px at 55% 35%,rgba(201,169,78,0.5) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 35% 90%,rgba(200,100,255,0.25) 0%,transparent 100%),radial-gradient(2px 2px at 75% 10%,rgba(255,200,100,0.3) 0%,transparent 100%);animation:stardrift 50s linear infinite}
+    @keyframes stardrift{0%{transform:translate(0,0)}25%{transform:translate(-15px,-20px)}50%{transform:translate(10px,-35px)}75%{transform:translate(20px,-15px)}100%{transform:translate(0,0)}}
+    .cg{position:absolute;font-size:1.2rem;color:rgba(201,169,78,0.15);letter-spacing:4px;animation:gb 6s ease-in-out infinite;z-index:2}
+    .cg.tl{top:1.5rem;left:1.5rem}.cg.tr{top:1.5rem;right:1.5rem;animation-delay:1.5s}.cg.bl{bottom:1.5rem;left:1.5rem;animation-delay:3s}.cg.br{bottom:1.5rem;right:1.5rem;animation-delay:4.5s}
+    @keyframes gb{0%,100%{opacity:.15;text-shadow:0 0 10px rgba(201,169,78,0)}50%{opacity:.5;text-shadow:0 0 20px rgba(201,169,78,0.3)}}
+    .ew{position:absolute;font-size:.45rem;letter-spacing:6px;color:rgba(201,169,78,0.06);text-transform:uppercase;font-family:monospace;white-space:nowrap;z-index:2}
+    .ew.t{top:4rem;left:50%;transform:translateX(-50%)}.ew.b{bottom:4rem;left:50%;transform:translateX(-50%)}.ew.l{left:2.5rem;top:50%;transform:translateY(-50%) rotate(-90deg);transform-origin:left center}.ew.r{right:2.5rem;top:50%;transform:translateY(-50%) rotate(90deg);transform-origin:right center}
+    #kscope{position:relative;width:82vmin;height:82vmin;max-width:750px;max-height:750px;transition:all 2.5s cubic-bezier(0.16,1,0.3,1);filter:drop-shadow(0 0 30px rgba(201,169,78,0.08))}
+    .kl{position:absolute;inset:0;width:100%;height:100%;transform-origin:center}
+    .kl:nth-child(1){animation:kr 100s linear infinite}.kl:nth-child(2){animation:krr 75s linear infinite}.kl:nth-child(3){animation:kr 55s linear infinite}.kl:nth-child(4){animation:krr 42s linear infinite}.kl:nth-child(5){animation:kr 33s linear infinite}.kl:nth-child(6){animation:krr 26s linear infinite}.kl:nth-child(7){animation:kr 20s linear infinite}.kl:nth-child(8){animation:krr 16s linear infinite}.kl:nth-child(9){animation:kr 12s linear infinite}.kl:nth-child(10){animation:krr 9s linear infinite}.kl:nth-child(11){animation:kr 7s linear infinite}.kl:nth-child(12){animation:kp 5s ease-in-out infinite}
+    @keyframes kr{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    @keyframes krr{from{transform:rotate(360deg)}to{transform:rotate(0deg)}}
+    @keyframes kp{0%,100%{filter:drop-shadow(0 0 8px rgba(201,169,78,0.2))}50%{filter:drop-shadow(0 0 40px rgba(201,169,78,0.6))}}
+    #kscope:hover{filter:drop-shadow(0 0 60px rgba(201,169,78,0.2)) drop-shadow(0 0 120px rgba(120,80,200,0.1))}
+    #gt{margin-top:1.5rem;text-align:center;opacity:0;animation:fu 2s ease 1s forwards;z-index:2}
     @keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    #gt1{font-size:.5rem;letter-spacing:10px;color:rgba(201,169,78,0.25);text-transform:uppercase;font-family:monospace;margin-bottom:.4rem}
-    #gt2{font-size:.7rem;color:rgba(201,169,78,0.1);letter-spacing:3px;font-style:italic}
-    #gate:hover #gt1{color:rgba(201,169,78,0.5)}
-    #gate:hover #gt2{color:rgba(201,169,78,0.25)}
-    #gate:hover .cg{color:rgba(201,169,78,0.15)}
-    #gate:hover .ew{color:rgba(201,169,78,0.08)}
-
-    /* ═══ PORTAL — CIRCULAR REVEAL ═══ */
-    #portal{
-      position:fixed;inset:0;z-index:200;display:none;
-      align-items:center;justify-content:center;
-      background:rgba(0,0,0,0);transition:background 1.2s ease;
-    }
-    #void-ring{
-      width:0;height:0;border-radius:50%;
-      border:1px solid rgba(201,169,78,0.2);
-      background:radial-gradient(ellipse at center,rgba(8,8,14,0.98) 0%,rgba(3,3,5,0.99) 100%);
-      box-shadow:0 0 80px rgba(201,169,78,0.08),inset 0 0 80px rgba(0,0,0,0.95);
-      transition:all 2s cubic-bezier(0.16,1,0.3,1);
-      display:flex;align-items:center;justify-content:center;
-      overflow:hidden;position:relative;
-    }
-    #void-ring::before{
-      content:'';position:absolute;inset:-2px;border-radius:50%;
-      border:1px solid transparent;
-      background:conic-gradient(from 0deg,transparent,rgba(201,169,78,0.15),transparent,rgba(201,169,78,0.1),transparent,rgba(201,169,78,0.12),transparent) border-box;
-      -webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);
-      -webkit-mask-composite:xor;mask-composite:exclude;
-      animation:ring-spin 20s linear infinite;
-    }
-    @keyframes ring-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-
-    #pcontent{
-      opacity:0;transform:scale(0.85);
-      transition:all 1s ease;
-      text-align:center;padding:2rem;width:100%;max-width:520px;
-    }
-    #pcontent.vis{opacity:1;transform:scale(1)}
-
-    .ct-pre{font-size:.45rem;letter-spacing:8px;color:#C9A94E;text-transform:uppercase;font-family:monospace;margin-bottom:.5rem}
-    .ct{font-size:2rem;color:#f8eacb;font-weight:300;margin-bottom:.3rem}
-    .ct-sub{font-size:.8rem;color:#444;line-height:1.8;margin-bottom:2rem;font-style:italic}
-
-    .off-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem}
-    .off-card{
-      display:block;padding:20px 14px;border:1px solid rgba(201,169,78,0.08);
-      background:rgba(201,169,78,0.015);text-decoration:none;
-      transition:all .4s;border-radius:2px;position:relative;overflow:hidden;
-    }
-    .off-card::before{
-      content:'';position:absolute;inset:0;
-      background:radial-gradient(ellipse at center,rgba(201,169,78,0.04) 0%,transparent 70%);
-      opacity:0;transition:opacity .4s;
-    }
-    .off-card:hover{border-color:rgba(201,169,78,0.35);background:rgba(201,169,78,0.05);box-shadow:0 0 30px rgba(201,169,78,0.04)}
-    .off-card:hover::before{opacity:1}
-    .off-i{font-size:1.6rem;display:block;margin-bottom:6px}
-    .off-n{font-size:.6rem;letter-spacing:4px;color:#C9A94E;text-transform:uppercase;display:block}
-    .off-d{font-size:.5rem;color:#444;display:block;margin-top:5px;letter-spacing:1px}
-
-    .pnav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:1rem}
-    .pbtn{
-      background:none;border:1px solid rgba(201,169,78,0.08);color:#383838;
-      padding:9px 24px;font-size:.55rem;letter-spacing:3px;cursor:pointer;
-      text-transform:uppercase;font-family:monospace;transition:all .3s;text-decoration:none;
-    }
-    .pbtn:hover{color:#C9A94E;border-color:rgba(201,169,78,0.25)}
-
-    /* Gate opening animation */
-    .gate-opening #kscope{transform:scale(4) rotate(180deg);opacity:0;filter:blur(30px)}
-    .gate-opening .cg,.gate-opening .ew,.gate-opening #gt{opacity:0!important;transition:opacity .4s}
-
-    @media(max-width:600px){
-      #kscope{width:90vmin;height:90vmin}
-      .cg{font-size:.7rem}.ew{display:none}
-      .ct{font-size:1.5rem}
-      .off-grid{gap:6px}.off-card{padding:14px 10px}
-    }
+    #gt1{font-size:.55rem;letter-spacing:10px;color:rgba(201,169,78,0.35);text-transform:uppercase;font-family:monospace;margin-bottom:.4rem}
+    #gt2{font-size:.7rem;color:rgba(201,169,78,0.15);letter-spacing:3px;font-style:italic}
+    #gate:hover #gt1{color:rgba(201,169,78,0.7);text-shadow:0 0 20px rgba(201,169,78,0.3)}
+    #gate:hover #gt2{color:rgba(201,169,78,0.35)}
+    #gate:hover .cg{color:rgba(201,169,78,0.4)}
+    #gate:hover .ew{color:rgba(201,169,78,0.12)}
+    #portal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0);transition:background 1.2s ease}
+    #vr{width:0;height:0;border-radius:50%;background:radial-gradient(ellipse at center,rgba(10,6,20,0.98) 0%,rgba(3,3,5,0.99) 100%);box-shadow:0 0 100px rgba(201,169,78,0.1),0 0 200px rgba(120,80,200,0.05),inset 0 0 80px rgba(0,0,0,0.95);transition:all 2s cubic-bezier(0.16,1,0.3,1);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+    #vr::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:2px solid transparent;background:conic-gradient(from 0deg,rgba(201,169,78,0.4),rgba(120,80,200,0.2),rgba(201,169,78,0.1),rgba(255,150,80,0.2),rgba(201,169,78,0.3),rgba(80,180,255,0.15),rgba(201,169,78,0.4)) border-box;-webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:rs 15s linear infinite}
+    #vr::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid transparent;background:conic-gradient(from 180deg,rgba(201,169,78,0.15),transparent,rgba(120,80,200,0.1),transparent,rgba(201,169,78,0.15)) border-box;-webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:rs 25s linear infinite reverse}
+    @keyframes rs{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    #pc{opacity:0;transform:scale(0.85);transition:all 1s ease;text-align:center;padding:2rem;width:100%;max-width:520px}
+    #pc.vis{opacity:1;transform:scale(1)}
+    .ctp{font-size:.45rem;letter-spacing:8px;color:#C9A94E;text-transform:uppercase;font-family:monospace;margin-bottom:.5rem}
+    .ctt{font-size:2rem;color:#f8eacb;font-weight:300;margin-bottom:.3rem}
+    .cts{font-size:.8rem;color:#555;line-height:1.8;margin-bottom:2rem;font-style:italic}
+    .og{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem}
+    .oc{display:block;padding:20px 14px;border:1px solid rgba(201,169,78,0.12);background:rgba(201,169,78,0.02);text-decoration:none;transition:all .4s;position:relative;overflow:hidden}
+    .oc::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(201,169,78,0.06) 0%,transparent 70%);opacity:0;transition:opacity .4s}
+    .oc:hover{border-color:rgba(201,169,78,0.5);background:rgba(201,169,78,0.06);box-shadow:0 0 40px rgba(201,169,78,0.06)}
+    .oc:hover::before{opacity:1}
+    .oi{font-size:1.6rem;display:block;margin-bottom:6px}.on{font-size:.6rem;letter-spacing:4px;color:#C9A94E;text-transform:uppercase;display:block}.od{font-size:.5rem;color:#555;display:block;margin-top:5px;letter-spacing:1px}
+    .pn{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:1rem}
+    .pb{background:none;border:1px solid rgba(201,169,78,0.1);color:#444;padding:9px 24px;font-size:.55rem;letter-spacing:3px;cursor:pointer;text-transform:uppercase;font-family:monospace;transition:all .3s;text-decoration:none}
+    .pb:hover{color:#C9A94E;border-color:rgba(201,169,78,0.3)}
+    .gate-opening #kscope{transform:scale(5) rotate(360deg);opacity:0;filter:blur(40px)}
+    .gate-opening .cg,.gate-opening .ew,.gate-opening #gt{opacity:0!important;transition:opacity .3s}
+    @media(max-width:600px){#kscope{width:92vmin;height:92vmin}.cg{font-size:.8rem}.ew{display:none}.ctt{font-size:1.5rem}.og{gap:6px}.oc{padding:14px 10px}}
   </style>
 </head>
 <body>
-
 <div id="gate" onclick="openThreshold()">
   <span class="cg tl">Ω · Α</span><span class="cg tr">Δ · Σ</span>
   <span class="cg bl">Ψ · Θ</span><span class="cg br">Φ · Λ</span>
-  <span class="ew t">through the pattern · through the pattern · through the pattern · through the pattern</span>
+  <span class="ew t">through the pattern · through the pattern · through the pattern</span>
   <span class="ew b">what was lost returns · what was broken spirals · what was hidden opens</span>
   <span class="ew l">phase zero · source · dissolution · return</span>
   <span class="ew r">limen · threshold · crossing · becoming</span>
 
   <div id="kscope">
-    <!-- L1: Outermost fractal boundary -->
-    <svg viewBox="0 0 400 400" class="k-layer">
-      <circle cx="200" cy="200" r="198" fill="none" stroke="rgba(201,169,78,0.02)" stroke-width=".3"/>
-      <circle cx="200" cy="200" r="190" fill="none" stroke="rgba(201,169,78,0.025)" stroke-width=".2" stroke-dasharray="1 15"/>
-      <text x="200" y="8" text-anchor="middle" fill="rgba(201,169,78,0.04)" font-size="4" font-family="monospace">LIMEN</text>
-      <text x="200" y="398" text-anchor="middle" fill="rgba(201,169,78,0.04)" font-size="4" font-family="monospace">RETURN</text>
-      <text x="8" y="202" text-anchor="middle" fill="rgba(201,169,78,0.04)" font-size="4" font-family="monospace" transform="rotate(-90,8,202)">PATTERN</text>
-      <text x="392" y="202" text-anchor="middle" fill="rgba(201,169,78,0.04)" font-size="4" font-family="monospace" transform="rotate(90,392,202)">HELIX</text>
+    <svg viewBox="0 0 400 400" class="kl">
+      <circle cx="200" cy="200" r="196" fill="none" stroke="rgba(201,169,78,0.06)" stroke-width=".5"/>
+      <circle cx="200" cy="200" r="192" fill="none" stroke="rgba(160,100,255,0.04)" stroke-width=".3" stroke-dasharray="2 20"/>
+      <text x="200" y="10" text-anchor="middle" fill="rgba(201,169,78,0.1)" font-size="5" font-family="monospace">L I M E N</text>
+      <text x="200" y="396" text-anchor="middle" fill="rgba(201,169,78,0.1)" font-size="5" font-family="monospace">R E T U R N</text>
+      <text x="10" y="202" text-anchor="middle" fill="rgba(201,169,78,0.1)" font-size="5" font-family="monospace" transform="rotate(-90,10,202)">P A T T E R N</text>
+      <text x="390" y="202" text-anchor="middle" fill="rgba(201,169,78,0.1)" font-size="5" font-family="monospace" transform="rotate(90,390,202)">H E L I X</text>
     </svg>
 
-    <!-- L2: 12-pointed star outer -->
-    <svg viewBox="0 0 400 400" class="k-layer">
-      <circle cx="200" cy="200" r="180" fill="none" stroke="rgba(201,169,78,0.05)" stroke-width=".4" stroke-dasharray="2 10"/>
-      <polygon points="200,22 233,110 325,75 280,165 375,200 280,235 325,325 233,290 200,378 167,290 75,325 120,235 25,200 120,165 75,75 167,110" fill="none" stroke="rgba(201,169,78,0.04)" stroke-width=".3"/>
+    <svg viewBox="0 0 400 400" class="kl">
+      <circle cx="200" cy="200" r="182" fill="none" stroke="rgba(201,169,78,0.12)" stroke-width=".6" stroke-dasharray="3 8"/>
+      <polygon points="200,20 230,105 320,70 278,158 378,200 278,242 320,330 230,295 200,380 170,295 80,330 122,242 22,200 122,158 80,70 170,105" fill="none" stroke="rgba(201,169,78,0.1)" stroke-width=".8"/>
+      <polygon points="200,20 230,105 320,70 278,158 378,200 278,242 320,330 230,295 200,380 170,295 80,330 122,242 22,200 122,158 80,70 170,105" fill="none" stroke="rgba(160,100,255,0.05)" stroke-width="2"/>
     </svg>
 
-    <!-- L3: Hexagonal web -->
-    <svg viewBox="0 0 400 400" class="k-layer">
-      <circle cx="200" cy="200" r="160" fill="none" stroke="rgba(201,169,78,0.04)" stroke-width=".3"/>
-      <polygon points="200,40 339,120 339,280 200,360 61,280 61,120" fill="none" stroke="rgba(201,169,78,0.05)" stroke-width=".4"/>
-      <polygon points="200,70 316,135 316,265 200,330 84,265 84,135" fill="none" stroke="rgba(201,169,78,0.03)" stroke-width=".3"/>
-      <line x1="200" y1="40" x2="200" y2="360" stroke="rgba(201,169,78,0.02)" stroke-width=".2"/>
-      <line x1="61" y1="120" x2="339" y2="280" stroke="rgba(201,169,78,0.02)" stroke-width=".2"/>
-      <line x1="339" y1="120" x2="61" y2="280" stroke="rgba(201,169,78,0.02)" stroke-width=".2"/>
+    <svg viewBox="0 0 400 400" class="kl">
+      <polygon points="200,35 343,118 343,282 200,365 57,282 57,118" fill="none" stroke="rgba(255,180,80,0.1)" stroke-width="1"/>
+      <polygon points="200,60 322,132 322,268 200,340 78,268 78,132" fill="none" stroke="rgba(201,169,78,0.08)" stroke-width=".6"/>
+      <polygon points="200,85 300,145 300,255 200,315 100,255 100,145" fill="none" stroke="rgba(80,180,255,0.06)" stroke-width=".5"/>
+      <line x1="200" y1="35" x2="200" y2="365" stroke="rgba(201,169,78,0.05)" stroke-width=".4"/>
+      <line x1="57" y1="118" x2="343" y2="282" stroke="rgba(201,169,78,0.05)" stroke-width=".4"/>
+      <line x1="343" y1="118" x2="57" y2="282" stroke="rgba(201,169,78,0.05)" stroke-width=".4"/>
     </svg>
 
-    <!-- L4: Double hexagram -->
-    <svg viewBox="0 0 400 400" class="k-layer">
-      <circle cx="200" cy="200" r="140" fill="none" stroke="rgba(201,169,78,0.06)" stroke-width=".3" stroke-dasharray="4 8"/>
-      <polygon points="200,65 317,268 83,268" fill="none" stroke="rgba(201,169,78,0.06)" stroke-width=".4"/>
-      <polygon points="200,335 83,132 317,132" fill="none" stroke="rgba(201,169,78,0.06)" stroke-width=".4"/>
-      <text x="200" y="55" text-anchor="middle" fill="rgba(201,169,78,0.15)" font-size="12">Ω</text>
-      <text x="330" y="204" text-anchor="middle" fill="rgba(201,169,78,0.15)" font-size="12">Δ</text>
-      <text x="200" y="350" text-anchor="middle" fill="rgba(201,169,78,0.15)" font-size="12">Ψ</text>
-      <text x="70" y="204" text-anchor="middle" fill="rgba(201,169,78,0.15)" font-size="12">Φ</text>
+    <svg viewBox="0 0 400 400" class="kl">
+      <circle cx="200" cy="200" r="145" fill="none" stroke="rgba(201,169,78,0.15)" stroke-width=".5"/>
+      <polygon points="200,60 322,275 78,275" fill="none" stroke="rgba(201,169,78,0.15)" stroke-width="1"/>
+      <polygon points="200,340 78,125 322,125" fill="none" stroke="rgba(160,100,255,0.1)" stroke-width="1"/>
+      <text x="200" y="48" text-anchor="middle" fill="rgba(201,169,78,0.35)" font-size="16">Ω</text>
+      <text x="338" y="206" text-anchor="middle" fill="rgba(255,180,80,0.25)" font-size="16">Δ</text>
+      <text x="200" y="360" text-anchor="middle" fill="rgba(80,180,255,0.25)" font-size="16">Ψ</text>
+      <text x="62" y="206" text-anchor="middle" fill="rgba(160,100,255,0.25)" font-size="16">Φ</text>
     </svg>
 
-    <!-- L5: Octagram -->
-    <svg viewBox="0 0 400 400" class="k-layer">
-      <polygon points="200,80 268,132 320,200 268,268 200,320 132,268 80,200 132,132" fill="none" stroke="rgba(201,169,78,0.07)" stroke-width=".3"/>
-      <line x1="200" y1="80" x2="200" y2="320" stroke="rgba(201,169,78,0.03)" stroke-width=".2"/>
-      <line x1="80" y1="200" x2="320" y2="200" stroke="rgba(201,169,78,0.03)" stroke-width=".2"/>
-      <line x1="132" y1="132" x2="268" y2="268" stroke="rgba(201,169,78,0.03)" stroke-width=".2"/>
-      <line x1="268" y1="132" x2="132" y2="268" stroke="rgba(201,169,78,0.03)" stroke-width=".2"/>
+    <svg viewBox="0 0 400 400" class="kl">
+      <polygon points="200,75 270,130 325,200 270,270 200,325 130,270 75,200 130,130" fill="none" stroke="rgba(255,120,60,0.1)" stroke-width=".8"/>
+      <line x1="200" y1="75" x2="200" y2="325" stroke="rgba(255,150,80,0.06)" stroke-width=".4"/>
+      <line x1="75" y1="200" x2="325" y2="200" stroke="rgba(255,150,80,0.06)" stroke-width=".4"/>
+      <line x1="130" y1="130" x2="270" y2="270" stroke="rgba(201,169,78,0.05)" stroke-width=".4"/>
+      <line x1="270" y1="130" x2="130" y2="270" stroke="rgba(201,169,78,0.05)" stroke-width=".4"/>
     </svg>
 
-    <!-- L6: Pentagonal fractal -->
-    <svg viewBox="0 0 400 400" class="k-layer">
-      <circle cx="200" cy="200" r="110" fill="none" stroke="rgba(201,169,78,0.08)" stroke-width=".3"/>
-      <polygon points="200,92 300,170 262,282 138,282 100,170" fill="none" stroke="rgba(201,169,78,0.05)" stroke-width=".3"/>
-      <!-- Inner pentagram -->
-      <line x1="200" y1="92" x2="262" y2="282" stroke="rgba(201,169,78,0.035)" stroke-width=".25"/>
-      <line x1="262" y1="282" x2="100" y2="170" stroke="rgba(201,169,78,0.035)" stroke-width=".25"/>
-      <line x1="100" y1="170" x2="300" y2="170" stroke="rgba(201,169,78,0.035)" stroke-width=".25"/>
-      <line x1="300" y1="170" x2="138" y2="282" stroke="rgba(201,169,78,0.035)" stroke-width=".25"/>
-      <line x1="138" y1="282" x2="200" y2="92" stroke="rgba(201,169,78,0.035)" stroke-width=".25"/>
+    <svg viewBox="0 0 400 400" class="kl">
+      <circle cx="200" cy="200" r="115" fill="none" stroke="rgba(80,180,255,0.08)" stroke-width=".5"/>
+      <polygon points="200,88 305,165 265,285 135,285 95,165" fill="none" stroke="rgba(80,180,255,0.1)" stroke-width=".8"/>
+      <line x1="200" y1="88" x2="265" y2="285" stroke="rgba(80,180,255,0.07)" stroke-width=".5"/>
+      <line x1="265" y1="285" x2="95" y2="165" stroke="rgba(80,180,255,0.07)" stroke-width=".5"/>
+      <line x1="95" y1="165" x2="305" y2="165" stroke="rgba(80,180,255,0.07)" stroke-width=".5"/>
+      <line x1="305" y1="165" x2="135" y2="285" stroke="rgba(80,180,255,0.07)" stroke-width=".5"/>
+      <line x1="135" y1="285" x2="200" y2="88" stroke="rgba(80,180,255,0.07)" stroke-width=".5"/>
     </svg>
 
-    <!-- L7: Nested triangles -->
-    <svg viewBox="0 0 400 400" class="k-layer">
-      <polygon points="200,110 275,250 125,250" fill="none" stroke="rgba(201,169,78,0.07)" stroke-width=".35"/>
-      <polygon points="200,260 137,150 263,150" fill="none" stroke="rgba(201,169,78,0.06)" stroke-width=".3"/>
-      <polygon points="200,130 258,235 142,235" fill="none" stroke="rgba(201,169,78,0.04)" stroke-width=".25"/>
-      <polygon points="200,245 152,165 248,165" fill="none" stroke="rgba(201,169,78,0.035)" stroke-width=".25"/>
+    <svg viewBox="0 0 400 400" class="kl">
+      <polygon points="200,105 282,255 118,255" fill="none" stroke="rgba(255,80,180,0.1)" stroke-width=".8"/>
+      <polygon points="200,265 132,148 268,148" fill="none" stroke="rgba(201,169,78,0.1)" stroke-width=".8"/>
+      <polygon points="200,125 265,240 135,240" fill="none" stroke="rgba(255,80,180,0.06)" stroke-width=".5"/>
+      <polygon points="200,250 145,160 255,160" fill="none" stroke="rgba(201,169,78,0.06)" stroke-width=".5"/>
     </svg>
 
-    <!-- L8: Inner sacred circle -->
-    <svg viewBox="0 0 400 400" class="k-layer">
-      <circle cx="200" cy="200" r="80" fill="none" stroke="rgba(201,169,78,0.1)" stroke-width=".5"/>
-      <circle cx="200" cy="200" r="75" fill="none" stroke="rgba(201,169,78,0.04)" stroke-width=".2" stroke-dasharray="1 5"/>
-      <!-- 10 phase dots -->
-      <circle cx="200" cy="120" r="1.5" fill="rgba(201,169,78,0.2)"/>
-      <circle cx="249" cy="135" r="1.5" fill="rgba(201,169,78,0.15)"/>
-      <circle cx="276" cy="175" r="1.5" fill="rgba(201,169,78,0.15)"/>
-      <circle cx="276" cy="225" r="1.5" fill="rgba(201,169,78,0.15)"/>
-      <circle cx="249" cy="265" r="1.5" fill="rgba(201,169,78,0.15)"/>
-      <circle cx="200" cy="280" r="1.5" fill="rgba(201,169,78,0.2)"/>
-      <circle cx="151" cy="265" r="1.5" fill="rgba(201,169,78,0.15)"/>
-      <circle cx="124" cy="225" r="1.5" fill="rgba(201,169,78,0.15)"/>
-      <circle cx="124" cy="175" r="1.5" fill="rgba(201,169,78,0.15)"/>
-      <circle cx="151" cy="135" r="1.5" fill="rgba(201,169,78,0.15)"/>
+    <svg viewBox="0 0 400 400" class="kl">
+      <circle cx="200" cy="200" r="85" fill="none" stroke="rgba(201,169,78,0.2)" stroke-width=".8"/>
+      <circle cx="200" cy="200" r="80" fill="none" stroke="rgba(160,100,255,0.06)" stroke-width=".3" stroke-dasharray="2 4"/>
+      <circle cx="200" cy="115" r="3" fill="rgba(201,169,78,0.5)"><animate attributeName="opacity" values=".5;1;.5" dur="3s" repeatCount="indefinite"/></circle>
+      <circle cx="251" cy="131" r="2.5" fill="rgba(255,180,80,0.4)"><animate attributeName="opacity" values=".4;.9;.4" dur="3.5s" repeatCount="indefinite"/></circle>
+      <circle cx="280" cy="175" r="2.5" fill="rgba(255,120,60,0.4)"><animate attributeName="opacity" values=".4;.9;.4" dur="4s" repeatCount="indefinite"/></circle>
+      <circle cx="280" cy="225" r="2.5" fill="rgba(255,80,180,0.4)"><animate attributeName="opacity" values=".4;.9;.4" dur="3.2s" repeatCount="indefinite"/></circle>
+      <circle cx="251" cy="269" r="2.5" fill="rgba(160,100,255,0.4)"><animate attributeName="opacity" values=".4;.9;.4" dur="3.8s" repeatCount="indefinite"/></circle>
+      <circle cx="200" cy="285" r="3" fill="rgba(80,180,255,0.5)"><animate attributeName="opacity" values=".5;1;.5" dur="3s" begin="1.5s" repeatCount="indefinite"/></circle>
+      <circle cx="149" cy="269" r="2.5" fill="rgba(80,255,180,0.4)"><animate attributeName="opacity" values=".4;.9;.4" dur="3.6s" repeatCount="indefinite"/></circle>
+      <circle cx="120" cy="225" r="2.5" fill="rgba(180,255,80,0.4)"><animate attributeName="opacity" values=".4;.9;.4" dur="4.2s" repeatCount="indefinite"/></circle>
+      <circle cx="120" cy="175" r="2.5" fill="rgba(255,255,80,0.4)"><animate attributeName="opacity" values=".4;.9;.4" dur="3.3s" repeatCount="indefinite"/></circle>
+      <circle cx="149" cy="131" r="2.5" fill="rgba(255,200,80,0.4)"><animate attributeName="opacity" values=".4;.9;.4" dur="3.9s" repeatCount="indefinite"/></circle>
     </svg>
 
-    <!-- L9: Inner geometry -->
-    <svg viewBox="0 0 400 400" class="k-layer">
-      <circle cx="200" cy="200" r="55" fill="none" stroke="rgba(201,169,78,0.12)" stroke-width=".5"/>
-      <polygon points="200,148 245,225 155,225" fill="none" stroke="rgba(201,169,78,0.09)" stroke-width=".35"/>
-      <polygon points="200,252 155,175 245,175" fill="none" stroke="rgba(201,169,78,0.07)" stroke-width=".3"/>
+    <svg viewBox="0 0 400 400" class="kl">
+      <circle cx="200" cy="200" r="60" fill="none" stroke="rgba(201,169,78,0.25)" stroke-width=".8"/>
+      <polygon points="200,143 250,230 150,230" fill="none" stroke="rgba(255,150,80,0.15)" stroke-width=".6"/>
+      <polygon points="200,257 150,170 250,170" fill="none" stroke="rgba(160,100,255,0.12)" stroke-width=".6"/>
     </svg>
 
-    <!-- L10: Core orbit -->
-    <svg viewBox="0 0 400 400" class="k-layer">
-      <circle cx="200" cy="200" r="38" fill="none" stroke="rgba(201,169,78,0.15)" stroke-width=".6"/>
-      <circle cx="200" cy="162" r="2" fill="rgba(201,169,78,0.25)"/>
-      <circle cx="233" cy="219" r="2" fill="rgba(201,169,78,0.2)"/>
-      <circle cx="167" cy="219" r="2" fill="rgba(201,169,78,0.2)"/>
+    <svg viewBox="0 0 400 400" class="kl">
+      <circle cx="200" cy="200" r="42" fill="none" stroke="rgba(201,169,78,0.3)" stroke-width=".6"/>
+      <circle cx="200" cy="158" r="3" fill="rgba(201,169,78,0.6)"><animate attributeName="r" values="3;5;3" dur="2s" repeatCount="indefinite"/></circle>
+      <circle cx="236" cy="221" r="3" fill="rgba(255,150,80,0.5)"><animate attributeName="r" values="3;5;3" dur="2.5s" repeatCount="indefinite"/></circle>
+      <circle cx="164" cy="221" r="3" fill="rgba(160,100,255,0.5)"><animate attributeName="r" values="3;5;3" dur="2.2s" repeatCount="indefinite"/></circle>
     </svg>
 
-    <!-- L11: Inner spin -->
-    <svg viewBox="0 0 400 400" class="k-layer">
-      <circle cx="200" cy="200" r="25" fill="none" stroke="rgba(201,169,78,0.18)" stroke-width=".4" stroke-dasharray="3 3"/>
-      <line x1="200" y1="175" x2="200" y2="225" stroke="rgba(201,169,78,0.1)" stroke-width=".3"/>
-      <line x1="175" y1="200" x2="225" y2="200" stroke="rgba(201,169,78,0.1)" stroke-width=".3"/>
+    <svg viewBox="0 0 400 400" class="kl">
+      <circle cx="200" cy="200" r="28" fill="none" stroke="rgba(201,169,78,0.35)" stroke-width=".5" stroke-dasharray="4 4"/>
+      <line x1="200" y1="172" x2="200" y2="228" stroke="rgba(201,169,78,0.2)" stroke-width=".4"/>
+      <line x1="172" y1="200" x2="228" y2="200" stroke="rgba(201,169,78,0.2)" stroke-width=".4"/>
+      <line x1="180" y1="180" x2="220" y2="220" stroke="rgba(201,169,78,0.12)" stroke-width=".3"/>
+      <line x1="220" y1="180" x2="180" y2="220" stroke="rgba(201,169,78,0.12)" stroke-width=".3"/>
     </svg>
 
-    <!-- L12: THE EYE — static center -->
-    <svg viewBox="0 0 400 400" class="k-layer">
-      <circle cx="200" cy="200" r="18" fill="rgba(3,3,5,0.97)"/>
-      <ellipse cx="200" cy="200" rx="18" ry="7" fill="none" stroke="rgba(201,169,78,0.5)" stroke-width=".7">
-        <animate attributeName="ry" values="7;1;7" dur="7s" repeatCount="indefinite"/>
+    <svg viewBox="0 0 400 400" class="kl">
+      <defs><radialGradient id="eg"><stop offset="0%" stop-color="rgba(201,169,78,0.2)"/><stop offset="100%" stop-color="rgba(3,3,5,0.98)"/></radialGradient></defs>
+      <circle cx="200" cy="200" r="20" fill="url(#eg)"/>
+      <ellipse cx="200" cy="200" rx="20" ry="8" fill="none" stroke="rgba(201,169,78,0.7)" stroke-width="1">
+        <animate attributeName="ry" values="8;1.5;8" dur="7s" repeatCount="indefinite"/>
       </ellipse>
-      <circle cx="200" cy="200" r="5" fill="rgba(201,169,78,0.7)">
-        <animate attributeName="r" values="5;4;5" dur="3s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values="0.7;0.4;0.7" dur="3s" repeatCount="indefinite"/>
+      <circle cx="200" cy="200" r="6" fill="rgba(201,169,78,0.8)">
+        <animate attributeName="r" values="6;4;6" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="fill" values="rgba(201,169,78,0.8);rgba(255,150,80,0.9);rgba(160,100,255,0.7);rgba(80,180,255,0.8);rgba(201,169,78,0.8)" dur="12s" repeatCount="indefinite"/>
       </circle>
       <circle cx="200" cy="200" r="2" fill="#030305"/>
     </svg>
@@ -305,71 +181,108 @@
   </div>
 </div>
 
-<!-- ═══ THE INNER CHAMBER — circular reveal ═══ -->
 <div id="portal">
-  <div id="void-ring">
-    <div id="pcontent">
-      <p class="ct-pre">You have crossed the limen</p>
-      <h1 class="ct">The Inner Chamber</h1>
-      <p class="ct-sub">
-        What you offer here feeds the pattern.<br>
-        What returns to you is the architecture of your own becoming.
-      </p>
-      <div class="off-grid">
-        <a href="https://chapel-pos-v2.vercel.app" class="off-card">
-          <span class="off-i">✦</span><span class="off-n">Offering</span><span class="off-d">Donation · Tithe</span>
-        </a>
-        <a href="https://chapel-pos-v2.vercel.app" class="off-card">
-          <span class="off-i">⬡</span><span class="off-n">Workshop</span><span class="off-d">Sessions · Training</span>
-        </a>
-        <a href="https://chapel-pos-v2.vercel.app" class="off-card">
-          <span class="off-i">⊕</span><span class="off-n">Consultation</span><span class="off-d">1-on-1 · Guidance</span>
-        </a>
-        <a href="https://chapel-pos-v2.vercel.app" class="off-card">
-          <span class="off-i">◇</span><span class="off-n">Materials</span><span class="off-d">Texts · Resources</span>
-        </a>
+  <div id="vr">
+    <div id="pc">
+      <p class="ctp">You have crossed the limen</p>
+      <h1 class="ctt">The Inner Chamber</h1>
+      <p class="cts">What you offer here feeds the pattern.<br>What returns to you is the architecture of your own becoming.</p>
+      <div class="og">
+        <a href="https://chapel-pos-v2.vercel.app" class="oc"><span class="oi">✦</span><span class="on">Offering</span><span class="od">Donation · Tithe</span></a>
+        <a href="https://chapel-pos-v2.vercel.app" class="oc"><span class="oi">⬡</span><span class="on">Workshop</span><span class="od">Sessions · Training</span></a>
+        <a href="https://chapel-pos-v2.vercel.app" class="oc"><span class="oi">⊕</span><span class="on">Consultation</span><span class="od">1-on-1 · Guidance</span></a>
+        <a href="https://chapel-pos-v2.vercel.app" class="oc"><span class="oi">◇</span><span class="on">Materials</span><span class="od">Texts · Resources</span></a>
       </div>
-      <div class="pnav">
-        <a href="spiral.html" class="pbtn">⟐ Phasecraft Descent</a>
-        <button class="pbtn" onclick="closeThreshold()">← Return to Gate</button>
+      <div class="pn">
+        <a href="spiral.html" class="pb">⟐ Phasecraft Descent</a>
+        <button class="pb" onclick="closeThreshold()">← Return to Gate</button>
       </div>
-      <p style="font-size:.35rem;color:rgba(201,169,78,0.06);margin-top:1.5rem;letter-spacing:4px;text-transform:uppercase">
-        Chapel of the LIMEN Helix · 501(c)(3) · EIN 33-4945631
-      </p>
+      <p style="font-size:.35rem;color:rgba(201,169,78,0.06);margin-top:1.5rem;letter-spacing:4px;text-transform:uppercase">Chapel of the LIMEN Helix · 501(c)(3) · EIN 33-4945631</p>
     </div>
   </div>
 </div>
 
+<canvas id="fractalBg" style="position:fixed;inset:0;z-index:99;pointer-events:none;opacity:0.12"></canvas>
+
 <script>
+// Fractal background canvas
+var c=document.getElementById('fractalBg'),ctx=c.getContext('2d');
+c.width=window.innerWidth;c.height=window.innerHeight;
+window.addEventListener('resize',function(){c.width=window.innerWidth;c.height=window.innerHeight});
+
+var t=0;
+function drawFractal(){
+  ctx.clearRect(0,0,c.width,c.height);
+  var cx=c.width/2,cy=c.height/2,s=Math.min(c.width,c.height)*0.45;
+  
+  // Draw rotating fractal spirals
+  for(var arm=0;arm<8;arm++){
+    var baseAngle=(arm/8)*Math.PI*2+t*0.2;
+    ctx.beginPath();
+    for(var i=0;i<200;i++){
+      var ratio=i/200;
+      var angle=baseAngle+ratio*Math.PI*4+Math.sin(t*0.5+ratio*3)*0.5;
+      var radius=ratio*s;
+      var x=cx+Math.cos(angle)*radius;
+      var y=cy+Math.sin(angle)*radius;
+      if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    }
+    var hue=(arm*45+t*20)%360;
+    ctx.strokeStyle='hsla('+hue+',60%,55%,'+(.06+Math.sin(t+arm)*0.03)+')';
+    ctx.lineWidth=0.8;
+    ctx.stroke();
+  }
+  
+  // Inner mandala rings
+  for(var r=0;r<6;r++){
+    var ringR=s*(0.15+r*0.12);
+    var pts=6+r*2;
+    ctx.beginPath();
+    for(var p=0;p<=pts;p++){
+      var a=(p/pts)*Math.PI*2+t*(r%2===0?0.3:-0.3)+r*0.5;
+      var wobble=Math.sin(t*2+p+r)*ringR*0.03;
+      var x=cx+Math.cos(a)*(ringR+wobble);
+      var y=cy+Math.sin(a)*(ringR+wobble);
+      if(p===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    var hue2=(r*60+t*15+180)%360;
+    ctx.strokeStyle='hsla('+hue2+',50%,50%,'+(.04+Math.sin(t*0.7+r)*0.02)+')';
+    ctx.lineWidth=0.5;
+    ctx.stroke();
+  }
+  
+  t+=0.008;
+  requestAnimationFrame(drawFractal);
+}
+drawFractal();
+
+// Portal functions
 function openThreshold(){
-  var g=document.getElementById('gate'),p=document.getElementById('portal'),
-      vr=document.getElementById('void-ring'),pc=document.getElementById('pcontent');
+  var g=document.getElementById('gate'),p=document.getElementById('portal'),vr=document.getElementById('vr'),pc=document.getElementById('pc');
   g.classList.add('gate-opening');
-  setTimeout(function(){
-    p.style.display='flex';
-    setTimeout(function(){p.style.background='rgba(3,3,5,0.97)'},50);
-  },500);
-  setTimeout(function(){
-    vr.style.width='88vmin';vr.style.height='88vmin';
-    vr.style.maxWidth='650px';vr.style.maxHeight='650px';
-  },800);
+  document.getElementById('fractalBg').style.transition='opacity 1s';
+  document.getElementById('fractalBg').style.opacity='0';
+  setTimeout(function(){p.style.display='flex';setTimeout(function(){p.style.background='rgba(3,3,5,0.97)'},50)},500);
+  setTimeout(function(){vr.style.width='88vmin';vr.style.height='88vmin';vr.style.maxWidth='650px';vr.style.maxHeight='650px'},800);
   setTimeout(function(){pc.classList.add('vis')},1800);
   setTimeout(function(){g.style.display='none'},2500);
 }
 function closeThreshold(){
-  var g=document.getElementById('gate'),p=document.getElementById('portal'),
-      vr=document.getElementById('void-ring'),pc=document.getElementById('pcontent');
+  var g=document.getElementById('gate'),p=document.getElementById('portal'),vr=document.getElementById('vr'),pc=document.getElementById('pc');
   pc.classList.remove('vis');
   setTimeout(function(){vr.style.width='0';vr.style.height='0'},300);
   setTimeout(function(){p.style.background='rgba(0,0,0,0)'},1000);
   setTimeout(function(){
     p.style.display='none';g.style.display='flex';g.classList.remove('gate-opening');
+    document.getElementById('fractalBg').style.opacity='0.12';
   },1400);
 }
+
 // Parallax
 document.getElementById('gate').addEventListener('mousemove',function(e){
   var r=this.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
-  document.getElementById('kscope').style.transform='translate('+x*20+'px,'+y*20+'px)';
+  document.getElementById('kscope').style.transform='translate('+x*25+'px,'+y*25+'px)';
 });
 </script>
 </body>
