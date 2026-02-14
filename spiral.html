@@ -268,8 +268,85 @@ pulse.addColorStop(0,'rgba('+p.aR+','+p.aG+','+p.aB+','+pulseA+')');pulse.addCol
 ctx.fillStyle=pulse;ctx.beginPath();ctx.arc(cx,cy,pulseR*3,0,Math.PI*2);ctx.fill();
 
 // CORNER BRACKETS — HUD frame
-var bL=30,bA=0.08*(1-p.dis*0.5);
+var bL=30,bA=0.2*(1-p.dis*0.5);
 ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+bA+')';ctx.lineWidth=0.8;
+
+// ═══ NEURAL IMPULSE SPARKS ═══
+// Random bright flashes that fire and fade - synaptic firing
+var sparkCount=8+Math.floor((1-p.dis)*12);
+for(var sp=0;sp<sparkCount;sp++){
+// Each spark has its own phase based on time - fires rapidly then dies
+var sparkPhase=(t*0.008+sp*137.5)%1000;// golden ratio spacing
+var sparkLife=sparkPhase%80;// 80ms cycle per spark
+if(sparkLife<15){// spark is active for 15ms of every 80ms cycle
+var sparkBright=(1-sparkLife/15);// fade out
+var sparkAngle=(sp*2.399+Math.floor(t/80)*sp*0.7);//semi-random position
+var sparkDist=maxD*(0.05+((sp*73)%100)/100*0.35)*p.scale*(1-p.dis*0.5);
+var spkX=cx+Math.cos(sparkAngle)*sparkDist;
+var spkY=cy+Math.sin(sparkAngle)*sparkDist*0.45;
+var spkR=2+sparkBright*4;
+var spkA=sparkBright*0.6*(1-p.dis*0.5);
+// Bright center
+var spkG=ctx.createRadialGradient(spkX,spkY,0,spkX,spkY,spkR*4);
+spkG.addColorStop(0,'rgba(255,255,255,'+spkA+')');
+spkG.addColorStop(0.3,'rgba('+p.aR+','+p.aG+','+p.aB+','+(spkA*0.6)+')');
+spkG.addColorStop(1,'rgba(0,0,0,0)');
+ctx.fillStyle=spkG;ctx.beginPath();ctx.arc(spkX,spkY,spkR*4,0,Math.PI*2);ctx.fill();
+// Core dot
+ctx.beginPath();ctx.arc(spkX,spkY,spkR*0.5,0,Math.PI*2);
+ctx.fillStyle='rgba(255,255,255,'+(spkA*0.9)+')';ctx.fill();
+}}
+
+// ═══ TRAVELING PULSES along rings ═══
+// Light moving along the concentric rings like signal propagation
+for(var tp=0;tp<Math.min(p.rings,6);tp++){
+var tpR=(tp+1)*maxD*0.04*p.scale;
+var tpAngle=t*0.004*(tp%2===0?1:-1)+tp*1.2;
+var tpX=cx+Math.cos(tpAngle)*tpR;
+var tpY=cy+Math.sin(tpAngle)*tpR;
+var tpA=0.3*(1-p.dis*0.7);
+if(tpA>0.01){
+// Traveling dot
+ctx.beginPath();ctx.arc(tpX,tpY,3,0,Math.PI*2);
+ctx.fillStyle='rgba(255,255,255,'+tpA+')';ctx.fill();
+// Trail
+var trailLen=5;
+for(var tr=1;tr<=trailLen;tr++){
+var trAngle=tpAngle-tr*0.08*(tp%2===0?1:-1);
+var trX=cx+Math.cos(trAngle)*tpR;
+var trY=cy+Math.sin(trAngle)*tpR;
+ctx.beginPath();ctx.arc(trX,trY,2-tr*0.3,0,Math.PI*2);
+ctx.fillStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+(tpA*(1-tr/trailLen)*0.5)+')';ctx.fill();
+}}}
+
+// ═══ MICRO-FLICKERS — background cortical noise ═══
+// Tiny rapid blinks scattered everywhere
+var flickerCount=15+Math.floor(p.particleCount*0.3);
+for(var fl=0;fl<flickerCount;fl++){
+var flPhase=(t*0.015+fl*89.3)%100;
+if(flPhase<3){// very brief flash
+var flX=cx+Math.sin(fl*5.7+Math.floor(t/100)*fl*0.3)*W*0.45;
+var flY=cy+Math.cos(fl*4.3+Math.floor(t/100)*fl*0.2)*H*0.4;
+ctx.beginPath();ctx.arc(flX,flY,1,0,Math.PI*2);
+ctx.fillStyle='rgba('+p.aR+','+p.aG+','+p.aB+',0.25)';ctx.fill();
+}}
+
+// ═══ SYNAPTIC CONNECTIONS — lines between active sparks ═══
+// Occasional bright lines connecting two points like signal transmission
+var connPhase=(t*0.002)%100;
+if(connPhase<8&&p.mirrors>2){
+var connA=(1-connPhase/8)*0.12*(1-p.dis);
+var c1Ang=(Math.floor(t/500)*2.399)%(Math.PI*2);
+var c2Ang=c1Ang+1.5+Math.sin(t*0.001)*0.5;
+var c1D=maxD*0.15*p.scale;var c2D=maxD*0.2*p.scale;
+var c1x=cx+Math.cos(c1Ang)*c1D,c1y=cy+Math.sin(c1Ang)*c1D*0.45;
+var c2x=cx+Math.cos(c2Ang)*c2D,c2y=cy+Math.sin(c2Ang)*c2D*0.45;
+ctx.beginPath();ctx.moveTo(c1x,c1y);ctx.lineTo(c2x,c2y);
+ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+connA+')';ctx.lineWidth=0.8;ctx.stroke();
+// Connection endpoints glow
+ctx.beginPath();ctx.arc(c1x,c1y,3,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,'+(connA*2)+')';ctx.fill();
+ctx.beginPath();ctx.arc(c2x,c2y,3,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,'+(connA*2)+')';ctx.fill();
+}
 // TL
 ctx.beginPath();ctx.moveTo(8,8+bL);ctx.lineTo(8,8);ctx.lineTo(8+bL,8);ctx.stroke();
 // TR
