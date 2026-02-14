@@ -281,9 +281,9 @@ Math.random=savedRandom;
 
 // === NODE LABEL (very subtle) ===
 if(nodeAlpha>0.15){
-ctx.font='7px monospace';ctx.textAlign='center';
-ctx.fillStyle='rgba('+aRGB+','+(nodeAlpha*0.2)+')';
-ctx.fillText(node.name,jx,jy+nodeR*3+10);
+ctx.font='10px monospace';ctx.textAlign='center';
+ctx.fillStyle='rgba('+aRGB+','+(nodeAlpha*0.25)+')';
+ctx.fillText(node.name,jx,jy+nodeR*3+12);
 }
 
 // === FIRE AN ACTION POTENTIAL occasionally ===
@@ -425,12 +425,12 @@ if((DMN_CONNECTIONS[pfc][0]===ui||DMN_CONNECTIONS[pfc][1]===ui)&&Math.random()<0
 fireAP(pfc,p);break;}}}
 
 // Show node name on hover
-ctx.font='9px monospace';ctx.textAlign='center';
-ctx.fillStyle='rgba('+aRGB+','+(proxStrength*0.6)+')';
-ctx.fillText(un.name,unx,uny-30-proxStrength*10);
+ctx.font='14px monospace';ctx.textAlign='center';
+ctx.fillStyle='rgba('+aRGB+','+(proxStrength*0.7)+')';
+ctx.fillText(un.name,unx,uny-35-proxStrength*10);
 // Show function
-ctx.font='7px monospace';
-ctx.fillStyle='rgba('+aRGB+','+(proxStrength*0.4)+')';
+ctx.font='11px monospace';
+ctx.fillStyle='rgba('+aRGB+','+(proxStrength*0.45)+')';
 var info=NODE_INFO[un.name];
 if(info)ctx.fillText(info.fn,unx,uny-20-proxStrength*10);
 
@@ -445,54 +445,71 @@ else{
 var tn=DMN_NODES[tappedNode];
 var tnInfo=NODE_INFO[tn.name];
 if(tnInfo){
-var panelX=tn.x<0.5?W*0.65:W*0.15;
-var panelY=Math.max(80,Math.min(H-200,tn.y*H-60));
-var panelW=Math.min(220,W*0.35);
+var panelW=Math.min(380,W*0.55);
+var panelH=280;
+var panelX=tn.x<0.5?Math.min(W-panelW-20,W*0.55):Math.max(20,W*0.45-panelW);
+var panelY=Math.max(70,Math.min(H-panelH-40,tn.y*H-panelH/2));
 var pAlpha=Math.min(tapFade,0.85);
 
 // Panel background
-ctx.fillStyle='rgba(0,0,0,'+(pAlpha*0.8)+')';
-ctx.strokeStyle='rgba('+aRGB+','+(pAlpha*0.3)+')';ctx.lineWidth=0.8;
-ctx.beginPath();ctx.rect(panelX-8,panelY-8,panelW+16,160);ctx.fill();ctx.stroke();
+ctx.fillStyle='rgba(0,0,0,'+(pAlpha*0.88)+')';
+ctx.strokeStyle='rgba('+aRGB+','+(pAlpha*0.4)+')';ctx.lineWidth=1;
+ctx.beginPath();ctx.rect(panelX-12,panelY-12,panelW+24,panelH+24);ctx.fill();ctx.stroke();
+
+// Inner border accent
+ctx.strokeStyle='rgba('+aRGB+','+(pAlpha*0.1)+')';ctx.lineWidth=0.5;
+ctx.beginPath();ctx.rect(panelX-6,panelY-6,panelW+12,panelH+12);ctx.stroke();
 
 // Connection line from node to panel
 ctx.beginPath();ctx.moveTo(tn.x*W,tn.y*H);ctx.lineTo(panelX+panelW/2,panelY);
-ctx.strokeStyle='rgba('+aRGB+','+(pAlpha*0.15)+')';ctx.lineWidth=0.5;ctx.stroke();
+ctx.strokeStyle='rgba('+aRGB+','+(pAlpha*0.2)+')';ctx.lineWidth=0.8;ctx.stroke();
 
-// Node name
-ctx.font='bold 10px monospace';ctx.textAlign='left';
+// Node name — BIG
+ctx.font='bold 18px monospace';ctx.textAlign='left';
 ctx.fillStyle='rgba('+aRGB+','+(pAlpha)+')';
-ctx.fillText(tn.name,panelX,panelY+4);
+ctx.fillText(tn.name,panelX,panelY+14);
 
-// Function
-ctx.font='8px monospace';
-ctx.fillStyle='rgba(255,255,255,'+(pAlpha*0.7)+')';
-ctx.fillText(tnInfo.fn,panelX,panelY+18);
+// Function — clear
+ctx.font='13px monospace';
+ctx.fillStyle='rgba(255,255,255,'+(pAlpha*0.8)+')';
+ctx.fillText(tnInfo.fn,panelX,panelY+38);
 
 // Description
-ctx.font='8px Georgia';
-ctx.fillStyle='rgba(255,255,255,'+(pAlpha*0.5)+')';
-ctx.fillText(tnInfo.desc,panelX,panelY+34);
+ctx.font='13px Georgia';
+ctx.fillStyle='rgba(255,255,255,'+(pAlpha*0.55)+')';
+ctx.fillText(tnInfo.desc,panelX,panelY+62);
+
+// Divider line
+ctx.beginPath();ctx.moveTo(panelX,panelY+74);ctx.lineTo(panelX+panelW,panelY+74);
+ctx.strokeStyle='rgba('+aRGB+','+(pAlpha*0.15)+')';ctx.lineWidth=0.5;ctx.stroke();
 
 // Population info — who is affected here
-ctx.font='7px monospace';
+ctx.font='12px monospace';
 var popLines=tnInfo.pop.split('\n');
 for(var pl=0;pl<popLines.length;pl++){
+// Highlight the condition name
+var colonIdx=popLines[pl].indexOf(':');
+if(colonIdx>0){
+ctx.fillStyle='rgba('+aRGB+','+(pAlpha*0.7)+')';
+ctx.fillText(popLines[pl].substring(0,colonIdx+1),panelX,panelY+94+pl*22);
+ctx.fillStyle='rgba(255,255,255,'+(pAlpha*0.45)+')';
+ctx.fillText(popLines[pl].substring(colonIdx+1),panelX+ctx.measureText(popLines[pl].substring(0,colonIdx+1)).width+4,panelY+94+pl*22);
+}else{
 ctx.fillStyle='rgba('+aRGB+','+(pAlpha*0.5)+')';
-ctx.fillText(popLines[pl],panelX,panelY+52+pl*12);
-}
+ctx.fillText(popLines[pl],panelX,panelY+94+pl*22);
+}}
 
-// Phase-specific note
+// Phase-specific note — RED and prominent
 if(phase===7&&tnInfo.phase7){
-ctx.font='bold 8px monospace';
-ctx.fillStyle='rgba(255,80,80,'+(pAlpha*0.7)+')';
-ctx.fillText(tnInfo.phase7,panelX,panelY+52+popLines.length*12+8);
+ctx.font='bold 14px monospace';
+ctx.fillStyle='rgba(255,60,60,'+(pAlpha*0.85)+')';
+ctx.fillText('\u26a0 '+tnInfo.phase7,panelX,panelY+94+popLines.length*22+14);
 }
 
 // Pulse ring on tapped node
 var pulseExpand=1-tapFade;
-ctx.beginPath();ctx.arc(tn.x*W,tn.y*H,20+pulseExpand*60,0,Math.PI*2);
-ctx.strokeStyle='rgba(255,255,255,'+(tapFade*0.15)+')';ctx.lineWidth=1;ctx.stroke();
+ctx.beginPath();ctx.arc(tn.x*W,tn.y*H,20+pulseExpand*80,0,Math.PI*2);
+ctx.strokeStyle='rgba(255,255,255,'+(tapFade*0.15)+')';ctx.lineWidth=1.5;ctx.stroke();
 }}}
 
 // === SCANNING CROSSHAIR at center (subtle) ===
