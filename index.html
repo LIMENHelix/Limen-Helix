@@ -25,7 +25,7 @@ body{background:#000;overflow:hidden;height:100vh;width:100vw;font-family:Georgi
 @keyframes gb{0%,100%{opacity:.3;text-shadow:0 0 15px rgba(201,169,78,0.2)}50%{opacity:.8;text-shadow:0 0 30px rgba(201,169,78,0.5)}}
 
 /* THE EYE */
-#eye-container{position:relative;z-index:3;width:75vmin;max-width:650px;height:38vmin;max-height:325px}
+#eye-container{position:relative;z-index:3;width:80vmin;max-width:700px;height:42vmin;max-height:360px}
 #eyeCanvas{width:100%;height:100%}
 
 /* Text below eye */
@@ -55,7 +55,7 @@ body{background:#000;overflow:hidden;height:100vh;width:100vw;font-family:Georgi
 .pb{display:inline-block;background:none;border:1px solid rgba(201,169,78,0.12);color:#444;padding:10px 28px;font-size:.55rem;letter-spacing:3px;cursor:pointer;text-transform:uppercase;font-family:monospace;transition:all .3s;text-decoration:none;margin-top:1rem}
 .pb:hover{color:#C9A94E;border-color:rgba(201,169,78,0.35)}
 .gate-opening{opacity:0!important;transition:opacity 1.2s!important}
-@media(max-width:600px){#eye-container{width:90vmin;height:45vmin}.cg{font-size:1rem}#gt1{font-size:.5rem;letter-spacing:8px}#gt2{font-size:.6rem}#gt3{font-size:.4rem;letter-spacing:3px}#gt{padding:1rem 1.5rem}.ctt{font-size:1.5rem}.og{gap:6px}.oc{padding:16px 10px}}
+@media(max-width:600px){#eye-container{width:95vmin;height:50vmin}.cg{font-size:1rem}#gt1{font-size:.5rem;letter-spacing:8px}#gt2{font-size:.6rem}#gt3{font-size:.4rem;letter-spacing:3px}#gt{padding:1rem 1.5rem}.ctt{font-size:1.5rem}.og{gap:6px}.oc{padding:16px 10px}}
 </style>
 </head>
 <body>
@@ -224,8 +224,8 @@ function drawEye(){
   var pxOff=pupilX*maxPupilOffset;
   var pyOff=pupilY*maxPupilOffset*0.6;// less vertical range
   
-  var eyeW=w*0.45;
-  var eyeH=h*0.42*eyeOpen;
+  var eyeW=w*0.48;
+  var eyeH=h*0.48*eyeOpen;
   
   // Breathing pulse on closed slit
   var breathGlow=0.15+Math.sin(breathPhase)*0.1;
@@ -259,14 +259,21 @@ function drawEye(){
     ex.closePath();
     ex.clip();
     
-    // Draw the actual photograph — shifted slightly by pupil tracking for parallax
+    // Draw the actual photograph — cover the entire eye shape
     if(eyeImg&&eyeImg.complete&&eyeImg.naturalWidth>0){
-      var imgW=eyeW*2.4;
-      var imgH=imgW*(eyeImg.naturalHeight/eyeImg.naturalWidth);
+      // Scale image to cover the eye opening fully
+      var imgAspect=eyeImg.naturalWidth/eyeImg.naturalHeight;
+      var drawW=eyeW*2.2;
+      var drawH=drawW/imgAspect;
+      // If height doesn't cover, scale up by height instead
+      if(drawH<eyeH*2.4){
+        drawH=eyeH*2.4;
+        drawW=drawH*imgAspect;
+      }
       // Slight parallax shift — image moves opposite to gaze for depth
       var parallaxX=pxOff*-0.3;
       var parallaxY=pyOff*-0.3;
-      ex.drawImage(eyeImg,cx-imgW/2+parallaxX,cy-imgH/2+parallaxY,imgW,imgH);
+      ex.drawImage(eyeImg,cx-drawW/2+parallaxX,cy-drawH/2+parallaxY,drawW,drawH);
     }
     
     // Supernatural overlay — very subtle golden pulse inside the eye
