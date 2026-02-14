@@ -412,6 +412,7 @@ body {
   <!-- Phase 0 -->
   <section id="phase0" class="phase0">
   <h1>Phase 0 – Source</h1>
+  <p style="font-size:0.65rem;color:#C9A94E;letter-spacing:4px;text-transform:uppercase;font-family:monospace;margin-bottom:1.5rem">TIER: INITIATE · $5 OFFERING</p>
 
   <p class="ritual phase-glyph">This is the ground before the story.</p>
   <p class="ritual phase-glyph">Here, nothing asks. Nothing answers.</p>
@@ -423,13 +424,87 @@ body {
   <p class="touch phase-glyph">Touch: cool marble, matte velvet, unfinished wood</p>
   <p class="taste phase-glyph">Taste: mineral + void</p>
   <p class="symbol phase-glyph">[⊘] Null Symmetry Engaged</p>
-  
+
+  <div style="margin:2rem 0;padding:1.5rem;border:1px solid rgba(201,169,78,0.2);border-radius:8px;background:rgba(0,0,0,0.4);max-width:500px;text-align:left">
+    <h2 style="font-size:1rem;color:#C9A94E;letter-spacing:3px;text-transform:uppercase;font-family:monospace;margin-bottom:1rem;text-align:center">⊘ PHASE 0 DELIVERABLES</h2>
+    
+    <p style="color:#ccc;font-size:0.85rem;margin-bottom:0.8rem">📄 <strong style="color:#e8e3d9">The Null Protocol</strong> — Daily grounding ritual (PDF)<br><span style="color:#888;font-size:0.75rem">Breathwork + body scan + vagal tone activation</span></p>
+    
+    <p style="color:#ccc;font-size:0.85rem;margin-bottom:0.8rem">🗣 <strong style="color:#e8e3d9">The Reset Incantation</strong> — Daily spoken spell<br><span style="color:#888;font-size:0.75rem">30-second nervous system down-regulation via vocal vibration</span></p>
+    
+    <p style="color:#ccc;font-size:0.85rem;margin-bottom:0.8rem">🙏 <strong style="color:#e8e3d9">Phase 0 Prayers</strong> — Multi-tradition<br><span style="color:#888;font-size:0.75rem">Christian · Hermetic · Buddhist · Islamic — same signal, different receivers</span></p>
+    
+    <p style="color:#ccc;font-size:0.85rem;margin-bottom:0.8rem">🧠 <strong style="color:#e8e3d9">The Neuroscience of Null</strong> — Research-backed<br><span style="color:#888;font-size:0.75rem">Vagus nerve, DMN suppression, Polyvagal Theory — why this works</span></p>
+    
+    <p style="color:#ccc;font-size:0.85rem;margin-bottom:0.8rem">🎵 <strong style="color:#e8e3d9">Source Frequency Playlist</strong> — Monthly updated<br><span style="color:#888;font-size:0.75rem">Ambient · drone · ritual — curated sonic architecture</span></p>
+    
+    <p style="color:#ccc;font-size:0.85rem;margin-bottom:0.8rem">🔊 <strong style="color:#e8e3d9">432Hz Tone Generator</strong> — Embedded player<br><span style="color:#888;font-size:0.75rem">The frequency of the earth. Tune your baseline.</span></p>
+    
+    <p style="color:#ccc;font-size:0.85rem;margin-bottom:0">🗂 <strong style="color:#e8e3d9">Sensory Prescription Card</strong> — Printable<br><span style="color:#888;font-size:0.75rem">Exact scent, light, touch, and taste specs for Phase 0 environment</span></p>
+  </div>
+
+  <div style="margin:1.5rem 0">
+    <a href="null-protocol.pdf" target="_blank" style="display:inline-block;padding:12px 30px;border:1px solid rgba(201,169,78,0.4);color:#C9A94E;text-decoration:none;font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;font-family:monospace;transition:all 0.3s;border-radius:3px">📄 Download: The Null Protocol (PDF)</a>
+  </div>
+
+  <!-- 432Hz Tone Generator -->
+  <div style="margin:1.5rem 0;padding:1rem;border:1px solid rgba(201,169,78,0.15);border-radius:8px;background:rgba(0,0,0,0.3);max-width:400px">
+    <p style="font-size:0.65rem;color:#C9A94E;letter-spacing:3px;text-transform:uppercase;font-family:monospace;margin-bottom:0.8rem;text-align:center">432Hz SOURCE FREQUENCY</p>
+    <div style="text-align:center">
+      <button onclick="toggle432()" id="btn432" style="padding:10px 28px;border:1px solid rgba(201,169,78,0.3);background:rgba(201,169,78,0.05);color:#C9A94E;font-family:monospace;font-size:0.7rem;letter-spacing:2px;cursor:pointer;border-radius:3px;text-transform:uppercase">▶ Activate 432Hz</button>
+    </div>
+    <p style="font-size:0.6rem;color:#555;text-align:center;margin-top:0.6rem">Use during the Null Breath (Step 3) for resonance calibration</p>
+  </div>
+  <script>
+  var ctx432,osc432,gain432,playing432=false;
+  function toggle432(){
+    if(!playing432){
+      ctx432=new(window.AudioContext||window.webkitAudioContext)();
+      osc432=ctx432.createOscillator();gain432=ctx432.createGain();
+      osc432.frequency.value=432;osc432.type='sine';
+      gain432.gain.value=0;
+      osc432.connect(gain432);gain432.connect(ctx432.destination);
+      osc432.start();gain432.gain.linearRampToValueAtTime(0.15,ctx432.currentTime+2);
+      playing432=true;document.getElementById('btn432').textContent='■ Deactivate 432Hz';
+      document.getElementById('btn432').style.borderColor='rgba(201,169,78,0.6)';
+    }else{
+      gain432.gain.linearRampToValueAtTime(0,ctx432.currentTime+1);
+      setTimeout(function(){osc432.stop();ctx432.close();playing432=false;
+        document.getElementById('btn432').textContent='▶ Activate 432Hz';
+        document.getElementById('btn432').style.borderColor='rgba(201,169,78,0.3)';
+      },1100);
+    }
+  }
+  </script>
+
+  <!-- Daily Spell -->
+  <div style="margin:1.5rem 0;padding:1.5rem;border:1px solid rgba(201,169,78,0.15);border-radius:8px;background:rgba(0,0,0,0.3);max-width:450px">
+    <p style="font-size:0.65rem;color:#C9A94E;letter-spacing:3px;text-transform:uppercase;font-family:monospace;margin-bottom:1rem;text-align:center">DAILY SPELL: THE RESET INCANTATION</p>
+    <p style="font-style:italic;color:#C9A94E;font-size:0.9rem;text-align:center;line-height:1.8;margin:0">
+      I release what the pattern has outgrown.<br>
+      I am the null before the signal.<br>
+      I am the silence before the name.<br>
+      The spiral does not need my fear.<br>
+      The spiral does not need my plan.<br>
+      I am Source. I am the ground.<br>
+      What forms from here — forms through me.
+    </p>
+    <p style="font-size:0.55rem;color:#555;text-align:center;margin-top:0.8rem">Speak aloud. Vocal vibration stimulates the vagus nerve via the recurrent laryngeal nerve.</p>
+  </div>
+
   <iframe style="border-radius:12px"
     src="https://open.spotify.com/embed/playlist/17vUdxgzuKBhwS8YPKKgrZ?utm_source=generator"
     width="100%" height="352" frameborder="0" allowfullscreen=""
     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
     loading="lazy">
   </iframe>
+
+  <div style="margin-top:2rem;padding:1rem;border:1px solid rgba(201,169,78,0.1);border-radius:8px;background:rgba(0,0,0,0.2);max-width:450px">
+    <p style="font-size:0.65rem;color:#888;text-align:center;font-family:monospace;letter-spacing:2px;text-transform:uppercase;margin-bottom:0.5rem">NEXT PHASE</p>
+    <p style="font-size:0.85rem;color:#C9A94E;text-align:center;margin-bottom:0.3rem">Phase 1: Light — "Where the Break Begins"</p>
+    <p style="font-size:0.7rem;color:#666;text-align:center;margin-bottom:0.8rem">Unlocks at Seeker tier · $20 cumulative offering</p>
+    <div style="text-align:center"><a href="https://chapel-pos-v2.vercel.app" target="_blank" style="display:inline-block;padding:8px 20px;border:1px solid rgba(201,169,78,0.3);color:#C9A94E;text-decoration:none;font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;font-family:monospace;border-radius:3px">↑ Upgrade to Continue</a></div>
+  </div>
 </section>
 
 
