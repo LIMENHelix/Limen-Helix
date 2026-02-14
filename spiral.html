@@ -122,9 +122,15 @@ var NODE_INFO={
 // ═══ TIER GATING ═══
 var TIERS=[{tier:0,min:5,label:'Initiate',phases:[0],color:'#888'},{tier:1,min:20,label:'Seeker',phases:[0,1],color:'#9a8a5a'},{tier:2,min:50,label:'Acolyte',phases:[0,1,2],color:'#a89050'},{tier:3,min:100,label:'Disciple',phases:[0,1,2,3],color:'#b89840'},{tier:4,min:200,label:'Adept',phases:[0,1,2,3,4],color:'#c8a030'},{tier:5,min:500,label:'Oracle',phases:[0,1,2,3,4,5],color:'#d0a828'},{tier:6,min:1000,label:'Architect',phases:[0,1,2,3,4,5,6],color:'#d8b020'},{tier:7,min:2500,label:'Hierophant',phases:[0,1,2,3,4,5,6,7],color:'#e0b818'},{tier:8,min:5000,label:'Threshold Keeper',phases:[0,1,2,3,4,5,6,7,8],color:'#e8c010'},{tier:9,min:10000,label:'Phase Walker',phases:[0,1,2,3,4,5,6,7,8,9],color:'#f0c808'},{tier:10,min:25000,label:'Source Aligned',phases:[0,1,2,3,4,5,6,7,8,9,10],color:'#f8d000'},{tier:11,min:50000,label:'Resurrected',phases:[0,1,2,3,4,5,6,7,8,9,10],color:'#ffd700'}];
 var params=new URLSearchParams(window.location.search);var isAdmin=params.get('limen')==='spiral99';
+var skipTunnel=params.get('skip')==='1';
 var access;try{access=JSON.parse(localStorage.getItem('limenAccess'))||{totalPaid:0,tier:-1}}catch(e){access={totalPaid:0,tier:-1}}
 var userTier=isAdmin?11:access.tier;var currentTierData=TIERS[Math.max(0,Math.min(userTier,11))]||TIERS[0];
 function isUnlocked(id){return isAdmin||currentTierData.phases.indexOf(id)!==-1}
+// First-time access — play the tunnel
+var tunnelSeen=false;try{tunnelSeen=localStorage.getItem('limenTunnelSeen')==='1'}catch(e){}
+if(!tunnelSeen&&!skipTunnel&&(userTier>=0||isAdmin)){
+  window.location.href='tunnel.html'+window.location.search;
+}
 if(userTier<0&&!isAdmin){document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:2rem;background:#000;font-family:monospace"><div style="font-size:0.5rem;color:rgba(201,169,78,0.3);letter-spacing:6px;margin-bottom:2rem">LIMEN HELIX</div><div style="font-size:2rem;opacity:0.15;margin-bottom:1rem">\u2298</div><p style="color:#888;font-size:0.75rem;letter-spacing:2px;margin-bottom:2rem">ACCESS REQUIRED</p><a href="https://chapel-pos-v2.vercel.app" style="display:inline-block;padding:10px 25px;border:1px solid rgba(201,169,78,0.3);color:#C9A94E;text-decoration:none;font-size:0.55rem;letter-spacing:3px;font-family:monospace;border-radius:2px">\u2726 OFFER</a></div>'}
 
 var phase=0,t=0,canvas=document.getElementById('c'),ctx=canvas.getContext('2d'),W,H;
