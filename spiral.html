@@ -17,14 +17,14 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
 
 /* Center phase display */
 .phase-label{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:50;text-align:center;pointer-events:none;transition:opacity 0.8s}
-.phase-num{font-size:clamp(4rem,12vw,8rem);font-weight:100;letter-spacing:clamp(8px,3vw,25px);opacity:0.06;font-family:Georgia,serif;transition:color 0.8s}
-.phase-name{font-size:clamp(0.6rem,1.8vw,0.8rem);letter-spacing:clamp(6px,2vw,15px);text-transform:uppercase;opacity:0.35;margin-top:-8px;transition:color 0.8s}
+.phase-num{font-size:clamp(4rem,12vw,8rem);font-weight:100;letter-spacing:clamp(8px,3vw,25px);opacity:0.15;font-family:Georgia,serif;transition:color 0.8s}
+.phase-name{font-size:clamp(0.6rem,1.8vw,0.8rem);letter-spacing:clamp(6px,2vw,15px);text-transform:uppercase;opacity:0.6;margin-top:-8px;transition:color 0.8s}
 
 /* HUD corners */
 .hud-bl{position:fixed;bottom:12px;left:14px;z-index:100;font-size:0.45rem;letter-spacing:2px;text-transform:uppercase}
 .hud-br{position:fixed;bottom:12px;right:14px;z-index:100;font-size:0.45rem;letter-spacing:2px;text-transform:uppercase;text-align:right}
-.hud-tl{position:fixed;top:50px;left:14px;z-index:100;font-size:0.4rem;letter-spacing:2px;text-transform:uppercase;opacity:0.3}
-.hud-tr{position:fixed;top:50px;right:14px;z-index:100;font-size:0.4rem;letter-spacing:2px;text-transform:uppercase;text-align:right;opacity:0.3}
+.hud-tl{position:fixed;top:50px;left:14px;z-index:100;font-size:0.4rem;letter-spacing:2px;text-transform:uppercase;opacity:0.65}
+.hud-tr{position:fixed;top:50px;right:14px;z-index:100;font-size:0.4rem;letter-spacing:2px;text-transform:uppercase;text-align:right;opacity:0.65}
 
 /* Stat readouts */
 .stat-row{display:flex;gap:12px;margin-top:4px}
@@ -97,10 +97,10 @@ document.getElementById('pnum').textContent=p.id;
 document.getElementById('pnum').style.color=ac;
 document.getElementById('pname').textContent=p.name;
 document.getElementById('pname').style.color=acD;
-document.getElementById('htl').innerHTML='<span style="color:'+acD+'">'+p.dmn+'</span>';
-document.getElementById('htr').innerHTML='<span style="color:'+acD+'">'+p.neural+'</span>';
-document.getElementById('hbl').innerHTML='<span style="color:'+acD+'">MIR:'+p.mirrors+' FRC:'+Math.round(p.crack*100)+'% DIS:'+Math.round(p.dis*100)+'% ENT:'+p.ent+'</span>';
-document.getElementById('hbr').innerHTML='<span style="color:'+acD+'">SCALE:'+p.scale.toFixed(1)+'x GRID:'+Math.round(p.grid*100)+'</span>'}
+document.getElementById('htl').innerHTML='<span style="color:"+ac+'">'+p.dmn+'</span>';
+document.getElementById('htr').innerHTML='<span style="color:"+ac+'">'+p.neural+'</span>';
+document.getElementById('hbl').innerHTML='<span style="color:"+ac+'">MIR:'+p.mirrors+' FRC:'+Math.round(p.crack*100)+'% DIS:'+Math.round(p.dis*100)+'% ENT:'+p.ent+'</span>';
+document.getElementById('hbr').innerHTML='<span style="color:"+ac+'">SCALE:'+p.scale.toFixed(1)+'x GRID:'+Math.round(p.grid*100)+'</span>'}
 
 // ═══ DRAW ═══
 function draw(){var p=PH[phase];var cx=W/2,cy=H/2,maxD=Math.max(W,H);
@@ -114,7 +114,7 @@ ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
 // PERSPECTIVE GRID — Jarvis holographic floor
 if(p.grid>0.003){
 var gR=p.aR+','+p.aG+','+p.aB;
-ctx.lineWidth=0.5;
+ctx.lineWidth=0.8;
 var horizon=cy*0.35;
 // Radial lines from vanishing point
 for(var i=-30;i<=30;i++){
@@ -148,7 +148,7 @@ ctx.beginPath();ctx.moveTo(W,0);ctx.lineTo(W*0.88,cy*0.25);ctx.lineTo(W*0.88,H*0
 ctx.fillStyle='rgba('+p.wR+','+p.wG+','+p.wB+','+(wa*0.5)+')';
 ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(W*0.12,cy*0.25);ctx.lineTo(W*0.88,cy*0.25);ctx.lineTo(W,0);ctx.fill();
 // Wall edge lines
-ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+(0.04*(1-p.dis))+')';ctx.lineWidth=0.5;
+ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+(0.12*(1-p.dis))+')';ctx.lineWidth=0.8;
 ctx.beginPath();ctx.moveTo(W*0.12,cy*0.25);ctx.lineTo(W*0.12,H*0.88);ctx.stroke();
 ctx.beginPath();ctx.moveTo(W*0.88,cy*0.25);ctx.lineTo(W*0.88,H*0.88);ctx.stroke();
 }
@@ -156,28 +156,28 @@ ctx.beginPath();ctx.moveTo(W*0.88,cy*0.25);ctx.lineTo(W*0.88,H*0.88);ctx.stroke(
 // CONCENTRIC RINGS — Jarvis-style holographic circles
 for(var r=0;r<p.rings;r++){
 var ringR=(r+1)*maxD*0.04*p.scale+Math.sin(t*0.002+r*1.5)*10;
-var ringAlpha=(0.04-r*0.003)*(1-p.dis);
+var ringAlpha=(0.12-r*0.006)*(1-p.dis);
 if(ringAlpha>0.002){
 ctx.beginPath();ctx.arc(cx,cy,ringR,0,Math.PI*2);
 ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+ringAlpha+')';
-ctx.lineWidth=0.5;ctx.stroke();
+ctx.lineWidth=0.8;ctx.stroke();
 // Tick marks on rings
 for(var tk=0;tk<12;tk++){
 var ta=tk/12*Math.PI*2+t*0.001*(r%2===0?1:-1);
 ctx.beginPath();
 ctx.moveTo(cx+Math.cos(ta)*(ringR-4),cy+Math.sin(ta)*(ringR-4));
 ctx.lineTo(cx+Math.cos(ta)*(ringR+4),cy+Math.sin(ta)*(ringR+4));
-ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+(ringAlpha*0.8)+')';ctx.lineWidth=0.5;ctx.stroke();
+ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+(ringAlpha*1.2)+')';ctx.lineWidth=0.8;ctx.stroke();
 }}}
 
 // ROTATING ARC SEGMENTS — scanning feel
-var scanAlpha=(0.08)*(1-p.dis*0.5);
+var scanAlpha=(0.2)*(1-p.dis*0.5);
 if(scanAlpha>0.005){
 for(var sa=0;sa<3;sa++){
 var scanAngle=t*0.001*(sa+1)*0.7+sa*2.1;
 var scanR=maxD*(0.08+sa*0.06)*p.scale;
 ctx.beginPath();ctx.arc(cx,cy,scanR,scanAngle,scanAngle+0.8);
-ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+scanAlpha+')';ctx.lineWidth=1.5;ctx.stroke();
+ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+scanAlpha+')';ctx.lineWidth=2.5;ctx.stroke();
 }}
 
 // MIRRORS — floating rectangles with glow
@@ -189,14 +189,14 @@ var my=cy+Math.sin(ang)*dist*0.4;
 var ms=maxD*0.02+Math.sin(t*0.002+m)*5;
 // Glow
 var mg=ctx.createRadialGradient(mx,my,0,mx,my,ms*3);
-mg.addColorStop(0,'rgba('+p.aR+','+p.aG+','+p.aB+','+(0.05*(1-p.dis))+')');
+mg.addColorStop(0,'rgba('+p.aR+','+p.aG+','+p.aB+','+(0.14*(1-p.dis))+')');
 mg.addColorStop(1,'rgba(0,0,0,0)');
 ctx.fillStyle=mg;ctx.beginPath();ctx.arc(mx,my,ms*3,0,Math.PI*2);ctx.fill();
 // Surface
 ctx.save();ctx.translate(mx,my);ctx.rotate(ang+Math.PI/2);
 ctx.beginPath();ctx.rect(-ms*0.35,-ms*0.8,ms*0.7,ms*1.6);
-ctx.fillStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+(0.03*(1-p.dis))+')';ctx.fill();
-ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+(0.08*(1-p.dis))+')';ctx.lineWidth=0.5;ctx.stroke();
+ctx.fillStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+(0.1*(1-p.dis))+')';ctx.fill();
+ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+(0.2*(1-p.dis))+')';ctx.lineWidth=0.8;ctx.stroke();
 ctx.restore();
 }
 
@@ -210,7 +210,7 @@ var px=sx,py=sy;
 for(var s=0;s<3+Math.floor(p.crack*6);s++){
 px+=Math.sin(c*3+s*2+t*0.003)*40;py+=Math.cos(c*2+s*3)*30;ctx.lineTo(px,py);
 }
-ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+(p.crack*0.05)+')';
+ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+(p.crack*0.14)+')';
 ctx.lineWidth=0.5+p.crack*2;ctx.stroke();
 if(p.crack>0.35){ctx.shadowColor='rgba('+p.aR+','+p.aG+','+p.aB+',0.4)';ctx.shadowBlur=20*p.crack;ctx.stroke();ctx.shadowBlur=0}
 }}
@@ -230,7 +230,7 @@ ctx.beginPath();ctx.arc(ex2,ey2-22,7,0,Math.PI*2);ctx.fillStyle='rgba('+p.aR+','
 
 // DISSOLUTION PARTICLES — floating debris
 if(p.particleCount>0){
-var pa=Math.min(p.dis*0.15+0.02,0.12);
+var pa=Math.min(p.dis*0.2+0.05,0.3);
 for(var dp=0;dp<p.particleCount;dp++){
 var dx=cx+Math.sin(dp*4.7+t*0.0015)*W*0.5*p.scale;
 var dy=cy+Math.cos(dp*3.1+t*0.001)*H*0.45;
@@ -241,16 +241,16 @@ ctx.fillStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+pa+')';ctx.fill();}
 
 // SELF-NARRATIVE TEXT — whispers in the room
 if(p.txt.length>0){
-ctx.font=Math.round(clamp(10,W*0.018,16))+'px monospace';ctx.textAlign='center';
+ctx.font=Math.round(clamp(13,W*0.025,20))+'px monospace';ctx.textAlign='center';
 for(var ti=0;ti<p.txt.length;ti++){
 var tx=cx+Math.sin(ti*2.1+t*0.0005)*W*0.35*(1-p.dis*0.8);
 var ty=cy+Math.cos(ti*1.7+t*0.0003)*H*0.28*(1-p.dis*0.8);
-var ta=0.08*(1-p.dis)*(0.4+Math.sin(t*0.0012+ti*1.5)*0.6);
+var ta=0.2*(1-p.dis)*(0.4+Math.sin(t*0.0012+ti*1.5)*0.6);
 if(ta>0.005){ctx.fillStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+ta+')';ctx.fillText(p.txt[ti],tx,ty);}
 }}
 
 // RECURSIVE SPIRAL
-var la=(1-p.dis*0.9)*0.08;
+var la=(1-p.dis*0.9)*0.2;
 if(la>0.003){
 ctx.beginPath();
 for(var a=0;a<Math.PI*10;a+=0.03){
@@ -258,18 +258,18 @@ var sr=20+a*10*p.scale*(1-p.dis*0.5);
 var spx=cx+Math.cos(a+t*0.0006)*sr;
 var spy=cy+Math.sin(a+t*0.0006)*sr*0.4;
 if(a===0)ctx.moveTo(spx,spy);else ctx.lineTo(spx,spy);}
-ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+la+')';ctx.lineWidth=0.6;ctx.stroke();}
+ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+la+')';ctx.lineWidth=1.2;ctx.stroke();}
 
 // CENTER PULSE — heartbeat
 var pulseR=20+Math.sin(t*0.003*p.pulseSpeed)*15;
-var pulseA=0.04+Math.sin(t*0.003*p.pulseSpeed)*0.03;
+var pulseA=0.1+Math.sin(t*0.003*p.pulseSpeed)*0.08;
 var pulse=ctx.createRadialGradient(cx,cy,0,cx,cy,pulseR*3);
 pulse.addColorStop(0,'rgba('+p.aR+','+p.aG+','+p.aB+','+pulseA+')');pulse.addColorStop(1,'rgba(0,0,0,0)');
 ctx.fillStyle=pulse;ctx.beginPath();ctx.arc(cx,cy,pulseR*3,0,Math.PI*2);ctx.fill();
 
 // CORNER BRACKETS — HUD frame
 var bL=30,bA=0.08*(1-p.dis*0.5);
-ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+bA+')';ctx.lineWidth=0.5;
+ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+bA+')';ctx.lineWidth=0.8;
 // TL
 ctx.beginPath();ctx.moveTo(8,8+bL);ctx.lineTo(8,8);ctx.lineTo(8+bL,8);ctx.stroke();
 // TR
