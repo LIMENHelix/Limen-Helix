@@ -445,74 +445,159 @@ break;// only one hovered node
 
 // === TAPPED NODE INFO PANEL ===
 if(tappedNode>=0&&tapFade>0){
-tapFade-=0.003;// slow fade
+tapFade-=0.003;
 if(tapFade<=0){tappedNode=-1;tapFade=0;}
 else{
 var tn=DMN_NODES[tappedNode];
 var tnInfo=NODE_INFO[tn.name];
 if(tnInfo){
-var panelW=Math.min(380,W*0.55);
-var panelH=280;
-var panelX=tn.x<0.5?Math.min(W-panelW-20,W*0.55):Math.max(20,W*0.45-panelW);
-var panelY=Math.max(70,Math.min(H-panelH-40,tn.y*H-panelH/2));
+var isMobile=W<600;
+var fontSize=isMobile?10:13;
+var titleSize=isMobile?14:18;
+var popSize=isMobile?9:12;
+var lineH=isMobile?16:22;
+var padding=isMobile?10:14;
+var popLines=tnInfo.pop.split('\n');
+var hasPhase7=phase===7&&tnInfo.phase7;
+var panelW=Math.min(isMobile?W*0.78:380,W*0.55);
+
+// ── PASS 1: Measure actual content height ──
+var measuredH=0;
+measuredH+=titleSize+10;// node name
+measuredH+=fontSize+8;// function
+// Description — check if wraps
+ctx.font=fontSize+'px Georgia';
+if(isMobile&&ctx.measureText(tnInfo.desc).width>panelW){
+  var wds=tnInfo.desc.split(' '),ln='',wrapLines=0;
+  for(var wi=0;wi<wds.length;wi++){
+    var tl=ln+(ln?' ':'')+wds[wi];
+    if(ctx.measureText(tl).width>panelW&&ln){wrapLines++;ln=wds[wi];}
+    else{ln=tl;}
+  }
+  if(ln)wrapLines++;
+  measuredH+=wrapLines*(fontSize+3)+4;
+}else{measuredH+=fontSize+6;}
+measuredH+=14;// divider + gap
+// Pop lines — check each for overflow
+ctx.font=popSize+'px monospace';
+for(var pl=0;pl<popLines.length;pl++){
+  if(isMobile&&ctx.measureText(popLines[pl]).width>panelW){
+    measuredH+=lineH+popSize;// wrapped line takes more
+  }else{measuredH+=lineH;}
+}
+if(hasPhase7)measuredH+=lineH+4;
+var panelH=measuredH+padding;
+
+// ── Position panel ──
+var panelX,panelY;
+if(isMobile){
+  panelX=Math.max(6,Math.min(W-panelW-6,(tn.x*W)-panelW/2));
+  panelY=Math.max(6,Math.min(H-panelH-padding*2-6,tn.y*H+35));
+  if(tn.y>0.45)panelY=Math.max(6,tn.y*H-panelH-padding*2-35);
+}else{
+  panelX=tn.x<0.5?Math.min(W-panelW-20,W*0.55):Math.max(20,W*0.45-panelW);
+  panelY=Math.max(70,Math.min(H-panelH-padding*2-20,tn.y*H-panelH/2));
+}
 var pAlpha=Math.min(tapFade,0.85);
 
-// Panel background
-ctx.fillStyle='rgba(0,0,0,'+(pAlpha*0.88)+')';
+// ── PASS 2: Draw box at measured size ──
+ctx.fillStyle='rgba(0,0,0,'+(pAlpha*0.93)+')';
 ctx.strokeStyle='rgba('+aRGB+','+(pAlpha*0.4)+')';ctx.lineWidth=1;
-ctx.beginPath();ctx.rect(panelX-12,panelY-12,panelW+24,panelH+24);ctx.fill();ctx.stroke();
-
-// Inner border accent
+ctx.beginPath();ctx.rect(panelX-padding,panelY-padding,panelW+padding*2,panelH+padding*2);ctx.fill();ctx.stroke();
 ctx.strokeStyle='rgba('+aRGB+','+(pAlpha*0.1)+')';ctx.lineWidth=0.5;
-ctx.beginPath();ctx.rect(panelX-6,panelY-6,panelW+12,panelH+12);ctx.stroke();
+ctx.beginPath();ctx.rect(panelX-padding/2,panelY-padding/2,panelW+padding,panelH+padding);ctx.stroke();
 
-// Connection line from node to panel
-ctx.beginPath();ctx.moveTo(tn.x*W,tn.y*H);ctx.lineTo(panelX+panelW/2,panelY);
+// Connection line
+ctx.beginPath();ctx.moveTo(tn.x*W,tn.y*H);
+var lineTarget=panelY>tn.y*H?panelY:panelY+panelH+padding*2;
+ctx.lineTo(panelX+panelW/2,lineTarget);
 ctx.strokeStyle='rgba('+aRGB+','+(pAlpha*0.2)+')';ctx.lineWidth=0.8;ctx.stroke();
 
-// Node name — BIG
-ctx.font='bold 18px monospace';ctx.textAlign='left';
+// ── PASS 3: Render text content ──
+var yOff=panelY;
+ctx.textAlign='left';
+
+// Node name
+ctx.font='bold '+titleSize+'px monospace';
 ctx.fillStyle='rgba('+aRGB+','+(pAlpha)+')';
-ctx.fillText(tn.name,panelX,panelY+14);
+ctx.fillText(tn.name,panelX,yOff+titleSize);yOff+=titleSize+10;
 
-// Function — clear
-ctx.font='13px monospace';
+// Function
+ctx.font=fontSize+'px monospace';
 ctx.fillStyle='rgba(255,255,255,'+(pAlpha*0.8)+')';
-ctx.fillText(tnInfo.fn,panelX,panelY+38);
+ctx.fillText(tnInfo.fn,panelX,yOff+fontSize);yOff+=fontSize+8;
 
-// Description
-ctx.font='13px Georgia';
+// Description with word wrap
+ctx.font=fontSize+'px Georgia';
 ctx.fillStyle='rgba(255,255,255,'+(pAlpha*0.55)+')';
-ctx.fillText(tnInfo.desc,panelX,panelY+62);
-
-// Divider line
-ctx.beginPath();ctx.moveTo(panelX,panelY+74);ctx.lineTo(panelX+panelW,panelY+74);
-ctx.strokeStyle='rgba('+aRGB+','+(pAlpha*0.15)+')';ctx.lineWidth=0.5;ctx.stroke();
-
-// Population info — who is affected here
-ctx.font='12px monospace';
-var popLines=tnInfo.pop.split('\n');
-for(var pl=0;pl<popLines.length;pl++){
-// Highlight the condition name
-var colonIdx=popLines[pl].indexOf(':');
-if(colonIdx>0){
-ctx.fillStyle='rgba('+aRGB+','+(pAlpha*0.7)+')';
-ctx.fillText(popLines[pl].substring(0,colonIdx+1),panelX,panelY+94+pl*22);
-ctx.fillStyle='rgba(255,255,255,'+(pAlpha*0.45)+')';
-ctx.fillText(popLines[pl].substring(colonIdx+1),panelX+ctx.measureText(popLines[pl].substring(0,colonIdx+1)).width+4,panelY+94+pl*22);
+if(isMobile&&ctx.measureText(tnInfo.desc).width>panelW){
+  var words=tnInfo.desc.split(' '),line='';
+  for(var wi=0;wi<words.length;wi++){
+    var testLine=line+(line?' ':'')+words[wi];
+    if(ctx.measureText(testLine).width>panelW&&line){
+      ctx.fillText(line,panelX,yOff+fontSize);yOff+=fontSize+3;
+      line=words[wi];
+    }else{line=testLine;}
+  }
+  if(line){ctx.fillText(line,panelX,yOff+fontSize);yOff+=fontSize+4;}
 }else{
-ctx.fillStyle='rgba('+aRGB+','+(pAlpha*0.5)+')';
-ctx.fillText(popLines[pl],panelX,panelY+94+pl*22);
-}}
-
-// Phase-specific note — RED and prominent
-if(phase===7&&tnInfo.phase7){
-ctx.font='bold 14px monospace';
-ctx.fillStyle='rgba(255,60,60,'+(pAlpha*0.85)+')';
-ctx.fillText('\u26a0 '+tnInfo.phase7,panelX,panelY+94+popLines.length*22+14);
+  ctx.fillText(tnInfo.desc,panelX,yOff+fontSize);yOff+=fontSize+6;
 }
 
-// Pulse ring on tapped node
+// Divider
+yOff+=4;
+ctx.beginPath();ctx.moveTo(panelX,yOff);ctx.lineTo(panelX+panelW,yOff);
+ctx.strokeStyle='rgba('+aRGB+','+(pAlpha*0.15)+')';ctx.lineWidth=0.5;ctx.stroke();
+yOff+=10;
+
+// Population info with overflow handling
+ctx.font=popSize+'px monospace';
+for(var pl=0;pl<popLines.length;pl++){
+var colonIdx=popLines[pl].indexOf(':');
+if(colonIdx>0){
+  ctx.fillStyle='rgba('+aRGB+','+(pAlpha*0.7)+')';
+  var condText=popLines[pl].substring(0,colonIdx+1);
+  ctx.fillText(condText,panelX,yOff+popSize);
+  ctx.fillStyle='rgba(255,255,255,'+(pAlpha*0.45)+')';
+  var detailText=popLines[pl].substring(colonIdx+1);
+  var condW=ctx.measureText(condText).width+3;
+  // Wrap detail text if needed on mobile
+  if(isMobile&&ctx.measureText(detailText).width>panelW-condW){
+    // Truncate smartly at word boundary
+    var maxW=panelW-condW;
+    var trimmed='';
+    var dWords=detailText.trim().split(' ');
+    for(var dw=0;dw<dWords.length;dw++){
+      var test=trimmed+(trimmed?' ':'')+dWords[dw];
+      if(ctx.measureText(test).width>maxW){
+        if(!trimmed)trimmed=dWords[dw];
+        ctx.fillText(trimmed,panelX+condW,yOff+popSize);
+        yOff+=popSize+3;
+        trimmed=dWords.slice(dw).join(' ');
+        if(ctx.measureText(trimmed).width>panelW)trimmed=trimmed.substring(0,Math.floor(panelW/(popSize*0.6)))+'…';
+        ctx.fillText(trimmed,panelX+4,yOff+popSize);
+        trimmed='';break;
+      }else{trimmed=test;}
+    }
+    if(trimmed)ctx.fillText(trimmed,panelX+condW,yOff+popSize);
+  }else{
+    ctx.fillText(detailText,panelX+condW,yOff+popSize);
+  }
+}else{
+  ctx.fillStyle='rgba('+aRGB+','+(pAlpha*0.5)+')';
+  ctx.fillText(popLines[pl],panelX,yOff+popSize);
+}
+yOff+=lineH;
+}
+
+// Phase 7 warning
+if(hasPhase7){
+ctx.font='bold '+(isMobile?11:14)+'px monospace';
+ctx.fillStyle='rgba(255,60,60,'+(pAlpha*0.85)+')';
+ctx.fillText('\u26a0 '+tnInfo.phase7,panelX,yOff+12);
+}
+
+// Pulse ring
 var pulseExpand=1-tapFade;
 ctx.beginPath();ctx.arc(tn.x*W,tn.y*H,20+pulseExpand*80,0,Math.PI*2);
 ctx.strokeStyle='rgba(255,255,255,'+(tapFade*0.15)+')';ctx.lineWidth=1.5;ctx.stroke();
