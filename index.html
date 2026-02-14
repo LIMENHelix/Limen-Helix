@@ -514,6 +514,112 @@ gateEl.addEventListener('mousemove',function(e){
   var r=this.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
   document.getElementById('eye-container').style.transform='translate('+x*20+'px,'+y*15+'px)';
 });
+
+// ═══ FORCED ENTRY — post-payment eye takeover ═══
+(function(){
+  var params=new URLSearchParams(window.location.search);
+  if(!params.get('paid'))return;
+  
+  // Store tier from POS into localStorage on this domain
+  var tier=parseInt(params.get('tier'))||0;
+  var tk=params.get('tk')||'';
+  try{
+    var existing=JSON.parse(localStorage.getItem('limenAccess')||'{"totalPaid":0,"tier":-1}');
+    if(tier>existing.tier){existing.tier=tier;existing.token=tk;}
+    localStorage.setItem('limenAccess',JSON.stringify(existing));
+  }catch(e){}
+  
+  // Hide all non-eye elements
+  var gate=document.getElementById('gate');
+  var glyphs=document.querySelectorAll('.cg');
+  var subtitle=document.querySelector('#gate p');
+  glyphs.forEach(function(g){g.style.transition='opacity 1s';g.style.opacity='0'});
+  if(subtitle)subtitle.style.display='none';
+  
+  // Create takeover overlay
+  var takeoverDiv=document.createElement('div');
+  takeoverDiv.id='eyeTakeover';
+  takeoverDiv.style.cssText='position:fixed;inset:0;z-index:9999;background:#000;opacity:0;transition:opacity 0.5s;pointer-events:none;display:flex;align-items:center;justify-content:center;flex-direction:column';
+  var takeoverMsg=document.createElement('div');
+  takeoverMsg.style.cssText='font-family:monospace;font-size:clamp(0.4rem,1.2vw,0.6rem);letter-spacing:4px;text-transform:uppercase;color:rgba(201,169,78,0);transition:color 2s;text-align:center;position:fixed;bottom:15%;z-index:10000';
+  takeoverDiv.appendChild(takeoverMsg);
+  document.body.appendChild(takeoverDiv);
+  
+  // Create whiteout
+  var wo=document.createElement('div');
+  wo.style.cssText='position:fixed;inset:0;z-index:10001;background:#fff;opacity:0;transition:opacity 0.6s;pointer-events:none';
+  document.body.appendChild(wo);
+  
+  var eyeContainer=document.getElementById('eye-container');
+  
+  // Phase 1 (0s): Fade to black, show just the eye
+  setTimeout(function(){takeoverDiv.style.opacity='1'},100);
+  
+  // Phase 2 (1.5s): Eye begins opening on its own — they didn't click it
+  setTimeout(function(){
+    eyeTarget=1;
+    eyeClicked=true;
+    takeoverMsg.textContent='YOUR OFFERING HAS BEEN ACCEPTED';
+    takeoverMsg.style.color='rgba(201,169,78,0.5)';
+  },1500);
+  
+  // Phase 3 (4s): Eye fully open — message changes  
+  setTimeout(function(){
+    takeoverMsg.style.color='rgba(201,169,78,0)';
+    setTimeout(function(){
+      takeoverMsg.textContent='THE THRESHOLD OPENS';
+      takeoverMsg.style.color='rgba(201,169,78,0.5)';
+    },800);
+  },4000);
+  
+  // Phase 4 (6s): Eye begins SCALING — zooming into the pupil
+  // The eye-container grows to fill the screen over 5 seconds
+  setTimeout(function(){
+    eyeContainer.style.transition='transform 6s cubic-bezier(0.25,0.1,0.25,1)';
+    eyeContainer.style.transformOrigin='center center';
+    eyeContainer.style.transform='scale(8)';// fills well past screen edges — you're IN the pupil
+    eyeContainer.style.zIndex='10000';
+  },6000);
+  
+  // Phase 5 (8s): Message — fear trigger
+  setTimeout(function(){
+    takeoverMsg.style.color='rgba(201,169,78,0)';
+    setTimeout(function(){
+      takeoverMsg.textContent='LOOK CLOSER';
+      takeoverMsg.style.color='rgba(201,169,78,0.4)';
+    },600);
+  },8000);
+  
+  // Phase 6 (10s): Scale even more — past the iris, INTO the pupil void
+  setTimeout(function(){
+    eyeContainer.style.transition='transform 4s cubic-bezier(0.4,0,0.2,1)';
+    eyeContainer.style.transform='scale(25)';
+  },10000);
+  
+  // Phase 7 (12s): Message gone, just black pupil filling screen
+  setTimeout(function(){
+    takeoverMsg.style.color='rgba(201,169,78,0)';
+  },11500);
+  
+  // Phase 8 (13s): Brief flash then redirect to tunnel
+  setTimeout(function(){
+    wo.style.opacity='0.15';
+    setTimeout(function(){wo.style.opacity='0'},100);
+  },13000);
+  
+  // Phase 9 (14s): Full whiteout
+  setTimeout(function(){
+    wo.style.opacity='1';
+  },14000);
+  
+  // Phase 10 (15s): Redirect to tunnel
+  setTimeout(function(){
+    var qs=window.location.search.replace(/[?&]paid=[^&]*/g,'').replace(/[?&]tier=[^&]*/g,'').replace(/[?&]tk=[^&]*/g,'');
+    if(qs&&qs[0]!=='?')qs='?'+qs;
+    if(!qs)qs='';
+    window.location.href='tunnel.html'+qs;
+  },15000);
+})();
 </script>
 </body>
 </html>
