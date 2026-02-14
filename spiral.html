@@ -24,6 +24,15 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
 .flash.on{opacity:1}
 .lock{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.95);text-align:center}
 .lock-btn{display:inline-block;padding:10px 25px;border:1px solid rgba(201,169,78,0.3);color:#C9A94E;text-decoration:none;font-size:0.55rem;letter-spacing:3px;text-transform:uppercase;font-family:monospace;border-radius:2px}
+.phase-enter{font-size:clamp(0.45rem,1.2vw,0.6rem);letter-spacing:6px;color:rgba(201,169,78,0);cursor:pointer;pointer-events:none;margin-top:12px;transition:color 2s,opacity 0.5s;text-transform:uppercase;animation:enterPulse 3s ease-in-out infinite}
+.phase-enter.vis{color:rgba(201,169,78,0.35);pointer-events:auto}
+@keyframes enterPulse{0%,100%{opacity:0.6}50%{opacity:1}}
+#immersive-overlay{position:fixed;inset:0;z-index:300;pointer-events:none;opacity:0;transition:opacity 1s}
+#immersive-narration{position:fixed;bottom:8%;left:50%;transform:translateX(-50%);z-index:310;font-family:monospace;font-size:clamp(0.5rem,1.5vw,0.7rem);letter-spacing:4px;color:rgba(201,169,78,0);text-align:center;transition:color 1.5s;text-transform:uppercase;pointer-events:none;line-height:2.2;max-width:80vw}
+#immersive-source{position:fixed;top:8%;left:50%;transform:translateX(-50%);z-index:310;font-family:monospace;font-size:clamp(0.35rem,0.9vw,0.45rem);letter-spacing:3px;color:rgba(201,169,78,0);text-align:center;transition:color 1.5s;text-transform:uppercase;pointer-events:none}
+#immersive-exit{position:fixed;top:14px;right:14px;z-index:320;font-family:monospace;font-size:0.5rem;letter-spacing:3px;color:rgba(201,169,78,0);cursor:pointer;transition:color 0.5s;text-transform:uppercase;padding:8px}
+#immersive-exit.vis{color:rgba(201,169,78,0.3);pointer-events:auto}
+#immersive-exit.vis:hover{color:rgba(201,169,78,0.7)}
 </style>
 </head>
 <body>
@@ -31,12 +40,16 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
 <div class="scanline"></div>
 <div class="flash" id="flash"></div>
 <div class="hud-top" id="nav"></div>
-<div class="phase-label" id="plabel"><div class="phase-num" id="pnum">0</div><div class="phase-name" id="pname">SOURCE</div></div>
+<div class="phase-label" id="plabel"><div class="phase-num" id="pnum">0</div><div class="phase-name" id="pname">SOURCE</div><div class="phase-enter" id="penter" onclick="enterPhaseExperience()">⊘ ENTER</div></div>
 <div class="hud-tl" id="htl"></div>
 <div class="hud-tr" id="htr"></div>
 <div class="hud-bl" id="hbl"></div>
 <div class="hud-br" id="hbr"></div>
 <div id="lock-container"></div>
+<div id="immersive-overlay"></div>
+<div id="immersive-narration"></div>
+<div id="immersive-source"></div>
+<div id="immersive-exit" onclick="exitPhaseExperience()">✕ EXIT</div>
 <script>
 // ═══ PHASE DATA ═══
 var PH=[
@@ -134,11 +147,17 @@ if(!tunnelSeen&&!skipTunnel&&(userTier>=0||isAdmin)){
 if(userTier<0&&!isAdmin){document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:2rem;background:#000;font-family:monospace"><div style="font-size:0.5rem;color:rgba(201,169,78,0.3);letter-spacing:6px;margin-bottom:2rem">LIMEN HELIX</div><div style="font-size:2rem;opacity:0.15;margin-bottom:1rem">\u2298</div><p style="color:#888;font-size:0.75rem;letter-spacing:2px;margin-bottom:2rem">ACCESS REQUIRED</p><a href="https://chapel-pos-v2.vercel.app" style="display:inline-block;padding:10px 25px;border:1px solid rgba(201,169,78,0.3);color:#C9A94E;text-decoration:none;font-size:0.55rem;letter-spacing:3px;font-family:monospace;border-radius:2px">\u2726 OFFER</a></div>'}
 
 var phase=0,t=0,canvas=document.getElementById('c'),ctx=canvas.getContext('2d'),W,H;
+var immersiveMode=false,immersiveT=0,immersiveZoom=0,immersiveFocusNode=0;
+// Show ENTER button after 2 seconds on each phase
+var enterTimer=null;
+function showEnterBtn(){var el=document.getElementById('penter');if(el&&isUnlocked(phase))el.classList.add('vis')}
+function hideEnterBtn(){var el=document.getElementById('penter');if(el)el.classList.remove('vis');clearTimeout(enterTimer)}
+setTimeout(showEnterBtn,2500);
 function resize(){W=window.innerWidth;H=window.innerHeight;canvas.width=W*2;canvas.height=H*2;ctx.setTransform(2,0,0,2,0,0)}
 window.addEventListener('resize',resize);resize();
 
 function buildNav(){var nav=document.getElementById('nav');nav.innerHTML='';for(var i=0;i<PH.length;i++){var b=document.createElement('button');b.textContent=i;b.className=i===phase?'act':(!isUnlocked(i)?'locked':'');b.onclick=(function(idx){return function(){if(isUnlocked(idx))setPhase(idx)}})(i);nav.appendChild(b)}}
-function setPhase(n){if(n===phase)return;var fl=document.getElementById('flash');fl.style.background='rgba('+PH[n].aR+','+PH[n].aG+','+PH[n].aB+',0.08)';fl.className='flash on';document.getElementById('plabel').style.opacity='0';actionPotentials=[];setTimeout(function(){phase=n;updateHUD();buildNav();checkLock();fl.className='flash';setTimeout(function(){document.getElementById('plabel').style.opacity='1'},150)},250)}
+function setPhase(n){if(n===phase)return;hideEnterBtn();var fl=document.getElementById('flash');fl.style.background='rgba('+PH[n].aR+','+PH[n].aG+','+PH[n].aB+',0.08)';fl.className='flash on';document.getElementById('plabel').style.opacity='0';actionPotentials=[];setTimeout(function(){phase=n;updateHUD();buildNav();checkLock();fl.className='flash';setTimeout(function(){document.getElementById('plabel').style.opacity='1';enterTimer=setTimeout(showEnterBtn,2500)},150)},250)}
 function checkLock(){var lc=document.getElementById('lock-container');if(!isUnlocked(phase)){var needed=TIERS.find(function(ti){return ti.phases.indexOf(phase)!==-1});var amt=needed?needed.min:50000;lc.innerHTML='<div class="lock"><p style="font-size:0.5rem;color:rgba(201,169,78,0.3);letter-spacing:4px;margin-bottom:1rem">PHASE '+phase+' \xb7 '+PH[phase].name+'</p><p style="font-size:0.4rem;color:#444;letter-spacing:2px;margin-bottom:1.5rem">REQUIRES '+needed.label.toUpperCase()+' \xb7 $'+amt.toLocaleString()+'</p><a href="https://chapel-pos-v2.vercel.app" class="lock-btn">\u2726 UNLOCK</a></div>'}else{lc.innerHTML=''}}
 function updateHUD(){var p=PH[phase];var ac='rgb('+p.aR+','+p.aG+','+p.aB+')';document.getElementById('pnum').textContent=p.id;document.getElementById('pnum').style.color=ac;document.getElementById('pname').textContent=p.name;document.getElementById('pname').style.color='rgba('+p.aR+','+p.aG+','+p.aB+',0.5)';document.getElementById('htl').innerHTML='<span style="color:'+ac+'">'+p.dmn+'</span>';document.getElementById('htr').innerHTML='<span style="color:'+ac+'">'+p.neural+'</span>';document.getElementById('hbl').innerHTML='<span style="color:'+ac+'">NODES:'+Math.round(DMN_NODES.length*(1-p.dissolution))+' CONN:'+Math.round(p.connectivity*100)+'% FIRE:'+p.fireRate.toFixed(1)+'Hz</span>';document.getElementById('hbr').innerHTML='<span style="color:'+ac+'">CHAOS:'+Math.round(p.chaos*100)+'% WAVE:'+p.waveAmp.toFixed(1)+' DIS:'+Math.round(p.dissolution*100)+'%</span>'}
 
@@ -171,6 +190,12 @@ function draw(){
 var p=PH[phase];var cx=W/2,cy=H/2,maxD=Math.max(W,H);
 var aRGB=p.aR+','+p.aG+','+p.aB;
 ctx.clearRect(0,0,W,H);
+
+// ── IMMERSIVE MODE — first-person neural experience ──
+if(immersiveMode){
+  drawImmersive(ctx,p,W,H,t);
+  t+=16;requestAnimationFrame(draw);return;
+}
 
 // === DEEP SPACE BACKGROUND ===
 var bg=ctx.createRadialGradient(cx,cy,0,cx,cy,maxD*0.7);
@@ -668,6 +693,371 @@ break;}}
 }
 setTimeout(function(){mouseX=-1;mouseY=-1;touchActive=false},100);
 });
+
+// ═══════════════════════════════════════════════
+// IMMERSIVE PHASE EXPERIENCE SYSTEM
+// You become a neuron. The DMN morphs around you.
+// ═══════════════════════════════════════════════
+
+// Phase experience data — what each phase feels like from inside
+var PHASE_EXP={
+0:{ // SOURCE — you are a neuron in the mPFC
+  focusNode:0, // mPFC index in DMN_NODES
+  title:"YOU ARE A NEURON IN THE MEDIAL PREFRONTAL CORTEX",
+  sequence:[
+    {at:0,  narr:"INITIALIZING FIRST-PERSON PERSPECTIVE",src:""},
+    {at:3,  narr:"YOU EXIST AT THE CENTER OF THE DEFAULT MODE NETWORK",src:"mPFC · BRODMANN AREAS 10, 32"},
+    {at:8,  narr:"YOUR JOB: INTEGRATE EVERY INPUT INTO A COHERENT SELF",src:"SELF-REFERENTIAL PROCESSING"},
+    {at:14, narr:"SIGNAL ARRIVING FROM HIPPOCAMPUS",src:"MEMORY FRAGMENT · EPISODIC RECALL",input:"hippo",word:"I REMEMBER"},
+    {at:20, narr:"SIGNAL ARRIVING FROM AMYGDALA",src:"EMOTIONAL VALENCE · THREAT ASSESSMENT",input:"amyg",word:"I FEAR"},
+    {at:26, narr:"SIGNAL ARRIVING FROM INSULA",src:"INTEROCEPTIVE STATE · BODY MAP",input:"insula",word:"I FEEL"},
+    {at:32, narr:"SIGNAL ARRIVING FROM TEMPOROPARIETAL JUNCTION",src:"SOCIAL PREDICTION · THEORY OF MIND",input:"tpj",word:"I PREDICT"},
+    {at:38, narr:"SIGNAL ARRIVING FROM POSTERIOR CINGULATE",src:"AUTOBIOGRAPHICAL MEMORY · SELF-CONTINUITY",input:"pcc",word:"I ALWAYS"},
+    {at:44, narr:"ALL INPUTS CONVERGING",src:"INTEGRATION THRESHOLD REACHED",word:"I AM"},
+    {at:50, narr:"THIS IS YOUR DEFAULT MODE",src:"THIS NARRATIVE RUNS WHEN NOTHING ELSE DOES"},
+    {at:56, narr:"YOU ARE THE STORY YOUR BRAIN TELLS ITSELF ABOUT ITSELF",src:""},
+    {at:62, narr:"THE QUESTION IS — IS THE STORY TRUE",src:"PHASE 0 · SOURCE · COMPLETE"},
+    {at:68, narr:"",src:""},
+  ],
+  // Input signal definitions — where they come from visually
+  inputs:{
+    hippo:{angle:Math.PI*0.8, color:[120,180,140], label:"HIPPOCAMPUS"},
+    amyg:{angle:Math.PI*1.3, color:[200,80,80], label:"AMYGDALA"},
+    insula:{angle:Math.PI*0.3, color:[160,120,200], label:"INSULA"},
+    tpj:{angle:Math.PI*1.7, color:[100,160,220], label:"TPJ"},
+    pcc:{angle:Math.PI*0.0, color:[180,160,100], label:"PCC"},
+  }
+}
+};
+
+var immActiveInputs=[];// signals currently arriving
+var immAssembledWords=[];// narrative fragments that have been bound
+var immLastSeqIdx=-1;
+
+function enterPhaseExperience(){
+  if(immersiveMode)return;
+  if(!PHASE_EXP[phase])return;// no experience built for this phase yet
+  
+  immersiveMode=true;
+  immersiveT=0;
+  immersiveFocusNode=PHASE_EXP[phase].focusNode;
+  immersiveZoom=0;
+  immActiveInputs=[];
+  immAssembledWords=[];
+  immLastSeqIdx=-1;
+  
+  // Hide HUD
+  hideEnterBtn();
+  document.getElementById('plabel').style.opacity='0';
+  document.getElementById('nav').style.opacity='0';
+  document.getElementById('htl').style.opacity='0';
+  document.getElementById('htr').style.opacity='0';
+  document.getElementById('hbl').style.opacity='0';
+  document.getElementById('hbr').style.opacity='0';
+  
+  // Show exit button after 5s
+  setTimeout(function(){document.getElementById('immersive-exit').classList.add('vis')},5000);
+}
+
+function exitPhaseExperience(){
+  immersiveMode=false;
+  immersiveZoom=0;
+  
+  // Restore HUD
+  document.getElementById('plabel').style.opacity='1';
+  document.getElementById('nav').style.opacity='1';
+  document.getElementById('htl').style.opacity='1';
+  document.getElementById('htr').style.opacity='1';
+  document.getElementById('hbl').style.opacity='1';
+  document.getElementById('hbr').style.opacity='1';
+  document.getElementById('immersive-exit').classList.remove('vis');
+  document.getElementById('immersive-narration').style.color='rgba(201,169,78,0)';
+  document.getElementById('immersive-source').style.color='rgba(201,169,78,0)';
+  
+  enterTimer=setTimeout(showEnterBtn,2000);
+}
+
+// Draw immersive experience — called from main draw loop
+function drawImmersive(ctx,p,W,H,t){
+  var exp=PHASE_EXP[phase];
+  if(!exp)return;
+  
+  var cx=W/2,cy=H/2;
+  var aRGB=p.aR+','+p.aG+','+p.aB;
+  var elapsed=immersiveT/60;// seconds (approx at 60fps)
+  
+  // ── ZOOM TRANSITION (first 3 seconds) ──
+  if(immersiveZoom<1)immersiveZoom=Math.min(1,immersiveZoom+0.008);
+  var zoom=immersiveZoom;
+  var easeZoom=zoom*zoom*(3-2*zoom);// smoothstep
+  
+  // Focus node position
+  var fn=DMN_NODES[exp.focusNode];
+  var fnx=fn.x*W,fny=fn.y*H;
+  
+  // ── BACKGROUND: deep space, darker as we go in ──
+  var bg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*0.7);
+  bg.addColorStop(0,'rgba('+Math.floor(p.aR*0.04)+','+Math.floor(p.aG*0.04)+','+Math.floor(p.aB*0.04)+',1)');
+  bg.addColorStop(1,'rgba(0,0,0,1)');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  
+  // ── During zoom: DMN nodes shrink away except focus ──
+  if(easeZoom<1){
+    for(var ni=0;ni<DMN_NODES.length;ni++){
+      if(ni===exp.focusNode)continue;
+      var nd=DMN_NODES[ni];
+      var nx=nd.x*W,ny=nd.y*H;
+      // Nodes drift outward and fade
+      var dx=nx-fnx,dy=ny-fny;
+      var pushOut=easeZoom*3;
+      nx+=dx*pushOut;ny+=dy*pushOut;
+      var fadeAlpha=(1-easeZoom)*0.3;
+      if(fadeAlpha>0.01){
+        ctx.beginPath();ctx.arc(nx,ny,6*(1-easeZoom),0,Math.PI*2);
+        ctx.fillStyle='rgba('+aRGB+','+fadeAlpha+')';ctx.fill();
+      }
+    }
+  }
+  
+  // ── THE SOMA — you are inside it ──
+  // Membrane boundary — pulsing circle
+  var somaR=Math.min(W,H)*0.3*(0.5+easeZoom*0.5);
+  var breathe=Math.sin(immersiveT*0.02)*0.03+1;
+  somaR*=breathe;
+  
+  // Membrane — lipid bilayer ring
+  var memAlpha=0.08+easeZoom*0.12;
+  ctx.beginPath();ctx.arc(cx,cy,somaR,0,Math.PI*2);
+  ctx.strokeStyle='rgba('+aRGB+','+memAlpha+')';
+  ctx.lineWidth=2+easeZoom*3;ctx.stroke();
+  // Double membrane
+  ctx.beginPath();ctx.arc(cx,cy,somaR+4,0,Math.PI*2);
+  ctx.strokeStyle='rgba('+aRGB+','+(memAlpha*0.4)+')';
+  ctx.lineWidth=1;ctx.stroke();
+  
+  // Ion channel pores around membrane
+  var poreCount=24;
+  for(var pi=0;pi<poreCount;pi++){
+    var pa=(pi/poreCount)*Math.PI*2+immersiveT*0.003;
+    var px=cx+Math.cos(pa)*somaR;
+    var py=cy+Math.sin(pa)*somaR;
+    var poreOpen=Math.sin(immersiveT*0.05+pi*2.3)>0.3;
+    ctx.beginPath();ctx.arc(px,py,poreOpen?3.5:2,0,Math.PI*2);
+    ctx.fillStyle=poreOpen?'rgba('+aRGB+','+(memAlpha*1.5)+')':'rgba(40,40,50,'+(memAlpha)+')';
+    ctx.fill();
+  }
+  
+  // ── NUCLEUS at center ──
+  var nucR=somaR*0.15;
+  var nucGrad=ctx.createRadialGradient(cx,cy,0,cx,cy,nucR);
+  nucGrad.addColorStop(0,'rgba(255,255,255,0.12)');
+  nucGrad.addColorStop(0.5,'rgba('+aRGB+',0.08)');
+  nucGrad.addColorStop(1,'rgba('+aRGB+',0.02)');
+  ctx.fillStyle=nucGrad;ctx.beginPath();ctx.arc(cx,cy,nucR,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy,nucR,0,Math.PI*2);
+  ctx.strokeStyle='rgba('+aRGB+',0.1)';ctx.lineWidth=1;ctx.stroke();
+  
+  // ── DENDRITES extending outward — your input receivers ──
+  if(easeZoom>0.5){
+    var dendAlpha=(easeZoom-0.5)*2*0.15;
+    var numDendrites=6;
+    for(var di=0;di<numDendrites;di++){
+      var da=(di/numDendrites)*Math.PI*2+0.3;
+      var dLen=somaR*0.8;
+      // Main dendrite shaft
+      ctx.beginPath();
+      ctx.moveTo(cx+Math.cos(da)*somaR*0.1,cy+Math.sin(da)*somaR*0.1);
+      var dendEndX=cx+Math.cos(da)*dLen;
+      var dendEndY=cy+Math.sin(da)*dLen;
+      // Slight curve
+      var ctrlX=cx+Math.cos(da+0.2)*dLen*0.6;
+      var ctrlY=cy+Math.sin(da+0.2)*dLen*0.6;
+      ctx.quadraticCurveTo(ctrlX,ctrlY,dendEndX,dendEndY);
+      ctx.strokeStyle='rgba('+aRGB+','+dendAlpha+')';
+      ctx.lineWidth=2;ctx.stroke();
+      
+      // Dendritic spines — tiny protrusions (synaptic receivers)
+      var spineCount=8;
+      for(var si=0;si<spineCount;si++){
+        var st=(si+1)/(spineCount+1);
+        var sx=cx+Math.cos(da)*dLen*st+Math.cos(da+0.2)*dLen*st*0.2*(1-st);
+        var sy=cy+Math.sin(da)*dLen*st+Math.sin(da+0.2)*dLen*st*0.2*(1-st);
+        var spineAngle=da+Math.PI/2*(si%2===0?1:-1)+Math.sin(immersiveT*0.03+si)*0.3;
+        var spineLen=4+Math.sin(immersiveT*0.05+si*1.7)*2;
+        ctx.beginPath();
+        ctx.moveTo(sx,sy);
+        ctx.lineTo(sx+Math.cos(spineAngle)*spineLen,sy+Math.sin(spineAngle)*spineLen);
+        ctx.strokeStyle='rgba('+aRGB+','+(dendAlpha*0.6)+')';
+        ctx.lineWidth=0.8;ctx.stroke();
+        // Spine head (bouton)
+        ctx.beginPath();
+        ctx.arc(sx+Math.cos(spineAngle)*spineLen,sy+Math.sin(spineAngle)*spineLen,1.5,0,Math.PI*2);
+        ctx.fillStyle='rgba('+aRGB+','+(dendAlpha*0.5)+')';ctx.fill();
+      }
+    }
+  }
+  
+  // ── RESTING POTENTIAL — subtle oscillation ──
+  // Faint concentric rings pulsing outward from nucleus — membrane potential
+  var rpAlpha=easeZoom*0.04;
+  for(var rpi=0;rpi<3;rpi++){
+    var rpR=(nucR+immersiveT*0.5+rpi*30)%(somaR*0.9);
+    var rpFade=1-rpR/(somaR*0.9);
+    ctx.beginPath();ctx.arc(cx,cy,rpR,0,Math.PI*2);
+    ctx.strokeStyle='rgba('+aRGB+','+(rpAlpha*rpFade)+')';
+    ctx.lineWidth=0.5;ctx.stroke();
+  }
+  
+  // ── SEQUENCE EVENTS — narration + input signals ──
+  var seq=exp.sequence;
+  for(var si=0;si<seq.length;si++){
+    if(elapsed>=seq[si].at&&si>immLastSeqIdx){
+      immLastSeqIdx=si;
+      var narrEl=document.getElementById('immersive-narration');
+      var srcEl=document.getElementById('immersive-source');
+      
+      // Fade out then in
+      narrEl.style.color='rgba(201,169,78,0)';
+      srcEl.style.color='rgba(201,169,78,0)';
+      (function(s){setTimeout(function(){
+        narrEl.textContent=s.narr;
+        srcEl.textContent=s.src;
+        if(s.narr)narrEl.style.color='rgba(201,169,78,0.7)';
+        if(s.src)srcEl.style.color='rgba(201,169,78,0.3)';
+      },400)})(seq[si]);
+      
+      // Trigger input signal
+      if(seq[si].input&&exp.inputs[seq[si].input]){
+        var inp=exp.inputs[seq[si].input];
+        immActiveInputs.push({
+          angle:inp.angle,
+          color:inp.color,
+          label:inp.label,
+          word:seq[si].word,
+          startT:immersiveT,
+          duration:300,// frames
+          arrived:false
+        });
+      }
+      // Word assembly (no input signal, just convergence)
+      if(seq[si].word&&!seq[si].input){
+        immAssembledWords.push(seq[si].word);
+      }
+      
+      // Auto-exit at end
+      if(si===seq.length-1){
+        setTimeout(exitPhaseExperience,4000);
+      }
+    }
+  }
+  
+  // ── DRAW ACTIVE INPUT SIGNALS ──
+  for(var ii=immActiveInputs.length-1;ii>=0;ii--){
+    var inp=immActiveInputs[ii];
+    var inpProgress=(immersiveT-inp.startT)/inp.duration;
+    if(inpProgress>1.5){immActiveInputs.splice(ii,1);continue;}
+    
+    var iR=inp.color[0],iG=inp.color[1],iB=inp.color[2];
+    var iRGB=iR+','+iG+','+iB;
+    
+    if(inpProgress<=1){
+      // Signal traveling inward — from edge of screen toward soma
+      var startDist=Math.max(W,H)*0.7;
+      var endDist=somaR*0.3;
+      var currentDist=startDist+(endDist-startDist)*inpProgress*inpProgress;
+      var sx=cx+Math.cos(inp.angle)*currentDist;
+      var sy=cy+Math.sin(inp.angle)*currentDist;
+      
+      // Signal packet — bright leading point with trail
+      var sigAlpha=Math.sin(inpProgress*Math.PI)*0.9;
+      var sigGrad=ctx.createRadialGradient(sx,sy,0,sx,sy,15);
+      sigGrad.addColorStop(0,'rgba(255,255,255,'+sigAlpha+')');
+      sigGrad.addColorStop(0.3,'rgba('+iRGB+','+(sigAlpha*0.8)+')');
+      sigGrad.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=sigGrad;ctx.beginPath();ctx.arc(sx,sy,15,0,Math.PI*2);ctx.fill();
+      
+      // Core
+      ctx.beginPath();ctx.arc(sx,sy,3,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,'+(sigAlpha*0.9)+')';ctx.fill();
+      
+      // Trail
+      for(var tr=1;tr<=10;tr++){
+        var tp=Math.max(0,inpProgress-tr*0.02);
+        var td=startDist+(endDist-startDist)*tp*tp;
+        var tx=cx+Math.cos(inp.angle)*td;
+        var ty=cy+Math.sin(inp.angle)*td;
+        ctx.beginPath();ctx.arc(tx,ty,2.5-tr*0.2,0,Math.PI*2);
+        ctx.fillStyle='rgba('+iRGB+','+(sigAlpha*(1-tr/11)*0.4)+')';ctx.fill();
+      }
+      
+      // Source label — where it's coming from
+      if(inpProgress<0.4){
+        var labelDist=startDist-40;
+        var lx=cx+Math.cos(inp.angle)*labelDist;
+        var ly=cy+Math.sin(inp.angle)*labelDist;
+        ctx.font='10px monospace';ctx.textAlign='center';
+        ctx.fillStyle='rgba('+iRGB+','+(0.4*(1-inpProgress/0.4))+')';
+        ctx.fillText(inp.label,lx,ly);
+      }
+      
+      // Arrival flash
+      if(inpProgress>0.95&&!inp.arrived){
+        inp.arrived=true;
+        if(inp.word)immAssembledWords.push(inp.word);
+      }
+    }
+    
+    // Post-arrival — soma brightens with that signal's color
+    if(inp.arrived){
+      var postP=Math.min(1,(inpProgress-1)*2);
+      var flashAlpha=(1-postP)*0.15;
+      var flashGrad=ctx.createRadialGradient(cx,cy,0,cx,cy,somaR*0.6);
+      flashGrad.addColorStop(0,'rgba('+iRGB+','+flashAlpha+')');
+      flashGrad.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=flashGrad;ctx.beginPath();ctx.arc(cx,cy,somaR*0.6,0,Math.PI*2);ctx.fill();
+    }
+  }
+  
+  // ── ASSEMBLED NARRATIVE — the words you've bound ──
+  if(immAssembledWords.length>0){
+    var wordStr=immAssembledWords.join('  ·  ');
+    ctx.font='bold '+Math.round(Math.min(18,W*0.03))+'px monospace';
+    ctx.textAlign='center';
+    // Glow behind
+    ctx.fillStyle='rgba('+aRGB+',0.06)';
+    var tw=ctx.measureText(wordStr).width;
+    ctx.fillRect(cx-tw/2-20,cy+somaR*0.45-12,tw+40,30);
+    // Text
+    ctx.fillStyle='rgba('+aRGB+',0.6)';
+    ctx.fillText(wordStr,cx,cy+somaR*0.45+5);
+  }
+  
+  // ── SPONTANEOUS FIRING — you fire occasionally ──
+  var fireRate=0.5+immAssembledWords.length*0.1;
+  var fireCycle=Math.sin(immersiveT*0.01*fireRate);
+  if(fireCycle>0.95){
+    // Action potential — bright flash from nucleus outward
+    var apExpand=(fireCycle-0.95)/0.05;
+    var apR=nucR+apExpand*somaR*0.8;
+    ctx.beginPath();ctx.arc(cx,cy,apR,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,'+(0.3*(1-apExpand))+')';
+    ctx.lineWidth=2;ctx.stroke();
+  }
+  
+  // ── CYTOPLASM texture ──
+  // Faint organic noise inside the soma
+  var cytoAlpha=easeZoom*0.015;
+  for(var ci=0;ci<40;ci++){
+    var cAngle=ci*0.618*Math.PI*2+immersiveT*0.001;
+    var cDist=(ci*7.3+immersiveT*0.1)%(somaR*0.85);
+    var cx2=cx+Math.cos(cAngle)*cDist;
+    var cy2=cy+Math.sin(cAngle)*cDist;
+    ctx.beginPath();ctx.arc(cx2,cy2,0.8+Math.sin(ci*3.1)*0.5,0,Math.PI*2);
+    ctx.fillStyle='rgba('+aRGB+','+cytoAlpha+')';ctx.fill();
+  }
+  
+  immersiveT++;
+}
 
 buildNav();updateHUD();checkLock();draw();
 </script>
