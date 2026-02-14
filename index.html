@@ -541,7 +541,7 @@ gateEl.addEventListener('mousemove',function(e){
   takeoverDiv.id='eyeTakeover';
   takeoverDiv.style.cssText='position:fixed;inset:0;z-index:9999;background:#000;opacity:0;transition:opacity 0.5s;pointer-events:none;display:flex;align-items:center;justify-content:center;flex-direction:column';
   var takeoverMsg=document.createElement('div');
-  takeoverMsg.style.cssText='font-family:monospace;font-size:clamp(0.4rem,1.2vw,0.6rem);letter-spacing:4px;text-transform:uppercase;color:rgba(201,169,78,0);transition:color 2s;text-align:center;position:fixed;bottom:15%;z-index:10000';
+  takeoverMsg.style.cssText='font-family:monospace;font-size:clamp(0.65rem,2vw,1rem);letter-spacing:4px;text-transform:uppercase;color:rgba(201,169,78,0);transition:color 2s;text-align:center;position:fixed;bottom:15%;z-index:10000';
   takeoverDiv.appendChild(takeoverMsg);
   document.body.appendChild(takeoverDiv);
   
@@ -559,8 +559,8 @@ gateEl.addEventListener('mousemove',function(e){
   setTimeout(function(){
     eyeTarget=1;
     eyeClicked=true;
-    takeoverMsg.textContent='YOUR OFFERING HAS BEEN ACCEPTED';
-    takeoverMsg.style.color='rgba(201,169,78,0.5)';
+    takeoverMsg.textContent="YOUR OFFERING HAS BEEN ACCEPTED";
+    takeoverMsg.style.color='rgba(201,169,78,0.9)';
   },1500);
   
   // Phase 3 (4s): Eye fully open — message changes  
@@ -568,7 +568,7 @@ gateEl.addEventListener('mousemove',function(e){
     takeoverMsg.style.color='rgba(201,169,78,0)';
     setTimeout(function(){
       takeoverMsg.textContent='THE THRESHOLD OPENS';
-      takeoverMsg.style.color='rgba(201,169,78,0.5)';
+      takeoverMsg.style.color='rgba(201,169,78,0.9)';
     },800);
   },4000);
   
@@ -586,7 +586,7 @@ gateEl.addEventListener('mousemove',function(e){
     takeoverMsg.style.color='rgba(201,169,78,0)';
     setTimeout(function(){
       takeoverMsg.textContent='LOOK CLOSER';
-      takeoverMsg.style.color='rgba(201,169,78,0.4)';
+      takeoverMsg.style.color='rgba(201,169,78,0.85)';
     },600);
   },8000);
   
