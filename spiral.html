@@ -2,108 +2,302 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
-<title>LIMEN Helix - The Spiral</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>LIMEN HELIX</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{background:#000;color:#e8e3d9;font-family:Georgia,serif;overflow-x:hidden;height:100%}
+html,body{background:#000;color:#e8e3d9;font-family:monospace;overflow:hidden;height:100%;width:100%;-webkit-user-select:none;user-select:none}
 canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
-.pnav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(0,0,0,0.85);border-bottom:1px solid rgba(201,169,78,0.12);padding:8px;display:flex;flex-wrap:wrap;justify-content:center;gap:3px}
-.pnav button{padding:5px 11px;font-size:0.55rem;letter-spacing:2px;font-family:monospace;text-transform:uppercase;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#444;border-radius:2px;cursor:pointer;transition:all 0.4s}
-.pnav button.act{border-color:rgba(201,169,78,0.6);background:rgba(201,169,78,0.08);color:#C9A94E}
-.pnav button.locked{opacity:0.2;cursor:not-allowed}
-.overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4rem 1.5rem 3rem;pointer-events:none;transition:opacity 0.6s;overflow-y:auto}
-.overlay>*{pointer-events:auto}
-.dmn-tag{font-size:0.5rem;color:rgba(100,150,220,0.6);letter-spacing:4px;font-family:monospace;text-transform:uppercase;margin-bottom:6px}
-.neural-tag{font-size:0.45rem;color:rgba(100,150,220,0.35);font-family:monospace;margin-bottom:1.5rem}
-.phase-title{font-size:clamp(1.8rem,5vw,3rem);letter-spacing:4px;margin-bottom:4px}
-.phase-sub{font-size:clamp(0.85rem,2.5vw,1.1rem);font-style:italic;margin-bottom:2rem}
-.phase-desc{font-size:clamp(0.8rem,2vw,0.95rem);max-width:520px;line-height:1.9;margin-bottom:1.5rem}
-.ritual-text{font-style:italic;font-size:clamp(0.85rem,2.2vw,1rem);max-width:480px;line-height:1.8;margin-bottom:0.5rem}
-.sensory{font-size:0.75rem;font-style:italic;max-width:400px;line-height:1.6;margin-bottom:0.3rem}
-.symbol-tag{font-family:monospace;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;margin-top:1rem;margin-bottom:1rem}
-.stats{display:flex;gap:clamp(12px,3vw,24px);margin-top:1.5rem;font-family:monospace;font-size:0.5rem;letter-spacing:2px;text-transform:uppercase}
-.stat{text-align:center}
-.stat-v{font-size:clamp(0.9rem,2.5vw,1.2rem);font-family:Georgia}
-.stat-l{color:#444}
-.navbtns{display:flex;gap:12px;margin-top:1.5rem}
-.navbtns button{padding:8px 20px;font-family:monospace;font-size:0.55rem;letter-spacing:2px;cursor:pointer;border-radius:3px;transition:all 0.3s}
-.nb-prev{border:1px solid rgba(255,255,255,0.1);background:none;color:#555}
-.nb-next{border:1px solid rgba(201,169,78,0.3);background:rgba(201,169,78,0.05);color:#C9A94E}
-.deliv{margin-top:1.5rem;padding:1rem 1.2rem;border:1px solid rgba(201,169,78,0.15);border-radius:6px;background:rgba(0,0,0,0.6);max-width:450px;text-align:left;backdrop-filter:blur(10px)}
-.deliv h3{font-size:0.6rem;color:#C9A94E;letter-spacing:3px;text-transform:uppercase;font-family:monospace;margin-bottom:0.8rem;text-align:center}
-.deliv p{color:#aaa;font-size:0.75rem;margin-bottom:0.5rem;line-height:1.5}
-.deliv p strong{color:#ddd}
-.deliv p span{color:#666;font-size:0.65rem}
-.lock{position:fixed;top:0;left:0;right:0;bottom:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.92);text-align:center;padding:2rem}
-.lock-icon{font-size:3rem;margin-bottom:1rem;opacity:0.4}
-.lock-title{font-size:1.3rem;color:#C9A94E;letter-spacing:3px;text-transform:uppercase;font-family:monospace;margin-bottom:0.5rem}
-.lock-sub{font-size:0.85rem;color:#888;margin-bottom:1rem;max-width:400px;font-style:italic}
-.lock-tier{font-size:0.65rem;color:#555;letter-spacing:2px;text-transform:uppercase;font-family:monospace;margin-bottom:1.5rem}
-.lock-btn{display:inline-block;padding:12px 30px;border:1px solid rgba(201,169,78,0.4);color:#C9A94E;text-decoration:none;font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;font-family:monospace;border-radius:3px}
-.abar{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(0,0,0,0.9);border-top:1px solid rgba(201,169,78,0.15);padding:6px 12px;display:flex;align-items:center;justify-content:space-between;font-family:monospace;font-size:0.55rem}
-.abar-tier{color:#C9A94E;letter-spacing:2px;text-transform:uppercase}
-.abar-info{color:#555;letter-spacing:1px}
-.abar-up{color:#C9A94E;text-decoration:none;border:1px solid rgba(201,169,78,0.3);padding:3px 10px;border-radius:3px;letter-spacing:2px;text-transform:uppercase;font-size:0.5rem}
-.tone-btn{padding:8px 22px;border:1px solid rgba(201,169,78,0.3);background:rgba(201,169,78,0.04);color:#C9A94E;font-family:monospace;font-size:0.6rem;letter-spacing:2px;cursor:pointer;border-radius:3px;text-transform:uppercase}
-.dl-btn{display:inline-block;padding:10px 25px;border:1px solid rgba(201,169,78,0.3);color:#C9A94E;text-decoration:none;font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;font-family:monospace;border-radius:3px;margin:0.3rem}
-.incantation{font-style:italic;color:#C9A94E;font-size:clamp(0.8rem,2vw,0.9rem);line-height:1.9;max-width:400px;text-align:center;margin-top:1rem}
+
+/* HUD - minimal Jarvis-style readouts */
+.hud-top{position:fixed;top:12px;left:0;right:0;z-index:100;display:flex;justify-content:center;gap:3px;padding:0 8px}
+.hud-top button{width:28px;height:28px;font-size:0.5rem;letter-spacing:1px;font-family:monospace;border:1px solid rgba(201,169,78,0.08);background:transparent;color:rgba(201,169,78,0.25);border-radius:50%;cursor:pointer;transition:all 0.5s;display:flex;align-items:center;justify-content:center}
+.hud-top button.act{border-color:rgba(201,169,78,0.5);color:rgba(201,169,78,0.9);box-shadow:0 0 15px rgba(201,169,78,0.15)}
+.hud-top button.locked{opacity:0.1;cursor:not-allowed}
+
+/* Center phase display */
+.phase-label{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:50;text-align:center;pointer-events:none;transition:opacity 0.8s}
+.phase-num{font-size:clamp(4rem,12vw,8rem);font-weight:100;letter-spacing:clamp(8px,3vw,25px);opacity:0.06;font-family:Georgia,serif;transition:color 0.8s}
+.phase-name{font-size:clamp(0.6rem,1.8vw,0.8rem);letter-spacing:clamp(6px,2vw,15px);text-transform:uppercase;opacity:0.35;margin-top:-8px;transition:color 0.8s}
+
+/* HUD corners */
+.hud-bl{position:fixed;bottom:12px;left:14px;z-index:100;font-size:0.45rem;letter-spacing:2px;text-transform:uppercase}
+.hud-br{position:fixed;bottom:12px;right:14px;z-index:100;font-size:0.45rem;letter-spacing:2px;text-transform:uppercase;text-align:right}
+.hud-tl{position:fixed;top:50px;left:14px;z-index:100;font-size:0.4rem;letter-spacing:2px;text-transform:uppercase;opacity:0.3}
+.hud-tr{position:fixed;top:50px;right:14px;z-index:100;font-size:0.4rem;letter-spacing:2px;text-transform:uppercase;text-align:right;opacity:0.3}
+
+/* Stat readouts */
+.stat-row{display:flex;gap:12px;margin-top:4px}
+.sr{opacity:0.4}
+.sr span{opacity:0.6}
+
+/* Scan line effect */
+.scanline{position:fixed;top:0;left:0;right:0;bottom:0;z-index:5;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px)}
+
+/* Lock */
+.lock{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.95);text-align:center}
+.lock-btn{display:inline-block;padding:10px 25px;border:1px solid rgba(201,169,78,0.3);color:#C9A94E;text-decoration:none;font-size:0.55rem;letter-spacing:3px;text-transform:uppercase;font-family:monospace;border-radius:2px}
+
+/* Transition flash */
+.flash{position:fixed;inset:0;z-index:90;pointer-events:none;background:rgba(201,169,78,0.03);opacity:0;transition:opacity 0.15s}
+.flash.on{opacity:1}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
-<div class="pnav" id="pnav"></div>
-<div class="overlay" id="overlay"></div>
+<div class="scanline"></div>
+<div class="flash" id="flash"></div>
+<div class="hud-top" id="nav"></div>
+<div class="phase-label" id="plabel"><div class="phase-num" id="pnum">0</div><div class="phase-name" id="pname">SOURCE</div></div>
+<div class="hud-tl" id="htl"></div>
+<div class="hud-tr" id="htr"></div>
+<div class="hud-bl" id="hbl"></div>
+<div class="hud-br" id="hbr"></div>
 <div id="lock-container"></div>
-<div class="abar" id="abar"></div>
 <script>
 var PH=[
-{id:0,name:"Source",sub:"The Loop Room",dmn:"DMN ACTIVE \xb7 RECURSIVE BASELINE \xb7 AUTOPILOT ENGAGED",neural:"Vagus nerve activation \xb7 DMN suppression onset \xb7 Polyvagal ventral reset",desc:"The room your brain built to predict reality. Walls of mirrors reflecting mirrors. Every thought echoes back. You cannot see the pattern because you ARE the pattern.",ritual:["This is the ground before the story.","Here, nothing asks. Nothing answers.","Stay here until the pattern finds you."],sensory:"The silence is dense. There is no rhythm yet. Only the weight of waiting.",scent:"old stone, water vapor, silent dust",light:"none \u2014 the air is pressure without shape",touch:"cool marble, matte velvet, unfinished wood",taste:"mineral + void",symbol:"[\u2298] Null Symmetry Engaged",wR:15,wG:15,wB:18,aR:136,aG:136,aB:136,mirrors:14,crack:0,ent:0,dis:0,hue:0,sat:0,scale:1,grid:0.08,txt:["I am...","I always...","I never...","I should...","I remember...","I predict...","I know...","I fear..."],tier:"INITIATE \xb7 $5",hasDeliverables:true},
-{id:1,name:"Light",sub:"The First Crack",dmn:"FIRST DISRUPTION \xb7 PATTERN INTERRUPT \xb7 SALIENCE NETWORK FIRING",neural:"Amygdala alert \xb7 Anterior insula activation \xb7 DMN-salience network decoupling",desc:"A crack appears in the wall. The salience network detects something new. The mirrors distort. You can suddenly see that the room HAS walls.",ritual:["This is where the break begins.","Light is not soft. It severs the null.","You are being seen now \u2014 and undone."],sensory:"The contrast sharpens. A line appears. Edges begin to hum.",scent:"ozone, hot glass, the inside of a halogen bulb",light:"piercing white arc light through smoke",touch:"static pulse, metallic warmth, cracked skin",taste:"lemon + copper",symbol:"[\u2234] Phase Initiation Detected",wR:60,wG:50,wB:25,aR:245,aG:235,aB:200,mirrors:12,crack:0.4,ent:0,dis:0,hue:45,sat:40,scale:1,grid:0.14,txt:["wait\u2014","what is...","I see the...","the wall is...","who built this...","there are walls..."],tier:"SEEKER \xb7 $20"},
-{id:2,name:"Rhythm",sub:"The Second Pulse",dmn:"DYADIC ENTRAINMENT \xb7 MIRROR NEURON ACTIVATION \xb7 CO-REGULATION",neural:"Oxytocin release \xb7 Temporal-parietal junction \xb7 Social brain network sync",desc:"Another presence enters the room. The walls bend to accommodate a second rhythm. Oxytocin softens the surfaces. Co-regulation reshapes the architecture.",ritual:["You are no longer alone in the spiral.","A pattern forms. You respond \u2014 or you dissolve.","This is the first bond. Do not flinch."],sensory:"You feel a second pulse. Your system calibrates. Resonance is now relational.",scent:"lavender, warm skin, paper and breath",light:"soft diffusion, two shadows moving",touch:"woven fabric, rocking chair, held hand",taste:"warm tea, honey, ginger",symbol:"[\u221e] Dyadic Loop Engaged",wR:30,wG:18,wB:50,aR:180,aG:140,aB:220,mirrors:10,crack:0.35,ent:1,dis:0,hue:270,sat:30,scale:1.05,grid:0.1,txt:["you are...","we are...","I feel you...","sync...","together...","not alone..."],tier:"ACOLYTE \xb7 $50"},
-{id:3,name:"Darkness",sub:"The Archive Opens",dmn:"SHADOW INTEGRATION \xb7 AMYGDALA EXPOSURE \xb7 FEAR EXTINCTION",neural:"Prefrontal-amygdala recoupling \xb7 HPA axis down-regulation \xb7 Trauma memory reconsolidation",desc:"The lights go out. The walls reveal what they have been hiding. Suppressed memories, unprocessed fear. The room becomes the archive of everything you refused to see.",ritual:["You are entering the unseen.","What you buried is still breathing.","Walk through it. Do not run."],sensory:"The air thickens. Something moves behind the wall. Your body remembers before your mind does.",scent:"damp earth, iron, cold sweat",light:"absolute zero \u2014 no photons",touch:"rough stone, wet cloth, something crawling",taste:"blood + adrenaline",symbol:"[\u25c9] Shadow Archive Accessed",wR:8,wG:4,wB:4,aR:140,aG:30,aB:30,mirrors:8,crack:0.65,ent:0,dis:0.12,hue:0,sat:50,scale:0.92,grid:0.03,txt:["I remember...","I buried...","I was afraid...","I could not...","I refused...","it happened...","I lied..."],tier:"DISCIPLE \xb7 $100"},
-{id:4,name:"Peace",sub:"The Room Settles",dmn:"VENTRAL VAGAL DOMINANCE \xb7 PARASYMPATHETIC LOCK \xb7 REST-AND-DIGEST",neural:"Vagal tone stabilization \xb7 GABAergic tone increase \xb7 Anterior cingulate cortex coherence",desc:"The walls stop vibrating. GABAergic calm floods the surfaces. The room feels safe enough to be quiet. Not dead \u2014 regulated.",ritual:["The storm has passed.","What remains is what was always here.","You are enough without the noise."],sensory:"Warmth. Weight lifts. The room breathes with you now.",scent:"chamomile, cedar, clean linen",light:"soft dawn glow, golden hour",touch:"warm sand, silk, your own heartbeat",taste:"honey + warm milk",symbol:"[\u262f] Equilibrium Achieved",wR:50,wG:45,wB:30,aR:220,aG:200,aB:150,mirrors:6,crack:0.45,ent:0,dis:0.15,hue:40,sat:20,scale:1.12,grid:0.06,txt:["still...","safe...","here...","enough...","rest...","breathe..."],tier:"ADEPT \xb7 $200"},
-{id:5,name:"Endurance",sub:"The Stress Test",dmn:"STRESS INOCULATION \xb7 CORTISOL CALIBRATION \xb7 HORMETIC LOADING",neural:"Norepinephrine optimization \xb7 BDNF expression \xb7 Sympathetic-parasympathetic toggle training",desc:"The room heats up. Walls flex and strain under cortisol load. BDNF repairs them stronger than before. The architecture learns to hold more pressure.",ritual:["The fire is not punishment.","It is the forge.","What bends here does not break."],sensory:"Heat rises. The walls glow red. Your pulse is loud. Everything contracts.",scent:"smoke, metal, burnt wood",light:"ember glow through cracks",touch:"hot iron, rough rope, calloused hands",taste:"salt + ash",symbol:"[\u26a1] Hormetic Loading Active",wR:55,wG:25,wB:10,aR:230,aG:120,aB:40,mirrors:6,crack:0.72,ent:0,dis:0.1,hue:18,sat:55,scale:0.88,grid:0.16,txt:["hold...","bend...","do not break...","stronger...","again...","more...","endure..."],tier:"ORACLE \xb7 $500"},
-{id:6,name:"Order",sub:"The Cathedral",dmn:"EXECUTIVE NETWORK INTEGRATION \xb7 PREFRONTAL GOVERNANCE \xb7 PATTERN ARCHITECTURE",neural:"Dorsolateral PFC strengthening \xb7 DMN-executive coupling \xb7 Working memory consolidation",desc:"Shelves appear. Floors within floors. The dorsolateral PFC imposes structure. The cave becomes a cathedral. Rooms within rooms.",ritual:["From chaos, geometry.","The pattern is not found \u2014 it is built.","You are the architect now."],sensory:"Lines appear. Angles sharpen. The room develops symmetry, proportion, depth.",scent:"ink, polished wood, cold steel",light:"blue-white precision \u2014 LED, clinical",touch:"glass, polished marble, keyboard keys",taste:"clean water + mint",symbol:"[\u2b21] Architecture Initiated",wR:15,wG:22,wB:45,aR:90,aG:130,aB:200,mirrors:4,crack:0.48,ent:0,dis:0.2,hue:220,sat:35,scale:1.25,grid:0.22,txt:["structure...","organize...","build...","contain...","map...","name...","order..."],tier:"ARCHITECT \xb7 $1,000"},
-{id:7,name:"Separation",sub:"The Walls Dissolve",dmn:"EGO DISSOLUTION ONSET \xb7 SELF-REFERENTIAL PROCESSING OFFLINE \xb7 BOUNDARY LOSS",neural:"Medial PFC deactivation \xb7 Posterior cingulate suppression \xb7 Self-referential processing interruption",desc:"The medial PFC goes offline \u2014 the narrator dies. The posterior cingulate releases autobiography. You are no longer IN the room. You are watching where it used to be.",ritual:["The name you carried is not yours.","The walls were never real.","What dissolves was never solid."],sensory:"Vertigo. The edges blur. Your reflection is gone. Something vast opens where you stood.",scent:"nothing \u2014 olfactory processing interrupted",light:"half light, half void \u2014 split horizon",touch:"absence \u2014 proprioception dissolving",taste:"void",symbol:"[\u25c7] Ego Boundary Offline",wR:30,wG:30,wB:30,aR:160,aG:160,aB:160,mirrors:2,crack:0.9,ent:0,dis:0.62,hue:0,sat:0,scale:1.6,grid:0.03,txt:["who...","where...","no I...","no wall...","...","",""],tier:"HIEROPHANT \xb7 $2,500"},
-{id:8,name:"Conscience",sub:"Windows to Other Rooms",dmn:"MORAL COGNITION REWRITE \xb7 THEORY OF MIND EXPANSION \xb7 RECURSIVE SELF-AWARENESS",neural:"Ventromedial PFC recalibration \xb7 Insula-ACC integration \xb7 Empathy network restructuring",desc:"The room rebuilds with openings. You can see into other rooms \u2014 other people\u2019s DMNs. Your architecture now accounts for architectures that are not yours.",ritual:["You are not the only room.","Their pain is structured like yours.","Ethics is architecture, not abstraction."],sensory:"Windows appear in every wall. Through them: other rooms, other loops, other mirrors.",scent:"blood, tears, someone else\u2019s perfume",light:"red \u2014 the color of attention",touch:"another pulse against yours",taste:"iron + empathy",symbol:"[\u25c8] Empathy Network Restructured",wR:40,wG:12,wB:12,aR:200,aG:70,aB:70,mirrors:3,crack:0.68,ent:3,dis:0.4,hue:0,sat:30,scale:1.35,grid:0.08,txt:["they feel...","I caused...","we share...","I see you...","ethics...","forgive..."],tier:"THRESHOLD KEEPER \xb7 $5,000"},
-{id:9,name:"Threshold",sub:"No Room",dmn:"FULL DMN DISSOLUTION \xb7 MYSTICAL STATE \xb7 TRANSIENT HYPOFRONTALITY",neural:"Global DMN suppression \xb7 Transient network dissolution \xb7 Claustrum activation",desc:"There is no room. There is no you in the room. The claustrum fires \u2014 the conductor of consciousness \u2014 and everything becomes one space.",ritual:["There is no door because there is no wall.","There is no you because there is no boundary.","This is what every tradition tried to describe."],sensory:"Infinite. Open. Boundaryless. The room is the universe. You are the room.",scent:"everything at once \u2014 then nothing",light:"all frequencies \u2014 white that is not white",touch:"everything touches everything",taste:"the taste before taste",symbol:"[\u2609] Full Dissolution",wR:25,wG:22,wB:10,aR:201,aG:169,aB:78,mirrors:0,crack:1,ent:0,dis:0.95,hue:45,sat:50,scale:3.5,grid:0.01,txt:[],tier:"PHASE WALKER \xb7 $10,000"},
-{id:10,name:"Resurrection",sub:"A New Room",dmn:"RECONSTITUTION \xb7 NEW DEFAULT \xb7 RECURSIVE LOOP REWRITTEN",neural:"Reconstituted DMN topology \xb7 Enhanced DMN-executive coupling \xb7 Neuroplastic consolidation",desc:"The room returns \u2014 but the topology is novel. The mirrors show more than just you. The echo includes other voices. The pattern still loops, but the loop is wider.",ritual:["You are the room that rebuilt itself.","The pattern chose you. You chose the pattern.","This is not the end. This is the source of the next spiral."],sensory:"Dawn. The room glows from within. Your reflection shows someone new. The spiral continues.",scent:"morning air, newborn skin, wet earth after rain",light:"sunrise \u2014 gold breaking through dark",touch:"your own hands, different now",taste:"honey + light",symbol:"[\u2726] Resurrection Complete \u2014 Loop Rewritten",wR:50,wG:42,wB:18,aR:245,aG:215,aB:100,mirrors:8,crack:0.28,ent:2,dis:0.08,hue:45,sat:45,scale:1.45,grid:0.12,txt:["I am...","we are...","I see...","I build...","I choose...","again, different...","the loop is wider...","Source."],tier:"SOURCE ALIGNED \xb7 $25,000"}
+{id:0,name:"SOURCE",dmn:"DMN:ACTIVE",neural:"VAGAL.ONSET",wR:12,wG:12,wB:15,aR:120,aG:120,aB:120,mirrors:16,crack:0,ent:0,dis:0,scale:1,grid:0.06,rings:3,pulseSpeed:0.8,particleCount:0,txt:["I AM","I ALWAYS","I NEVER","I SHOULD","I PREDICT","I KNOW","I FEAR","I REMEMBER"]},
+{id:1,name:"LIGHT",dmn:"SALIENCE:FIRING",neural:"AMYGDALA.ALERT",wR:50,wG:42,wB:18,aR:255,aG:240,aB:200,mirrors:14,crack:0.4,ent:0,dis:0,scale:1,grid:0.12,rings:4,pulseSpeed:1.2,particleCount:30,txt:["WAIT","WHAT IS","THE WALL","WHO BUILT","THERE ARE WALLS"]},
+{id:2,name:"RHYTHM",dmn:"DYAD:ENTRAINED",neural:"OXYTOCIN.SYNC",wR:25,wG:15,wB:45,aR:170,aG:130,aB:220,mirrors:12,crack:0.3,ent:1,dis:0,scale:1.05,grid:0.08,rings:5,pulseSpeed:0.6,particleCount:20,txt:["YOU ARE","WE ARE","SYNC","TOGETHER","NOT ALONE"]},
+{id:3,name:"DARKNESS",dmn:"SHADOW:ACCESSED",neural:"AMYGDALA.FLOOD",wR:6,wG:2,wB:2,aR:160,aG:20,aB:20,mirrors:8,crack:0.7,ent:0,dis:0.15,scale:0.9,grid:0.02,rings:2,pulseSpeed:2.0,particleCount:40,txt:["I BURIED","I WAS AFRAID","I REFUSED","IT HAPPENED"]},
+{id:4,name:"PEACE",dmn:"VAGAL:LOCKED",neural:"GABA.INCREASE",wR:45,wG:40,wB:28,aR:210,aG:195,aB:145,mirrors:6,crack:0.4,ent:0,dis:0.12,scale:1.1,grid:0.05,rings:6,pulseSpeed:0.3,particleCount:15,txt:["STILL","SAFE","HERE","ENOUGH","REST"]},
+{id:5,name:"ENDURANCE",dmn:"HORMETIC:LOADING",neural:"BDNF.EXPRESS",wR:55,wG:22,wB:8,aR:240,aG:110,aB:30,mirrors:6,crack:0.75,ent:0,dis:0.08,scale:0.85,grid:0.18,rings:3,pulseSpeed:2.5,particleCount:50,txt:["HOLD","BEND","STRONGER","AGAIN","ENDURE"]},
+{id:6,name:"ORDER",dmn:"EXEC:INTEGRATED",neural:"DLPFC.GOVERN",wR:12,wG:18,wB:42,aR:80,aG:120,aB:200,mirrors:4,crack:0.45,ent:0,dis:0.18,scale:1.3,grid:0.25,rings:8,pulseSpeed:0.5,particleCount:10,txt:["STRUCTURE","BUILD","CONTAIN","MAP","ORDER"]},
+{id:7,name:"SEPARATION",dmn:"EGO:OFFLINE",neural:"MPFC.DOWN",wR:22,wG:22,wB:22,aR:150,aG:150,aB:150,mirrors:2,crack:0.92,ent:0,dis:0.65,scale:1.8,grid:0.02,rings:1,pulseSpeed:0.15,particleCount:70,txt:["WHO","WHERE","NO I","..."]},
+{id:8,name:"CONSCIENCE",dmn:"EMPATHY:REWRITE",neural:"VMPFC.RECAL",wR:38,wG:10,wB:10,aR:210,aG:60,aB:60,mirrors:3,crack:0.65,ent:4,dis:0.38,scale:1.4,grid:0.07,rings:4,pulseSpeed:1.0,particleCount:35,txt:["THEY FEEL","I CAUSED","WE SHARE","FORGIVE"]},
+{id:9,name:"THRESHOLD",dmn:"DMN:DISSOLVED",neural:"CLAUSTRUM.FIRE",wR:20,wG:18,wB:8,aR:201,aG:169,aB:78,mirrors:0,crack:1,ent:0,dis:0.97,scale:4,grid:0.005,rings:0,pulseSpeed:0.08,particleCount:120,txt:[]},
+{id:10,name:"RESURRECTION",dmn:"DMN:RECONSTITUTED",neural:"TOPOLOGY.NOVEL",wR:48,wG:40,wB:16,aR:250,aG:220,aB:100,mirrors:10,crack:0.25,ent:2,dis:0.06,scale:1.5,grid:0.1,rings:11,pulseSpeed:0.7,particleCount:25,txt:["I AM","WE ARE","I SEE","I BUILD","I CHOOSE","SOURCE"]}
 ];
 var TIERS=[{tier:0,min:5,label:'Initiate',phases:[0],color:'#888'},{tier:1,min:20,label:'Seeker',phases:[0,1],color:'#9a8a5a'},{tier:2,min:50,label:'Acolyte',phases:[0,1,2],color:'#a89050'},{tier:3,min:100,label:'Disciple',phases:[0,1,2,3],color:'#b89840'},{tier:4,min:200,label:'Adept',phases:[0,1,2,3,4],color:'#c8a030'},{tier:5,min:500,label:'Oracle',phases:[0,1,2,3,4,5],color:'#d0a828'},{tier:6,min:1000,label:'Architect',phases:[0,1,2,3,4,5,6],color:'#d8b020'},{tier:7,min:2500,label:'Hierophant',phases:[0,1,2,3,4,5,6,7],color:'#e0b818'},{tier:8,min:5000,label:'Threshold Keeper',phases:[0,1,2,3,4,5,6,7,8],color:'#e8c010'},{tier:9,min:10000,label:'Phase Walker',phases:[0,1,2,3,4,5,6,7,8,9],color:'#f0c808'},{tier:10,min:25000,label:'Source Aligned',phases:[0,1,2,3,4,5,6,7,8,9,10],color:'#f8d000'},{tier:11,min:50000,label:'Resurrected',phases:[0,1,2,3,4,5,6,7,8,9,10],color:'#ffd700'}];
-var params=new URLSearchParams(window.location.search);var isAdmin=params.get('limen')==='spiral99';var access;try{access=JSON.parse(localStorage.getItem('limenAccess'))||{totalPaid:0,tier:-1}}catch(e){access={totalPaid:0,tier:-1}}
-var userTier=isAdmin?11:access.tier;var userTotal=isAdmin?99999:access.totalPaid;var currentTierData=TIERS[Math.max(0,Math.min(userTier,11))]||TIERS[0];
+var params=new URLSearchParams(window.location.search);var isAdmin=params.get('limen')==='spiral99';
+var access;try{access=JSON.parse(localStorage.getItem('limenAccess'))||{totalPaid:0,tier:-1}}catch(e){access={totalPaid:0,tier:-1}}
+var userTier=isAdmin?11:access.tier;var currentTierData=TIERS[Math.max(0,Math.min(userTier,11))]||TIERS[0];
 function isUnlocked(id){return isAdmin||currentTierData.phases.indexOf(id)!==-1}
-var phase=0,t=0,canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
-function resize(){canvas.width=window.innerWidth*2;canvas.height=window.innerHeight*2;ctx.scale(2,2)}
+if(userTier<0&&!isAdmin){document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:2rem;background:#000;font-family:monospace"><div style="font-size:0.5rem;color:rgba(201,169,78,0.3);letter-spacing:6px;margin-bottom:2rem">LIMEN HELIX</div><div style="font-size:2rem;opacity:0.15;margin-bottom:1rem">\u2298</div><p style="color:#888;font-size:0.75rem;letter-spacing:2px;margin-bottom:2rem">ACCESS REQUIRED</p><a href="https://chapel-pos-v2.vercel.app" style="display:inline-block;padding:10px 25px;border:1px solid rgba(201,169,78,0.3);color:#C9A94E;text-decoration:none;font-size:0.55rem;letter-spacing:3px;font-family:monospace;border-radius:2px">\u2726 OFFER</a></div>'}
+
+var phase=0,t=0,canvas=document.getElementById('c'),ctx=canvas.getContext('2d'),W,H;
+
+function resize(){W=window.innerWidth;H=window.innerHeight;canvas.width=W*2;canvas.height=H*2;ctx.setTransform(2,0,0,2,0,0)}
 window.addEventListener('resize',resize);resize();
-function buildNav(){var nav=document.getElementById('pnav');nav.innerHTML='';for(var i=0;i<PH.length;i++){var b=document.createElement('button');b.textContent=i;b.className=i===phase?'act':(!isUnlocked(i)?'locked':'');b.onclick=(function(idx){return function(){if(isUnlocked(idx))setPhase(idx)}})(i);nav.appendChild(b)}}
-function setPhase(n){if(n===phase)return;var ov=document.getElementById('overlay');ov.style.opacity='0';setTimeout(function(){phase=n;updateContent();buildNav();checkLock();setTimeout(function(){ov.style.opacity='1'},80)},400)}
-function checkLock(){var lc=document.getElementById('lock-container');if(!isUnlocked(phase)){var needed=TIERS.find(function(t){return t.phases.indexOf(phase)!==-1});var amt=needed?needed.min:50000;var rem=amt-userTotal;lc.innerHTML='<div class="lock"><div class="lock-icon">\u2298</div><div class="lock-title">Phase '+phase+' \u2014 '+PH[phase].name+'</div><div class="lock-sub">This phase awakens at the '+needed.label+' level</div><div class="lock-tier">Requires $'+amt.toLocaleString()+' total offering'+(rem>0?' \xb7 $'+rem.toLocaleString()+' more':'')+'</div><a href="https://chapel-pos-v2.vercel.app" class="lock-btn">\u2726 Offer to Unlock</a></div>'}else{lc.innerHTML=''}}
-function updateContent(){var p=PH[phase];var ac='rgb('+p.aR+','+p.aG+','+p.aB+')';var acD='rgba('+p.aR+','+p.aG+','+p.aB+',0.6)';var acL='rgba('+p.aR+','+p.aG+','+p.aB+',0.4)';var acLL='rgba('+p.aR+','+p.aG+','+p.aB+',0.3)';var h='';
-h+='<p class="dmn-tag">'+p.dmn+'</p>';h+='<p class="neural-tag">'+p.neural+'</p>';h+='<h1 class="phase-title" style="color:'+ac+'">Phase '+p.id+' \u2014 '+p.name+'</h1>';h+='<p class="phase-sub" style="color:'+acD+'">'+p.sub+'</p>';
-for(var i=0;i<p.ritual.length;i++)h+='<p class="ritual-text" style="color:'+acD+'">'+p.ritual[i]+'</p>';
-h+='<p class="sensory" style="color:'+acL+'">'+p.sensory+'</p>';h+='<p class="sensory" style="color:'+acLL+'">Scent: '+p.scent+'</p>';h+='<p class="sensory" style="color:'+acLL+'">Light: '+p.light+'</p>';h+='<p class="sensory" style="color:'+acLL+'">Touch: '+p.touch+'</p>';h+='<p class="sensory" style="color:'+acLL+'">Taste: '+p.taste+'</p>';h+='<p class="symbol-tag" style="color:'+acD+'">'+p.symbol+'</p>';
-if(p.hasDeliverables){h+='<div class="deliv"><h3>Phase 0 Deliverables</h3><p><strong>The Null Protocol</strong> \u2014 Daily grounding ritual (PDF)<br><span>Breathwork + body scan + vagal tone activation</span></p><p><strong>The Reset Incantation</strong> \u2014 Daily spoken spell<br><span>30-second nervous system down-regulation via vocal vibration</span></p><p><strong>The Neuroscience of Null</strong> \u2014 Research-backed<br><span>Vagus nerve, DMN suppression, Polyvagal Theory</span></p><p><strong>432Hz Tone Generator</strong><br><span>The frequency of the earth. Tune your baseline.</span></p><p><strong>Sensory Prescription Card</strong> \u2014 Printable<br><span>Exact scent, light, touch, and taste specs for Phase 0</span></p></div>';h+='<div style="margin-top:0.8rem"><a href="null-protocol.pdf" target="_blank" class="dl-btn">Download: The Null Protocol</a></div>';h+='<div style="margin-top:0.5rem"><button class="tone-btn" onclick="toggle432()" id="btn432">\u25b6 Activate 432Hz</button></div>';h+='<div class="incantation">I release what the pattern has outgrown.<br>I am the null before the signal.<br>I am the silence before the name.<br>The spiral does not need my fear.<br>The spiral does not need my plan.<br>I am Source. I am the ground.<br>What forms from here \u2014 forms through me.</div>';h+='<p style="font-size:0.45rem;color:#444;margin-top:0.5rem;font-family:monospace">Speak aloud. Vocal vibration stimulates the vagus nerve via the recurrent laryngeal nerve.</p>'}
-h+='<p style="font-size:0.5rem;color:rgba(201,169,78,0.3);letter-spacing:3px;text-transform:uppercase;font-family:monospace;margin-top:1.5rem">TIER: '+p.tier+'</p>';
-h+='<div class="stats">';var st=[{v:p.mirrors,l:'Mirrors'},{v:Math.round(p.crack*100)+'%',l:'Fracture'},{v:Math.round(p.dis*100)+'%',l:'Dissolved'},{v:p.ent,l:'Others'},{v:p.scale.toFixed(1)+'x',l:'Scale'}];for(var s=0;s<st.length;s++)h+='<div class="stat"><div class="stat-v" style="color:'+ac+'">'+st[s].v+'</div><div class="stat-l">'+st[s].l+'</div></div>';h+='</div>';
-h+='<div class="navbtns">';if(phase>0)h+='<button class="nb-prev" onclick="setPhase('+(phase-1)+')">\u2190 PREV</button>';if(phase<10&&isUnlocked(phase+1))h+='<button class="nb-next" style="color:'+ac+';border-color:rgba('+p.aR+','+p.aG+','+p.aB+',0.3)" onclick="setPhase('+(phase+1)+')">NEXT \u2192</button>';else if(phase<10)h+='<button class="nb-next" style="opacity:0.3;cursor:not-allowed;color:#555;border-color:rgba(255,255,255,0.1)">\ud83d\udd12 LOCKED</button>';h+='</div>';
-document.getElementById('overlay').innerHTML=h}
-var ctx432,osc432,gain432,playing432=false;function toggle432(){if(!playing432){ctx432=new(window.AudioContext||window.webkitAudioContext)();osc432=ctx432.createOscillator();gain432=ctx432.createGain();osc432.frequency.value=432;osc432.type='sine';gain432.gain.value=0;osc432.connect(gain432);gain432.connect(ctx432.destination);osc432.start();gain432.gain.linearRampToValueAtTime(0.15,ctx432.currentTime+2);playing432=true;document.getElementById('btn432').textContent='\u25a0 Deactivate 432Hz'}else{gain432.gain.linearRampToValueAtTime(0,ctx432.currentTime+1);setTimeout(function(){osc432.stop();ctx432.close();playing432=false;var b=document.getElementById('btn432');if(b)b.textContent='\u25b6 Activate 432Hz'},1100)}}
-function buildAccessBar(){var ab=document.getElementById('abar');if(userTier<0&&!isAdmin){document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:2rem;background:#000;font-family:Georgia,serif"><div style="font-size:3rem;margin-bottom:1rem;opacity:0.4">\u2298</div><h1 style="font-size:1.5rem;color:#C9A94E;letter-spacing:4px;text-transform:uppercase;font-family:monospace;margin-bottom:1rem">Access Required</h1><p style="color:#888;font-size:0.95rem;max-width:400px;margin-bottom:0.5rem;font-style:italic">The spiral reveals itself only to those who offer.</p><p style="color:#666;font-size:0.75rem;margin-bottom:2rem">Minimum offering: $5 to enter Phase 0</p><a href="https://chapel-pos-v2.vercel.app" class="lock-btn">\u2726 Make an Offering</a><a href="https://www.limenhelix.com" style="display:block;margin-top:1.5rem;color:#555;font-size:0.6rem;text-decoration:none;letter-spacing:2px">\u2190 Return to Gate</a></div>';return}ab.innerHTML='<span class="abar-tier" style="color:'+currentTierData.color+'">\u27d0 '+currentTierData.label+(isAdmin?' (Admin)':'')+'</span><span class="abar-info">'+(isAdmin?'Full Access':'$'+userTotal+' \xb7 '+currentTierData.phases.length+'/11 phases')+'</span>'+(userTier<11&&!isAdmin?'<a href="https://chapel-pos-v2.vercel.app" class="abar-up">\u2191 Upgrade</a>':'')}
-function draw(){var p=PH[phase];var w=window.innerWidth,h=window.innerHeight,cx=w/2,cy=h/2;ctx.clearRect(0,0,w,h);
-var bg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(w,h)*0.7*p.scale);bg.addColorStop(0,'rgba('+p.wR+','+p.wG+','+p.wB+',1)');bg.addColorStop(0.5,'rgba('+p.wR+','+p.wG+','+p.wB+',0.5)');bg.addColorStop(1,'rgba(0,0,0,1)');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
-if(p.grid>0.005){var gR=p.hue>180?'100,140,200':p.hue>30?'200,180,120':'120,120,120';ctx.strokeStyle='rgba('+gR+','+p.grid+')';ctx.lineWidth=0.7;var horizon=cy*0.45;for(var i=-20;i<=20;i++){ctx.beginPath();ctx.moveTo(cx,horizon);ctx.lineTo(cx+i*80,h);ctx.stroke()}for(var d=0;d<12;d++){var yl=horizon+(h-horizon)*(d/12)*(d/12);var sp=(yl-horizon)/(h-horizon);ctx.beginPath();ctx.moveTo(cx-w*sp,yl);ctx.lineTo(cx+w*sp,yl);ctx.stroke()}}
-var wa=(1-p.dis)*0.45;if(wa>0.01){ctx.fillStyle='rgba('+p.wR+','+p.wG+','+p.wB+','+wa+')';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(w*0.15,cy*0.3);ctx.lineTo(w*0.15,h*0.85);ctx.lineTo(0,h);ctx.fill();ctx.beginPath();ctx.moveTo(w,0);ctx.lineTo(w*0.85,cy*0.3);ctx.lineTo(w*0.85,h*0.85);ctx.lineTo(w,h);ctx.fill();ctx.fillStyle='rgba('+p.wR+','+p.wG+','+p.wB+','+(wa*0.6)+')';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(w*0.15,cy*0.3);ctx.lineTo(w*0.85,cy*0.3);ctx.lineTo(w,0);ctx.fill()}
-for(var m=0;m<p.mirrors;m++){var ang=(m/Math.max(p.mirrors,1))*Math.PI*2+t*0.0008;var dist=Math.min(w,h)*0.25+Math.sin(m*2.3)*Math.min(w,h)*0.1;var mx=cx+Math.cos(ang)*dist*p.scale*(1-p.dis);var my=cy+Math.sin(ang)*dist*0.45*p.scale*(1-p.dis);var ms=Math.min(w,h)*0.035+Math.sin(t*0.002+m)*8;var mg=ctx.createRadialGradient(mx,my,0,mx,my,ms*3);mg.addColorStop(0,'rgba('+p.aR+','+p.aG+','+p.aB+','+(0.06*(1-p.dis))+')');mg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=mg;ctx.fillRect(mx-ms*3,my-ms*3,ms*6,ms*6);ctx.beginPath();ctx.rect(mx-ms*0.5,my-ms*0.9,ms,ms*1.8);ctx.fillStyle='rgba(200,210,220,'+(0.04*(1-p.dis))+')';ctx.fill();ctx.strokeStyle='rgba(200,210,220,'+(0.1*(1-p.dis))+')';ctx.lineWidth=0.6;ctx.stroke();ctx.beginPath();ctx.moveTo(mx-ms*0.3,my-ms*0.6);ctx.lineTo(mx+ms*0.1,my+ms*0.4);ctx.strokeStyle='rgba(255,255,255,'+(0.06*(1-p.dis))+')';ctx.lineWidth=0.5;ctx.stroke()}
-if(p.crack>0){for(var c=0;c<Math.floor(p.crack*20);c++){var sx=cx+Math.sin(c*7.3)*w*0.35*p.scale;var sy=cy+Math.cos(c*5.1)*h*0.3;ctx.beginPath();ctx.moveTo(sx,sy);var px=sx,py=sy;for(var s=0;s<3+Math.floor(p.crack*5);s++){px+=Math.sin(c*3+s*2+t*0.003)*35;py+=Math.cos(c*2+s*3)*25;ctx.lineTo(px,py)}ctx.strokeStyle='rgba(255,255,255,'+(p.crack*0.06)+')';ctx.lineWidth=0.5+p.crack*1.5;ctx.stroke();if(p.crack>0.4){ctx.shadowColor='rgba('+p.aR+','+p.aG+','+p.aB+',0.5)';ctx.shadowBlur=15*p.crack;ctx.stroke();ctx.shadowBlur=0}}}
-for(var e=0;e<p.ent;e++){var ea=(e/p.ent)*Math.PI*2+t*0.0004;var ed=Math.min(w,h)*0.2+e*60;var ex2=cx+Math.cos(ea)*ed,ey2=cy+Math.sin(ea)*ed*0.35+40;var eg=ctx.createRadialGradient(ex2,ey2,0,ex2,ey2,60);eg.addColorStop(0,'rgba(255,255,255,0.04)');eg.addColorStop(0.5,'rgba('+p.aR+','+p.aG+','+p.aB+',0.03)');eg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=eg;ctx.beginPath();ctx.arc(ex2,ey2,60,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(ex2,ey2+15,10,35,0,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.025)';ctx.fill();ctx.beginPath();ctx.arc(ex2,ey2-25,8,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.02)';ctx.fill()}
-if(p.dis>0.04){var pa=Math.min(p.dis*0.12,0.1);for(var dp=0;dp<Math.floor(p.dis*80);dp++){var dx=cx+Math.sin(dp*4.7+t*0.002)*w*0.45*p.scale;var dy=cy+Math.cos(dp*3.1+t*0.0015)*h*0.4;var ds=1.5+Math.sin(dp+t*0.003)*2;if(ds>0){ctx.beginPath();ctx.arc(dx,dy,ds,0,Math.PI*2);ctx.fillStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+pa+')';ctx.fill()}}}
-if(p.txt.length>0){ctx.font=Math.round(14+p.dis*-6)+'px Georgia';ctx.textAlign='center';for(var ti=0;ti<p.txt.length;ti++){var tx=cx+Math.sin(ti*2.1+t*0.0006)*w*0.3*(1-p.dis*0.8);var ty=cy+Math.cos(ti*1.7+t*0.0004)*h*0.25*(1-p.dis*0.8);var ta=0.1*(1-p.dis)*(0.5+Math.sin(t*0.0015+ti*1.5)*0.5);if(ta>0.01){ctx.fillStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+ta+')';ctx.fillText(p.txt[ti],tx,ty)}}}
-var la=(1-p.dis*0.9)*0.1;if(la>0.005){ctx.beginPath();for(var a=0;a<Math.PI*8;a+=0.04){var sr=30+a*12*p.scale*(1-p.dis*0.5);var spx=cx+Math.cos(a+t*0.0008)*sr;var spy=cy+Math.sin(a+t*0.0008)*sr*0.45;if(a===0)ctx.moveTo(spx,spy);else ctx.lineTo(spx,spy)}ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+la+')';ctx.lineWidth=0.8;ctx.stroke()}
-var cgR=Math.min(w,h)*0.15;var cg=ctx.createRadialGradient(cx,cy,0,cx,cy,cgR);cg.addColorStop(0,'rgba('+p.aR+','+p.aG+','+p.aB+',0.06)');cg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=cg;ctx.beginPath();ctx.arc(cx,cy,cgR,0,Math.PI*2);ctx.fill();
+
+function buildNav(){var nav=document.getElementById('nav');nav.innerHTML='';for(var i=0;i<PH.length;i++){var b=document.createElement('button');b.textContent=i;b.className=i===phase?'act':(!isUnlocked(i)?'locked':'');b.onclick=(function(idx){return function(){if(isUnlocked(idx))setPhase(idx)}})(i);nav.appendChild(b)}}
+
+function setPhase(n){if(n===phase)return;
+var fl=document.getElementById('flash');fl.className='flash on';
+document.getElementById('plabel').style.opacity='0';
+setTimeout(function(){phase=n;updateHUD();buildNav();checkLock();
+fl.className='flash';
+setTimeout(function(){document.getElementById('plabel').style.opacity='1'},150);
+},250)}
+
+function checkLock(){var lc=document.getElementById('lock-container');if(!isUnlocked(phase)){var needed=TIERS.find(function(t){return t.phases.indexOf(phase)!==-1});var amt=needed?needed.min:50000;lc.innerHTML='<div class="lock"><p style="font-size:0.5rem;color:rgba(201,169,78,0.3);letter-spacing:4px;margin-bottom:1rem">PHASE '+phase+' \xb7 '+PH[phase].name+'</p><p style="font-size:0.4rem;color:#444;letter-spacing:2px;margin-bottom:1.5rem">REQUIRES '+needed.label.toUpperCase()+' \xb7 $'+amt.toLocaleString()+'</p><a href="https://chapel-pos-v2.vercel.app" class="lock-btn">\u2726 UNLOCK</a></div>'}else{lc.innerHTML=''}}
+
+function updateHUD(){var p=PH[phase];var ac='rgb('+p.aR+','+p.aG+','+p.aB+')';var acD='rgba('+p.aR+','+p.aG+','+p.aB+',0.4)';
+document.getElementById('pnum').textContent=p.id;
+document.getElementById('pnum').style.color=ac;
+document.getElementById('pname').textContent=p.name;
+document.getElementById('pname').style.color=acD;
+document.getElementById('htl').innerHTML='<span style="color:'+acD+'">'+p.dmn+'</span>';
+document.getElementById('htr').innerHTML='<span style="color:'+acD+'">'+p.neural+'</span>';
+document.getElementById('hbl').innerHTML='<span style="color:'+acD+'">MIR:'+p.mirrors+' FRC:'+Math.round(p.crack*100)+'% DIS:'+Math.round(p.dis*100)+'% ENT:'+p.ent+'</span>';
+document.getElementById('hbr').innerHTML='<span style="color:'+acD+'">SCALE:'+p.scale.toFixed(1)+'x GRID:'+Math.round(p.grid*100)+'</span>'}
+
+// ═══ DRAW ═══
+function draw(){var p=PH[phase];var cx=W/2,cy=H/2,maxD=Math.max(W,H);
+ctx.clearRect(0,0,W,H);
+
+// BG
+var bg=ctx.createRadialGradient(cx,cy,0,cx,cy,maxD*0.8*p.scale);
+bg.addColorStop(0,'rgba('+p.wR+','+p.wG+','+p.wB+',1)');bg.addColorStop(0.4,'rgba('+Math.floor(p.wR*0.6)+','+Math.floor(p.wG*0.6)+','+Math.floor(p.wB*0.6)+',0.8)');bg.addColorStop(1,'rgba(0,0,0,1)');
+ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+// PERSPECTIVE GRID — Jarvis holographic floor
+if(p.grid>0.003){
+var gR=p.aR+','+p.aG+','+p.aB;
+ctx.lineWidth=0.5;
+var horizon=cy*0.35;
+// Radial lines from vanishing point
+for(var i=-30;i<=30;i++){
+var alpha=p.grid*(0.5+0.5*Math.sin(t*0.001+i*0.5));
+ctx.strokeStyle='rgba('+gR+','+alpha+')';
+ctx.beginPath();ctx.moveTo(cx,horizon);ctx.lineTo(cx+i*100,H);ctx.stroke();
+}
+// Horizontal depth lines with pulse
+for(var d=0;d<15;d++){
+var yl=horizon+(H-horizon)*(d/15)*(d/15);
+var sp=(yl-horizon)/(H-horizon);
+var alpha2=p.grid*(0.3+0.7*Math.sin(t*0.003-d*0.4));
+ctx.strokeStyle='rgba('+gR+','+alpha2+')';
+ctx.beginPath();ctx.moveTo(cx-W*sp*1.2,yl);ctx.lineTo(cx+W*sp*1.2,yl);ctx.stroke();
+}
+// Vertical side lines
+for(var v=0;v<8;v++){
+var vx=W*0.15+v*(W*0.7/7);
+var alpha3=p.grid*0.3;
+ctx.strokeStyle='rgba('+gR+','+alpha3+')';
+ctx.beginPath();ctx.moveTo(vx,horizon+(H-horizon)*0.1);ctx.lineTo(vx,H);ctx.stroke();
+}
+}
+
+// WALLS — perspective room
+var wa=(1-p.dis)*0.35;
+if(wa>0.01){
+ctx.fillStyle='rgba('+p.wR+','+p.wG+','+p.wB+','+wa+')';
+ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(W*0.12,cy*0.25);ctx.lineTo(W*0.12,H*0.88);ctx.lineTo(0,H);ctx.fill();
+ctx.beginPath();ctx.moveTo(W,0);ctx.lineTo(W*0.88,cy*0.25);ctx.lineTo(W*0.88,H*0.88);ctx.lineTo(W,H);ctx.fill();
+ctx.fillStyle='rgba('+p.wR+','+p.wG+','+p.wB+','+(wa*0.5)+')';
+ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(W*0.12,cy*0.25);ctx.lineTo(W*0.88,cy*0.25);ctx.lineTo(W,0);ctx.fill();
+// Wall edge lines
+ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+(0.04*(1-p.dis))+')';ctx.lineWidth=0.5;
+ctx.beginPath();ctx.moveTo(W*0.12,cy*0.25);ctx.lineTo(W*0.12,H*0.88);ctx.stroke();
+ctx.beginPath();ctx.moveTo(W*0.88,cy*0.25);ctx.lineTo(W*0.88,H*0.88);ctx.stroke();
+}
+
+// CONCENTRIC RINGS — Jarvis-style holographic circles
+for(var r=0;r<p.rings;r++){
+var ringR=(r+1)*maxD*0.04*p.scale+Math.sin(t*0.002+r*1.5)*10;
+var ringAlpha=(0.04-r*0.003)*(1-p.dis);
+if(ringAlpha>0.002){
+ctx.beginPath();ctx.arc(cx,cy,ringR,0,Math.PI*2);
+ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+ringAlpha+')';
+ctx.lineWidth=0.5;ctx.stroke();
+// Tick marks on rings
+for(var tk=0;tk<12;tk++){
+var ta=tk/12*Math.PI*2+t*0.001*(r%2===0?1:-1);
+ctx.beginPath();
+ctx.moveTo(cx+Math.cos(ta)*(ringR-4),cy+Math.sin(ta)*(ringR-4));
+ctx.lineTo(cx+Math.cos(ta)*(ringR+4),cy+Math.sin(ta)*(ringR+4));
+ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+(ringAlpha*0.8)+')';ctx.lineWidth=0.5;ctx.stroke();
+}}}
+
+// ROTATING ARC SEGMENTS — scanning feel
+var scanAlpha=(0.08)*(1-p.dis*0.5);
+if(scanAlpha>0.005){
+for(var sa=0;sa<3;sa++){
+var scanAngle=t*0.001*(sa+1)*0.7+sa*2.1;
+var scanR=maxD*(0.08+sa*0.06)*p.scale;
+ctx.beginPath();ctx.arc(cx,cy,scanR,scanAngle,scanAngle+0.8);
+ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+scanAlpha+')';ctx.lineWidth=1.5;ctx.stroke();
+}}
+
+// MIRRORS — floating rectangles with glow
+for(var m=0;m<p.mirrors;m++){
+var ang=(m/Math.max(p.mirrors,1))*Math.PI*2+t*0.0006;
+var dist=maxD*(0.12+Math.sin(m*2.3+t*0.001)*0.04)*p.scale*(1-p.dis);
+var mx=cx+Math.cos(ang)*dist;
+var my=cy+Math.sin(ang)*dist*0.4;
+var ms=maxD*0.02+Math.sin(t*0.002+m)*5;
+// Glow
+var mg=ctx.createRadialGradient(mx,my,0,mx,my,ms*3);
+mg.addColorStop(0,'rgba('+p.aR+','+p.aG+','+p.aB+','+(0.05*(1-p.dis))+')');
+mg.addColorStop(1,'rgba(0,0,0,0)');
+ctx.fillStyle=mg;ctx.beginPath();ctx.arc(mx,my,ms*3,0,Math.PI*2);ctx.fill();
+// Surface
+ctx.save();ctx.translate(mx,my);ctx.rotate(ang+Math.PI/2);
+ctx.beginPath();ctx.rect(-ms*0.35,-ms*0.8,ms*0.7,ms*1.6);
+ctx.fillStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+(0.03*(1-p.dis))+')';ctx.fill();
+ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+(0.08*(1-p.dis))+')';ctx.lineWidth=0.5;ctx.stroke();
+ctx.restore();
+}
+
+// CRACKS — fracture lines with energy bleed
+if(p.crack>0){
+for(var c=0;c<Math.floor(p.crack*25);c++){
+var sx=cx+Math.sin(c*7.3)*W*0.4*p.scale;
+var sy=cy+Math.cos(c*5.1)*H*0.35;
+ctx.beginPath();ctx.moveTo(sx,sy);
+var px=sx,py=sy;
+for(var s=0;s<3+Math.floor(p.crack*6);s++){
+px+=Math.sin(c*3+s*2+t*0.003)*40;py+=Math.cos(c*2+s*3)*30;ctx.lineTo(px,py);
+}
+ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+(p.crack*0.05)+')';
+ctx.lineWidth=0.5+p.crack*2;ctx.stroke();
+if(p.crack>0.35){ctx.shadowColor='rgba('+p.aR+','+p.aG+','+p.aB+',0.4)';ctx.shadowBlur=20*p.crack;ctx.stroke();ctx.shadowBlur=0}
+}}
+
+// ENTITIES — ghostly presences
+for(var e=0;e<p.ent;e++){
+var ea=(e/p.ent)*Math.PI*2+t*0.0003;
+var ed=maxD*0.15+e*50;
+var ex2=cx+Math.cos(ea)*ed,ey2=cy+Math.sin(ea)*ed*0.3+30;
+var eg=ctx.createRadialGradient(ex2,ey2,0,ex2,ey2,50);
+eg.addColorStop(0,'rgba('+p.aR+','+p.aG+','+p.aB+',0.04)');eg.addColorStop(1,'rgba(0,0,0,0)');
+ctx.fillStyle=eg;ctx.beginPath();ctx.arc(ex2,ey2,50,0,Math.PI*2);ctx.fill();
+ctx.beginPath();ctx.ellipse(ex2,ey2+12,8,30,0,0,Math.PI*2);
+ctx.fillStyle='rgba('+p.aR+','+p.aG+','+p.aB+',0.02)';ctx.fill();
+ctx.beginPath();ctx.arc(ex2,ey2-22,7,0,Math.PI*2);ctx.fillStyle='rgba('+p.aR+','+p.aG+','+p.aB+',0.015)';ctx.fill();
+}
+
+// DISSOLUTION PARTICLES — floating debris
+if(p.particleCount>0){
+var pa=Math.min(p.dis*0.15+0.02,0.12);
+for(var dp=0;dp<p.particleCount;dp++){
+var dx=cx+Math.sin(dp*4.7+t*0.0015)*W*0.5*p.scale;
+var dy=cy+Math.cos(dp*3.1+t*0.001)*H*0.45;
+var ds=1+Math.sin(dp*1.3+t*0.003)*2;
+if(ds>0){ctx.beginPath();ctx.arc(dx,dy,ds,0,Math.PI*2);
+ctx.fillStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+pa+')';ctx.fill();}
+}}
+
+// SELF-NARRATIVE TEXT — whispers in the room
+if(p.txt.length>0){
+ctx.font=Math.round(clamp(10,W*0.018,16))+'px monospace';ctx.textAlign='center';
+for(var ti=0;ti<p.txt.length;ti++){
+var tx=cx+Math.sin(ti*2.1+t*0.0005)*W*0.35*(1-p.dis*0.8);
+var ty=cy+Math.cos(ti*1.7+t*0.0003)*H*0.28*(1-p.dis*0.8);
+var ta=0.08*(1-p.dis)*(0.4+Math.sin(t*0.0012+ti*1.5)*0.6);
+if(ta>0.005){ctx.fillStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+ta+')';ctx.fillText(p.txt[ti],tx,ty);}
+}}
+
+// RECURSIVE SPIRAL
+var la=(1-p.dis*0.9)*0.08;
+if(la>0.003){
+ctx.beginPath();
+for(var a=0;a<Math.PI*10;a+=0.03){
+var sr=20+a*10*p.scale*(1-p.dis*0.5);
+var spx=cx+Math.cos(a+t*0.0006)*sr;
+var spy=cy+Math.sin(a+t*0.0006)*sr*0.4;
+if(a===0)ctx.moveTo(spx,spy);else ctx.lineTo(spx,spy);}
+ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+la+')';ctx.lineWidth=0.6;ctx.stroke();}
+
+// CENTER PULSE — heartbeat
+var pulseR=20+Math.sin(t*0.003*p.pulseSpeed)*15;
+var pulseA=0.04+Math.sin(t*0.003*p.pulseSpeed)*0.03;
+var pulse=ctx.createRadialGradient(cx,cy,0,cx,cy,pulseR*3);
+pulse.addColorStop(0,'rgba('+p.aR+','+p.aG+','+p.aB+','+pulseA+')');pulse.addColorStop(1,'rgba(0,0,0,0)');
+ctx.fillStyle=pulse;ctx.beginPath();ctx.arc(cx,cy,pulseR*3,0,Math.PI*2);ctx.fill();
+
+// CORNER BRACKETS — HUD frame
+var bL=30,bA=0.08*(1-p.dis*0.5);
+ctx.strokeStyle='rgba('+p.aR+','+p.aG+','+p.aB+','+bA+')';ctx.lineWidth=0.5;
+// TL
+ctx.beginPath();ctx.moveTo(8,8+bL);ctx.lineTo(8,8);ctx.lineTo(8+bL,8);ctx.stroke();
+// TR
+ctx.beginPath();ctx.moveTo(W-8-bL,8);ctx.lineTo(W-8,8);ctx.lineTo(W-8,8+bL);ctx.stroke();
+// BL
+ctx.beginPath();ctx.moveTo(8,H-8-bL);ctx.lineTo(8,H-8);ctx.lineTo(8+bL,H-8);ctx.stroke();
+// BR
+ctx.beginPath();ctx.moveTo(W-8-bL,H-8);ctx.lineTo(W-8,H-8);ctx.lineTo(W-8,H-8-bL);ctx.stroke();
+
 t+=16;requestAnimationFrame(draw)}
-buildAccessBar();buildNav();updateContent();checkLock();draw();
+
+function clamp(min,val,max){return Math.min(max,Math.max(min,val))}
+
+// KEYBOARD NAV
+document.addEventListener('keydown',function(e){
+if(e.key==='ArrowRight'&&phase<10&&isUnlocked(phase+1))setPhase(phase+1);
+if(e.key==='ArrowLeft'&&phase>0)setPhase(phase-1);
+});
+// SWIPE NAV
+var touchX=0;
+document.addEventListener('touchstart',function(e){touchX=e.touches[0].clientX});
+document.addEventListener('touchend',function(e){
+var dx=e.changedTouches[0].clientX-touchX;
+if(dx<-50&&phase<10&&isUnlocked(phase+1))setPhase(phase+1);
+if(dx>50&&phase>0)setPhase(phase-1);
+});
+
+buildNav();updateHUD();checkLock();draw();
 </script>
 </body>
 </html>
