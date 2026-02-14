@@ -11,14 +11,16 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%}
 #overlay{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;pointer-events:none}
 #msg{font-family:monospace;font-size:clamp(0.5rem,1.5vw,0.7rem);letter-spacing:4px;text-transform:uppercase;color:rgba(201,169,78,0);transition:color 1.2s;text-align:center;line-height:2.5}
 #whiteout{position:fixed;inset:0;z-index:20;background:#fff;opacity:0;pointer-events:none;transition:opacity 0.8s}
-#vignette{position:fixed;inset:0;z-index:5;pointer-events:none;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.7) 100%)}
+#vignette{position:fixed;inset:0;z-index:5;pointer-events:none;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.7) 100%);transition:background 0.3s}
 #flash{position:fixed;inset:0;z-index:8;pointer-events:none;background:#fff;opacity:0}
+#blackout{position:fixed;inset:0;z-index:15;background:#000;opacity:0;pointer-events:none;transition:opacity 0.5s}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
 <div id="vignette"></div>
 <div id="flash"></div>
+<div id="blackout"></div>
 <div id="overlay"><div id="msg"></div></div>
 <div id="whiteout"></div>
 <script>
@@ -61,7 +63,6 @@ float fbm(vec2 p){
   return v;
 }
 
-// Voronoi for organic cellular structure
 float voronoi(vec2 p){
   vec2 n=floor(p),f=fract(p);
   float md=8.0;
@@ -75,7 +76,6 @@ float voronoi(vec2 p){
   return sqrt(md);
 }
 
-// Second voronoi for distance to edge (ion channel pores)
 vec2 voronoi2(vec2 p){
   vec2 n=floor(p),f=fract(p);
   float md=8.0,md2=8.0;
@@ -94,398 +94,370 @@ vec2 voronoi2(vec2 p){
 void main(){
   vec2 uv=(gl_FragCoord.xy*0.5)/res-0.5;
   uv.x*=res.x/res.y;
-  
   float time=t;
   float p=phase;
   vec3 col=vec3(0);
+  float r=length(uv);
+  float a=atan(uv.y,uv.x);
   
-  // ════════════════════════════════════════════════
-  // PHASE 0 — 0.12: THE EYE (breathing, alive, wrong)
-  // ════════════════════════════════════════════════
-  if(p<0.12){
-    float ep=p/0.12;
-    float r=length(uv);
-    float a=atan(uv.y,uv.x);
+  // ════════════════════════════════════════
+  // 0.00-0.10: THE EYE — pupillary reflex failing
+  // ════════════════════════════════════════
+  if(p<0.10){
+    float ep=p/0.10;
     float breathe=sin(time*1.5)*0.02+sin(time*3.7)*0.008;
-    r+=breathe;
+    float rr=r+breathe;
     
-    float iris=smoothstep(0.35-ep*0.15,0.33-ep*0.15,r)-smoothstep(0.12+ep*0.08,0.14+ep*0.08,r);
-    vec3 irisCol=mix(
-      vec3(0.15,0.35,0.55),
-      vec3(0.5,0.1,0.3),
-      fbm(uv*8.0+time*0.4)*ep+sin(time*2.0)*0.3
-    );
+    float iris=smoothstep(0.35-ep*0.15,0.33-ep*0.15,rr)-smoothstep(0.12+ep*0.08,0.14+ep*0.08,rr);
+    vec3 irisCol=mix(vec3(0.15,0.35,0.55),vec3(0.5,0.1,0.3),fbm(uv*8.0+time*0.4)*ep+sin(time*2.0)*0.3);
     irisCol=mix(irisCol,vec3(0.78,0.5,0.1),smoothstep(-0.01,0.01,uv.x)*0.4*ep);
-    
     float fiber=abs(sin(a*24.0+fbm(uv*6.0+time*0.8)*4.0+time*0.5));
     irisCol+=vec3(0.2,0.15,0.08)*fiber*fiber;
     
-    float veins=smoothstep(0.45,0.65,fbm(uv*20.0+vec2(time*0.3,-time*0.2)));
-    
     float pupilR=0.08+ep*0.4+sin(time*4.0)*0.03;
-    float pupil=1.0-smoothstep(pupilR-0.02,pupilR+0.01,r);
-    
-    float limbal=(smoothstep(0.33,0.35,r)-smoothstep(0.36,0.38,r))*(0.7+sin(time*3.0)*0.3);
-    
-    float sclera=smoothstep(0.37,0.5,r)-smoothstep(0.5,0.7,r);
+    float pupil=1.0-smoothstep(pupilR-0.02,pupilR+0.01,rr);
+    float limbal=(smoothstep(0.33,0.35,rr)-smoothstep(0.36,0.38,rr))*(0.7+sin(time*3.0)*0.3);
+    float sclera=smoothstep(0.37,0.5,rr)-smoothstep(0.5,0.7,rr);
+    float veins=smoothstep(0.45,0.65,fbm(uv*20.0+vec2(time*0.3,-time*0.2)));
     
     col+=irisCol*iris*(1.0-pupil);
     col+=vec3(0.85,0.7,0.3)*limbal*0.8;
     col+=(vec3(0.95,0.88,0.85)+vec3(0.15,0.0,0.0)*sin(time*2.0)*0.5)*sclera*0.2;
     col+=vec3(0.5,0.02,0.02)*veins*sclera*0.4;
-    
-    // Something in the pupil void
     col=mix(col,vec3(0.03,0.0,0.02)+vec3(0.15,0.0,0.08)*fbm(uv*30.0+time*2.0)*pupil,pupil);
-    
-    // Wet cornea specular
     col+=vec3(1)*pow(max(0.0,1.0-length(uv-vec2(-0.1,-0.12))*6.0),4.0)*0.3*(1.0-pupil);
-    col*=1.0-smoothstep(0.3,0.85,r);
+    col*=1.0-smoothstep(0.3,0.85,rr);
     
     gl_FragColor=vec4(col,1);return;
   }
   
-  // ════════════════════════════════════════════════
-  // PHASE 0.12 — 0.30: MYELINATED AXON INTERIOR
-  // Dark, wet, organic. Lipid bilayer walls.
-  // Ion channel protein clusters as pores.
-  // Resting potential: ~-70mV. Dim blue-gray.
-  // ════════════════════════════════════════════════
-  if(p<0.30){
-    float np=(p-0.12)/0.18;
-    float r=length(uv);
-    float a=atan(uv.y,uv.x);
-    
-    // Tunnel depth — accelerating as action potential propagates
+  // ════════════════════════════════════════
+  // 0.10-0.28: MYELINATED AXON — dark, wet, real
+  // Na+ depolarization, K+ repolarization, Nodes of Ranvier
+  // ════════════════════════════════════════
+  if(p<0.28){
+    float np=(p-0.10)/0.18;
     float speed=2.0+np*6.0;
     float z=1.0/max(r,0.001)+time*speed+np*20.0;
     vec2 tp=vec2(z*0.15,a/3.14159);
     
-    // === LIPID BILAYER MEMBRANE WALL ===
-    // Textured with embedded proteins — voronoi gives organic cell membrane look
+    // Lipid bilayer membrane
     vec2 v2=voronoi2(tp*vec2(4.0,8.0));
-    float membrane=smoothstep(0.08,0.15,v2.y-v2.x);// cell borders
-    float proteinCluster=1.0-smoothstep(0.0,0.06,v2.x);// dark pores — ion channels
+    float membrane=smoothstep(0.08,0.15,v2.y-v2.x);
+    float proteinCluster=1.0-smoothstep(0.0,0.06,v2.x);
     
-    // Ion channel gates — some open, some closed
-    // Opening probability increases as depolarization wave approaches
-    float depolarWave=sin(z*0.8-time*8.0)*0.5+0.5;
-    depolarWave=pow(depolarWave,3.0);
+    // Depolarization wave
+    float depolarWave=pow(sin(z*0.8-time*8.0)*0.5+0.5,3.0);
     float channelOpen=step(0.7-depolarWave*0.4,hash(floor(tp*vec2(4.0,8.0))));
     
-    // === RESTING POTENTIAL GLOW ===
-    // -70mV — faint blue-gray. Not colorful. Electrical.
     float wallDist=smoothstep(0.55,0.03,r);
-    vec3 restingCol=vec3(0.04,0.05,0.08);// near black — inside of a nerve is DARK
-    vec3 membraneCol=vec3(0.08,0.09,0.12);// lipid bilayer — slightly lighter gray-blue
+    col+=vec3(0.04,0.05,0.08);// near black interior
+    col+=vec3(0.08,0.09,0.12)*membrane*wallDist*0.6;
     
-    col+=restingCol;
-    col+=membraneCol*membrane*wallDist*0.6;
+    // Ion channels — Na+ glow when open
+    col+=mix(vec3(0.01),vec3(0.5,0.6,0.8)*depolarWave*0.4,channelOpen)*proteinCluster*wallDist;
     
-    // === ION CHANNEL PORES ===
-    // Dark holes in the membrane. When open during depolarization: sodium glow
-    vec3 poreCol=vec3(0.01,0.01,0.02);// closed — just dark holes
-    vec3 naGlow=vec3(0.5,0.6,0.8);// sodium influx — cold blue-white electrical
-    col+=mix(poreCol,naGlow*depolarWave*0.4,channelOpen)*proteinCluster*wallDist;
+    // Na+ depolarization flash — sharp blue-white arc
+    float depolarFlash=pow(sin(z*1.2-time*10.0)*0.5+0.5,20.0);
+    col+=vec3(0.6,0.7,0.95)*depolarFlash*smoothstep(0.4,0.0,r)*0.8;
     
-    // === DEPOLARIZATION WAVE ===
-    // Na+ rushing in — this is THE flash. Blue-white electrical arc.
-    // Travels as a ring passing through the tunnel
-    float depolarFlash=sin(z*1.2-time*10.0)*0.5+0.5;
-    depolarFlash=pow(depolarFlash,20.0);// sharp spike — like a real action potential
-    vec3 naFlash=vec3(0.6,0.7,0.95);// blue-white — like an electrical discharge
-    col+=naFlash*depolarFlash*smoothstep(0.4,0.0,r)*0.8;
+    // K+ repolarization — amber trail behind
+    float repolar=pow(sin(z*1.2-time*10.0+1.8)*0.5+0.5,12.0)*0.4;
+    col+=vec3(0.4,0.25,0.08)*repolar*smoothstep(0.35,0.0,r);
     
-    // Sodium ions — tiny bright points rushing inward toward center
-    float naIons=pow(hash(floor(tp*30.0+vec2(floor(time*12.0),0))),35.0);
-    naIons*=depolarWave;
+    // Nodes of Ranvier — saltatory conduction
+    float nodePos=mod(z,3.5);
+    float atNode=smoothstep(0.3,0.0,abs(nodePos-0.5));
+    col+=vec3(0.7,0.8,1.0)*atNode*depolarWave*smoothstep(0.5,0.0,r)*0.6;
+    
+    // Myelin sheath layers
+    float myelin=(1.0-atNode)*wallDist;
+    float myelinLayers=pow(abs(sin(r*60.0+fbm(tp*4.0)*2.0)),6.0);
+    col+=vec3(0.06,0.06,0.04)*myelin*0.4;
+    col+=vec3(0.1,0.09,0.06)*myelinLayers*myelin*0.15;
+    
+    // Microtubules
+    float microtubes=pow(abs(sin(a*20.0+noise(tp*2.0)*1.5)),8.0);
+    col+=vec3(0.05,0.06,0.04)*microtubes*smoothstep(0.15,0.03,r)*0.3;
+    
+    // Na+ ions
+    float naIons=pow(hash(floor(tp*30.0+vec2(floor(time*12.0),0))),35.0)*depolarWave;
     col+=vec3(0.5,0.55,0.7)*naIons*wallDist*2.0;
     
-    // === REPOLARIZATION TRAIL ===
-    // K+ flowing out behind the depolarization wave — warm amber
-    float repolar=sin(z*1.2-time*10.0+1.8)*0.5+0.5;// behind the Na+ wave
-    repolar=pow(repolar,12.0)*0.4;
-    vec3 kCol=vec3(0.4,0.25,0.08);// potassium — warm amber-brown
-    col+=kCol*repolar*smoothstep(0.35,0.0,r);
-    
-    // === NODES OF RANVIER ===
-    // Gaps in myelin sheath — bright rings where signal JUMPS
-    // Saltatory conduction — the signal leaps between nodes
-    float nodeSpacing=3.5;// distance between nodes
-    float nodePos=mod(z,nodeSpacing);
-    float atNode=smoothstep(0.3,0.0,abs(nodePos-0.5));// are we at a node?
-    
-    // Node flash — much brighter than internodal regions
-    float nodeFlash=atNode*depolarWave;
-    col+=vec3(0.7,0.8,1.0)*nodeFlash*smoothstep(0.5,0.0,r)*0.6;
-    
-    // Node structure — exposed axon membrane, denser ion channels
-    float nodePores=voronoi(tp*vec2(8.0,16.0));
-    col+=vec3(0.12,0.1,0.06)*atNode*(1.0-smoothstep(0.0,0.1,nodePores))*wallDist*0.5;
-    
-    // === MYELIN SHEATH ===
-    // Between nodes — thick insulating layer. Dark. Fatty. Layered.
-    float myelin=(1.0-atNode)*wallDist;
-    float myelinLayers=abs(sin(r*60.0+fbm(tp*4.0)*2.0));// concentric fatty layers
-    myelinLayers=pow(myelinLayers,6.0);
-    col+=vec3(0.06,0.06,0.04)*myelin*0.4;// base dark insulation
-    col+=vec3(0.1,0.09,0.06)*myelinLayers*myelin*0.15;// layer edges barely visible
-    
-    // === SCHWANN CELL NUCLEI ===
-    // Occasional bulges in the myelin — the cells that make it
-    float schwann=pow(hash(floor(tp*vec2(2.0,4.0))),8.0);
-    col+=vec3(0.08,0.06,0.1)*schwann*myelin*0.3;
-    
-    // === MICROTUBULE TRACKS ===
-    // Inside the axon — parallel lines running the length. Transport highways.
-    float microtubes=abs(sin(a*20.0+noise(tp*2.0)*1.5));
-    microtubes=pow(microtubes,8.0);
-    float axonInterior=smoothstep(0.15,0.03,r);
-    col+=vec3(0.05,0.06,0.04)*microtubes*axonInterior*0.3;
-    
-    // Vesicle transport along microtubules — tiny moving dots
+    // Vesicle transport
     float vesicle=pow(hash(floor(vec2(a*10.0,z*3.0-time*2.0))),50.0);
-    col+=vec3(0.15,0.12,0.08)*vesicle*axonInterior;
-    
-    // === CYTOPLASM ===
-    // The fluid interior — faint organic noise
-    float cyto=fbm(tp*6.0+time*0.2)*axonInterior*0.03;
-    col+=vec3(0.04,0.04,0.03)*cyto;
+    col+=vec3(0.15,0.12,0.08)*vesicle*smoothstep(0.15,0.03,r);
     
     gl_FragColor=vec4(col,1);return;
   }
   
-  // ════════════════════════════════════════════════
-  // PHASE 0.30 — 0.50: SYNAPTIC TERMINAL
-  // Action potential arrives. Voltage-gated Ca2+ channels open.
-  // Calcium cascade. Vesicle fusion. Neurotransmitter release.
-  // This is where it gets VIOLENT.
-  // ════════════════════════════════════════════════
-  if(p<0.50){
-    float sp=(p-0.30)/0.20;
-    float r=length(uv);
-    float a=atan(uv.y,uv.x);
-    
-    // Tunnel opens up — the terminal bouton is wider
-    float tunnelR=r*(1.0-sp*0.3);// space expands
-    float z=1.0/max(tunnelR,0.001)+time*2.0+sp*15.0;
+  // ════════════════════════════════════════
+  // 0.28-0.42: SYNAPTIC TERMINAL + CLEFT
+  // Ca2+ cascade, vesicle fusion, neurotransmitter release,
+  // crossing the 20nm void, receptor binding
+  // ════════════════════════════════════════
+  if(p<0.42){
+    float sp=(p-0.28)/0.14;
+    float z=1.0/max(r*(1.0-sp*0.3),0.001)+time*2.0+sp*15.0;
     vec2 tp=vec2(z*0.15,a/3.14159);
     
-    // === CALCIUM CHANNELS OPENING ===
-    // Voltage-gated Ca2+ — the trigger for everything
-    float caWave=sin(z*2.0-time*6.0)*0.5+0.5;
-    caWave=pow(caWave,6.0);
+    // Ca2+ cascade
+    float caWave=pow(sin(z*2.0-time*6.0)*0.5+0.5,6.0);
+    float caFlash=caWave*min(1.0,sp*2.0);
+    col+=vec3(0.9,0.75,0.4)*caFlash*smoothstep(0.4,0.0,r)*0.5;
     
-    // Calcium ions — brighter than sodium, more amber-white
-    // Ca2+ is the ALARM SIGNAL of cells
-    float caFlash=caWave*sp;
-    vec3 caCol=vec3(0.9,0.75,0.4);// calcium — warm bright amber-white
-    col+=caCol*caFlash*smoothstep(0.4,0.0,r)*0.5;
-    
-    // Individual calcium ions — sparking points
-    float caIons=pow(hash(floor(tp*20.0+vec2(floor(time*8.0),0))),30.0);
-    caIons*=caWave*sp;
+    // Ca2+ ions sparking
+    float caIons=pow(hash(floor(tp*20.0+vec2(floor(time*8.0),0))),30.0)*caWave*min(1.0,sp*2.0);
     col+=vec3(1.0,0.85,0.5)*caIons*2.0;
     
-    // === SYNAPTIC VESICLES ===
-    // Round membrane-bound spheres filled with neurotransmitter
-    // They SWARM toward the presynaptic membrane
+    // Vesicles swarming
     float vesicleField=voronoi(tp*vec2(6.0,12.0)+vec2(0,-time*sp*2.0));
     float vesicles=1.0-smoothstep(0.0,0.12+sp*0.05,vesicleField);
-    vec3 vesicleCol=vec3(0.12,0.1,0.06);// lipid spheres — dark organic
-    // Vesicles glow when calcium hits them — SNARE complex activation
-    vec3 vesicleActive=vec3(0.3,0.25,0.12);
-    col+=mix(vesicleCol,vesicleActive,caWave*sp)*vesicles*smoothstep(0.5,0.05,r)*0.6;
+    col+=mix(vec3(0.12,0.1,0.06),vec3(0.3,0.25,0.12),caWave*sp)*vesicles*smoothstep(0.5,0.05,r)*0.6;
     
-    // === VESICLE FUSION EVENTS ===
-    // When sp > 0.4, vesicles start BURSTING at the membrane
+    // Vesicle fusion bursts
     float fusionZone=smoothstep(0.3,0.5,sp);
     float fusion=pow(hash(floor(tp*8.0)+floor(time*3.0)),20.0)*fusionZone;
-    // Fusion is a bright flash — membrane ripping open
     col+=vec3(0.8,0.7,0.4)*fusion*smoothstep(0.4,0.15,r)*3.0;
     
-    // === NEUROTRANSMITTER CLOUD ===
-    // After fusion — molecules spilling into synaptic cleft
-    // Not colored by type — they're all just small molecules. Faint glow.
-    float ntCloud=fbm(uv*15.0+time*vec2(1.5,-0.5))*fusionZone;
-    ntCloud*=smoothstep(0.5,0.2,r);
-    vec3 ntCol=vec3(0.15,0.12,0.1);// organic molecules — faint warm
-    col+=ntCol*ntCloud*0.4;
+    // The void between neurons (sp > 0.6)
+    float inCleft=smoothstep(0.5,0.8,sp);
     
-    // === MITOCHONDRIA ===
-    // Powering all of this. Dense in the terminal.
-    float mito=fbm(tp*vec2(3.0,6.0)+vec2(3.7,1.2));
-    mito=smoothstep(0.55,0.7,mito);
-    col+=vec3(0.08,0.04,0.02)*mito*smoothstep(0.5,0.1,r)*0.3;
-    
-    // === PRESYNAPTIC MEMBRANE ===
-    // The wall we're approaching — getting closer
-    float wallApproach=smoothstep(0.5,0.15,r)*(0.3+sp*0.7);
-    float memPores=voronoi(tp*vec2(5.0,10.0));
-    col+=vec3(0.06,0.07,0.05)*(1.0-smoothstep(0.0,0.1,memPores))*wallApproach;
-    
-    // Background — still dark but slightly warmer as calcium floods in
-    col+=vec3(0.03,0.025,0.02)*sp;
-    
-    // === THE MOMENT OF RELEASE ===
-    // At sp > 0.85 — massive vesicle dump. Screen brightens.
-    float release=smoothstep(0.85,1.0,sp);
-    col+=vec3(0.5,0.4,0.2)*release*smoothstep(0.3,0.0,r)*0.5;
-    // Bright center — the cleft is OPEN
-    col+=vec3(0.8,0.7,0.5)*release*pow(max(0.0,1.0-r*4.0),3.0)*0.4;
-    
-    gl_FragColor=vec4(col,1);return;
-  }
-  
-  // ════════════════════════════════════════════════
-  // PHASE 0.50 — 0.70: SYNAPTIC CLEFT CROSSING
-  // 20nm gap. Neurotransmitters diffusing.
-  // Binding to receptors on postsynaptic membrane.
-  // NEW action potential initiating on the other side.
-  // ════════════════════════════════════════════════
-  if(p<0.70){
-    float cp=(p-0.50)/0.20;
-    float r=length(uv);
-    float a=atan(uv.y,uv.x);
-    
-    // The cleft is OPEN SPACE — terrifying void between neurons
-    // No walls. Just floating.
-    
-    // === NEUROTRANSMITTER MOLECULES ===
-    // Diffusing across the gap — Brownian motion
+    // Neurotransmitter molecules diffusing — Brownian motion
     float molField=0.0;
     for(int i=0;i<3;i++){
       float fi=float(i);
       vec2 mp=uv*12.0+vec2(time*(0.8+fi*0.3),time*(-0.5+fi*0.2));
-      mp+=vec2(sin(time*2.0+fi),cos(time*1.7+fi))*0.5;// Brownian drift
-      float mol=voronoi(mp+fi*vec2(7.0,3.0));
-      molField+=1.0-smoothstep(0.0,0.08,mol);
+      mp+=vec2(sin(time*2.0+fi),cos(time*1.7+fi))*0.5;
+      molField+=1.0-smoothstep(0.0,0.08,voronoi(mp+fi*vec2(7.0,3.0)));
     }
-    // Molecules are faint — you can barely see them
-    vec3 molCol=vec3(0.12,0.1,0.07);
-    col+=molCol*molField*0.4*(1.0-cp*0.5);
+    col+=vec3(0.12,0.1,0.07)*molField*0.3*inCleft;
     
-    // === POSTSYNAPTIC MEMBRANE APPROACHING ===
-    // Receptor sites lighting up as neurotransmitters bind
-    float postMem=smoothstep(0.6-cp*0.3,0.5-cp*0.3,r);
-    vec2 rtp=vec2(a*3.0/3.14159,r*10.0);
-    float receptors=voronoi(rtp*vec2(4.0,3.0)+vec2(0,time*0.2));
-    float receptorSite=1.0-smoothstep(0.0,0.1,receptors);
+    // Receptor binding on postsynaptic side
+    float postMem=smoothstep(0.6,0.4,r)*inCleft;
+    float receptors=voronoi(vec2(a*3.0/3.14159,r*10.0)*vec2(4.0,3.0)+vec2(0,time*0.2));
+    float bindEvent=pow(hash(floor(vec2(a*12.0,r*10.0))+floor(time*2.0)),15.0)*inCleft;
+    col+=vec3(0.3,0.35,0.2)*bindEvent*postMem;
     
-    // Receptor binding events — flash when molecule docks
-    float bindEvent=pow(hash(floor(rtp*vec2(4.0,3.0))+floor(time*2.0)),15.0);
-    bindEvent*=cp;// more binding as we get further in
+    // New depolarization initiating
+    float newDepolar=smoothstep(0.8,1.0,sp);
+    float newWave=pow(sin(r*20.0-time*8.0)*0.5+0.5,16.0)*newDepolar;
+    col+=vec3(0.5,0.6,0.8)*newWave*postMem*0.5;
     
-    col+=vec3(0.06,0.07,0.05)*receptorSite*postMem*0.5;
-    col+=vec3(0.3,0.35,0.2)*bindEvent*receptorSite*postMem;// bind flash — faint green-gold
+    // Background gets slightly warmer
+    col+=vec3(0.025,0.02,0.018);
     
-    // === NEW DEPOLARIZATION INITIATING ===
-    // On the other side — the postsynaptic cell starts firing
-    float newDepolar=smoothstep(0.6,1.0,cp);
-    float newWave=sin(r*20.0-time*8.0)*0.5+0.5;
-    newWave=pow(newWave,16.0)*newDepolar;
-    col+=vec3(0.5,0.6,0.8)*newWave*postMem*0.5;// same Na+ blue-white
-    
-    // === THE VOID ===
-    // The cleft itself — near-black. You are BETWEEN neurons.
-    // This should feel existentially uncomfortable.
-    float voidDepth=smoothstep(0.5,0.0,r)*(1.0-postMem);
-    col+=vec3(0.015,0.012,0.01)*voidDepth;
-    
-    // Faint ambient — just enough to not be pure black
-    col+=vec3(0.02,0.018,0.015);
-    
-    // Occasional distant sparks — other synapses firing nearby
-    float distantSynapse=pow(hash(floor(uv*8.0)+floor(time*1.5)),40.0);
-    vec3 distCol=vec3(0.4,0.45,0.55)*distantSynapse*0.5;
-    col+=distCol;
+    // Distant synapses
+    float distSyn=pow(hash(floor(uv*8.0)+floor(time*1.5)),40.0);
+    col+=vec3(0.4,0.45,0.55)*distSyn*0.4;
     
     gl_FragColor=vec4(col,1);return;
   }
   
-  // ════════════════════════════════════════════════
-  // PHASE 0.70 — 0.88: THE FEAR
-  // Signal reaches cortex. Reality processing.
-  // The tunnel is made of EYES. They see you.
-  // ════════════════════════════════════════════════
-  if(p<0.88){
-    float fp=(p-0.70)/0.18;
-    float r=length(uv);
-    float a=atan(uv.y,uv.x);
+  // ════════════════════════════════════════
+  // 0.42-0.55: PERIPHERAL VISION DEATH
+  // Retinal ganglion cells dying from edges inward.
+  // THIS is what creates the "tunnel" NDE patients report.
+  // Blood flow drops, peripheral cells fail first (fovea last).
+  // ════════════════════════════════════════
+  if(p<0.55){
+    float vp=(p-0.42)/0.13;
     
-    // Reality warps
-    uv+=vec2(sin(uv.y*15.0+time*3.0),cos(uv.x*15.0+time*2.5))*0.05*fp;
+    // The tunnel forms as peripheral vision dies
+    // Outer edge goes dark, circle shrinks inward
+    float tunnelRadius=0.5-vp*0.35;// shrinks from 0.5 to 0.15
+    float tunnelEdge=smoothstep(tunnelRadius+0.08,tunnelRadius,r);
+    
+    // What you can still see — foveal remnant
+    // Faint phosphene patterns from dying retinal cells
+    float phosphenes=fbm(uv*20.0+time*vec2(0.5,0.3));
+    phosphenes*=smoothstep(tunnelRadius+0.05,tunnelRadius-0.02,r);
+    
+    // Retinal cell death — sparking, flickering noise at the dying edge
+    float deathEdge=smoothstep(tunnelRadius-0.05,tunnelRadius,r)*smoothstep(tunnelRadius+0.1,tunnelRadius+0.02,r);
+    float cellDeath=fbm(vec2(a*6.0,r*20.0)+time*3.0)*deathEdge;
+    float sparkle=pow(hash(floor(vec2(a*20.0,r*40.0))+floor(time*8.0)),30.0)*deathEdge;
+    
+    // Colors: dim phosphene blue-gray, occasional warm flicker
+    col+=vec3(0.04,0.05,0.07)*phosphenes*0.4;
+    col+=vec3(0.2,0.15,0.08)*cellDeath*0.15;
+    col+=vec3(0.5,0.4,0.3)*sparkle*0.8;
+    
+    // The light at center — not white yet, just brighter than the dying periphery
+    float centerBright=pow(max(0.0,1.0-r*4.0),2.0);
+    col+=vec3(0.08,0.09,0.1)*centerBright*(0.5+vp);
+    
+    // The dead zone — absolute black
+    col*=(1.0-tunnelEdge);
+    
+    // Very faint noise in the dead zone — not quite dead yet
+    col+=vec3(0.01,0.008,0.005)*tunnelEdge*fbm(uv*10.0+time)*0.3;
+    
+    gl_FragColor=vec4(col,1);return;
+  }
+  
+  // ════════════════════════════════════════
+  // 0.55-0.72: GAMMA SURGE — Borjigin CAS1→CAS2→CAS3
+  // The brain goes HYPERACTIVE after cardiac arrest.
+  // 130Hz gamma → 80-100Hz → 35-50Hz coupled to theta.
+  // Coherence EXCEEDS waking state.
+  // This is the "life review." Everything fires at once.
+  // ════════════════════════════════════════
+  if(p<0.72){
+    float gp=(p-0.55)/0.17;
+    
+    // The tunnel is still present (peripheral vision dead)
+    float tunnelR=0.15+gp*0.1;// slowly re-expands as brain activates
+    float tunnelMask=1.0-smoothstep(tunnelR+0.05,tunnelR,r);
+    
+    // === CAS1 (gp 0-0.3): 130Hz gamma surge ===
+    // High frequency. Sharp. Staccato. Like static electricity.
+    float cas1=smoothstep(0.0,0.3,gp)*smoothstep(0.4,0.2,gp);
+    float gamma130=sin(time*130.0*0.05)*0.5+0.5;
+    gamma130=pow(gamma130,4.0);
+    // Manifests as rapid flickering points — every neuron firing
+    float neuronFire1=pow(hash(floor(uv*30.0+floor(time*20.0))),15.0);
+    col+=vec3(0.5,0.55,0.7)*neuronFire1*cas1*smoothstep(tunnelR+0.02,0.0,r)*0.8;
+    col+=vec3(0.6,0.65,0.8)*gamma130*cas1*smoothstep(0.2,0.0,r)*0.3;
+    
+    // === CAS2 (gp 0.2-0.6): 80-100Hz gamma mixed with theta ===
+    // More structured. Theta waves (5-10Hz) carrying gamma bursts.
+    // This is where conscious-like processing happens.
+    float cas2=smoothstep(0.2,0.4,gp)*smoothstep(0.7,0.5,gp);
+    float theta=sin(time*7.0)*0.5+0.5;// 7Hz theta wave
+    float gammaBurst=pow(sin(time*90.0*0.05)*0.5+0.5,3.0);// gamma riding theta
+    float coupled=theta*gammaBurst;
+    
+    // Theta manifests as slow pulsing waves across the field
+    float thetaWave=sin(r*15.0-time*7.0)*0.5+0.5;
+    col+=vec3(0.15,0.12,0.08)*thetaWave*cas2*smoothstep(tunnelR+0.02,0.0,r)*0.4;
+    // Gamma bursts on top — sharper, brighter
+    float neuronFire2=pow(hash(floor(uv*20.0+floor(time*12.0))),20.0);
+    col+=vec3(0.7,0.65,0.5)*neuronFire2*coupled*cas2*smoothstep(tunnelR+0.02,0.0,r)*0.6;
+    
+    // === CAS3 (gp 0.5-1.0): 35-50Hz low gamma. Highly coherent. ===
+    // This EXCEEDS waking consciousness levels.
+    // Tight phase-coupling to theta and alpha.
+    // Anterior-posterior connectivity maximal.
+    // This is the peak. The "realer than real."
+    float cas3=smoothstep(0.5,0.7,gp);
+    
+    // Low gamma — slower, more powerful, more organized
+    float lowGamma=sin(time*42.0*0.05)*0.5+0.5;// ~42Hz
+    float alpha=sin(time*12.0)*0.5+0.5;// alpha modulation
+    float coherence=lowGamma*alpha;
+    
+    // Manifests as structured waves — not random fire, ORGANIZED
+    // Concentric rings emanating from center — coherent oscillation
+    float coherentWave=sin(r*25.0-time*42.0*0.05)*0.5+0.5;
+    coherentWave=pow(coherentWave,6.0)*cas3;
+    col+=vec3(0.8,0.75,0.6)*coherentWave*smoothstep(tunnelR+0.05,0.0,r)*0.5;
+    
+    // Anterior-posterior connectivity — directional streaks
+    float apConnect=pow(max(0.0,sin(uv.y*30.0-time*5.0)),12.0)*cas3;
+    col+=vec3(0.5,0.55,0.7)*apConnect*smoothstep(0.3,0.0,r)*0.3;
+    
+    // The LIGHT — growing brighter as coherence peaks
+    // This is what NDE patients see. Not metaphorical. Literal cortical activation.
+    float lightCenter=pow(max(0.0,1.0-r*(4.0-gp*2.0)),2.0);
+    col+=vec3(0.9,0.85,0.7)*lightCenter*cas3*0.6;
+    col+=vec3(1.0,0.95,0.85)*lightCenter*pow(cas3,2.0)*0.3;
+    
+    // Overall brightening as gamma coherence exceeds waking
+    col+=vec3(0.06,0.055,0.04)*cas3;
+    
+    // Kill the dead periphery
+    col*=(1.0-tunnelMask*smoothstep(0.3,1.0,1.0-gp));
+    
+    gl_FragColor=vec4(col,1);return;
+  }
+  
+  // ════════════════════════════════════════
+  // 0.72-0.78: ISOELECTRIC SILENCE
+  // EEG flatline. Total cessation.
+  // The most terrifying part: absolute nothing.
+  // Not black — NOTHING. No signal. No self.
+  // ════════════════════════════════════════
+  if(p<0.78){
+    float sp2=(p-0.72)/0.06;
+    
+    // Almost nothing. Near-total void.
+    // Faint residual noise — the last ions leaking across dead membranes
+    float residual=fbm(uv*5.0+time*0.1)*(1.0-sp2)*0.005;
+    col=vec3(residual);
+    
+    // One tiny point persists at center — or does it?
+    float lastSignal=pow(max(0.0,1.0-r*20.0),4.0)*(1.0-sp2)*0.02;
+    col+=vec3(0.5,0.5,0.6)*lastSignal;
+    
+    gl_FragColor=vec4(col,1);return;
+  }
+  
+  // ════════════════════════════════════════
+  // 0.78-0.88: THE EYES — cortical reactivation
+  // Something restarts. But it's wrong.
+  // Visual cortex fires without input.
+  // Face-processing areas (fusiform gyrus) hallucinate.
+  // ════════════════════════════════════════
+  if(p<0.88){
+    float fp=(p-0.78)/0.10;
+    
+    // Slowly fading back in from nothing
+    float fadeIn=fp*fp;// slow start, accelerating
+    
+    uv+=vec2(sin(uv.y*15.0+time*3.0),cos(uv.x*15.0+time*2.5))*0.04*fp;
     
     float z=1.0/max(length(uv),0.001)+time*2.0+fp*15.0;
     
-    // === TUNNEL OF EYES ===
+    // Tunnel of eyes — fusiform gyrus hallucinating faces
     vec2 eyeGrid=fract(vec2(z*0.5,a*4.0/6.28))-0.5;
     float eyeDist=length(eyeGrid);
     float eyeIris=smoothstep(0.2,0.18,eyeDist)-smoothstep(0.08,0.06,eyeDist);
     float eyePupil=1.0-smoothstep(0.04+sin(time*3.0+z)*0.02,0.06+sin(time*3.0+z)*0.02,eyeDist);
     
-    // Each eye a different color — but muted, biological
     float eyeHue=hash(floor(vec2(z*0.5,a*4.0/6.28)));
-    vec3 eyeCol=mix(
-      vec3(0.15,0.25,0.35),// gray-blue
-      vec3(0.3,0.2,0.1),// brown
-      eyeHue
-    );
-    // Some eyes gold — like the gate eye
+    vec3 eyeCol=mix(vec3(0.15,0.25,0.35),vec3(0.3,0.2,0.1),eyeHue);
     eyeCol=mix(eyeCol,vec3(0.5,0.4,0.15),step(0.85,eyeHue));
     
     float wallDist=smoothstep(0.6,0.03,r);
-    col+=eyeCol*eyeIris*wallDist*0.5;
-    col+=vec3(0.01,0.005,0.005)*eyePupil*wallDist;
+    col+=eyeCol*eyeIris*wallDist*0.5*fadeIn;
+    col+=vec3(0.01,0.005,0.005)*eyePupil*wallDist*fadeIn;
     
-    // Wet cornea reflections on each eye
+    // Wet cornea
     float eyeSpec=pow(max(0.0,1.0-length(eyeGrid-vec2(-0.06,-0.06))*12.0),4.0);
-    col+=vec3(0.3,0.3,0.28)*eyeSpec*eyeIris*wallDist*0.3;
+    col+=vec3(0.3,0.3,0.28)*eyeSpec*eyeIris*wallDist*0.3*fadeIn;
     
-    // === VEINS between the eyes — tissue ===
-    float tissue=fbm(vec2(z*0.3,a*2.0)+time*0.3);
-    float veinPattern=1.0-pow(abs(sin(a*8.0+tissue*5.0)),0.3);
-    float throb=0.5+0.5*sin(time*2.5-z*0.5);
-    col+=vec3(0.2,0.02,0.03)*veinPattern*wallDist*throb*fp*0.3;
+    // Veins
+    float veinPattern=1.0-pow(abs(sin(a*8.0+fbm(vec2(z*0.3,a*2.0)+time*0.5)*5.0)),0.3);
+    col+=vec3(0.2,0.02,0.03)*veinPattern*wallDist*(0.5+0.5*sin(time*2.5-z*0.5))*fp*0.3;
     
-    // === RED WARNING ===
-    // Deepening danger
-    float redPulse=pow(max(0.0,sin(time*4.0-r*10.0)),4.0);
-    col+=vec3(0.3,0.0,0.0)*redPulse*fp*0.3;
-    
-    // === CORTICAL COLUMN WIREFRAME ===
-    // The architecture of visual cortex bleeding through
+    // Cortical wireframe bleeding through
     float wireframe=0.0;
     for(int i=1;i<=3;i++){
       float fi=float(i);
       wireframe+=smoothstep(0.015,0.0,abs(fract(r*fi*4.0+time*fi*0.3)-0.5)-0.48)*0.2/fi;
       wireframe+=smoothstep(0.015,0.0,abs(fract(a/6.28*6.0*fi+time*fi*0.2)-0.5)-0.48)*0.15/fi;
     }
-    col+=vec3(0.15,0.3,0.2)*wireframe*fp*0.4;
-    
-    // Expanding void at center
-    float voidR=0.12*fp;
-    float voidEdge=smoothstep(voidR+0.04,voidR,r);
-    col=mix(col,vec3(0),voidEdge*0.85);
-    col+=vec3(0.08,0.0,0.03)*fbm(uv*40.0+time*3.0)*voidEdge;
+    col+=vec3(0.15,0.3,0.2)*wireframe*fp*0.3;
     
     gl_FragColor=vec4(col,1);return;
   }
   
-  // ════════════════════════════════════════════════
-  // PHASE 0.88 — 1.0: EMERGENCE — DMN initialization
-  // ════════════════════════════════════════════════
+  // ════════════════════════════════════════
+  // 0.88-1.0: DMN EMERGENCE — the self reboots
+  // Default Mode Network initializes.
+  // "Realer than real."
+  // ════════════════════════════════════════
   float ep=(p-0.88)/0.12;
-  float r=length(uv);
   float convergence=smoothstep(0.5,0.0,r)*ep;
   
-  // DMN nodes materializing
   float nodeGlow=0.0;
   vec2 nodes[5];
-  nodes[0]=vec2(0.0,-0.28);// mPFC
-  nodes[1]=vec2(0.0,0.05);// PCC
-  nodes[2]=vec2(-0.28,-0.08);// LTC_L
-  nodes[3]=vec2(0.28,-0.08);// LTC_R
-  nodes[4]=vec2(0.0,-0.18);// ACC
+  nodes[0]=vec2(0.0,-0.28);
+  nodes[1]=vec2(0.0,0.05);
+  nodes[2]=vec2(-0.28,-0.08);
+  nodes[3]=vec2(0.28,-0.08);
+  nodes[4]=vec2(0.0,-0.18);
   for(int i=0;i<5;i++){
     float nd=length(uv-nodes[i]);
     nodeGlow+=exp(-nd*15.0)*ep;
@@ -493,21 +465,14 @@ void main(){
       if(i!=j){
         vec2 ab=nodes[j]-nodes[i];
         float tl=clamp(dot(uv-nodes[i],ab)/dot(ab,ab),0.0,1.0);
-        float ld=length(uv-(nodes[i]+ab*tl));
-        nodeGlow+=exp(-ld*40.0)*ep*0.3;
+        nodeGlow+=exp(-length(uv-(nodes[i]+ab*tl))*40.0)*ep*0.3;
       }
     }
   }
   col+=vec3(0.4,0.45,0.55)*nodeGlow*0.5;
   col+=vec3(0.6,0.5,0.25)*nodeGlow*0.25;
-  
-  // Residual fear fading
   col+=vec3(0.1,0.03,0.03)*fbm(uv*5.0+time)*(1.0-ep)*0.08;
-  
-  // Gold convergence
   col+=vec3(0.6,0.5,0.25)*convergence*0.3;
-  
-  // White center
   col+=vec3(1)*pow(max(0.0,1.0-r*3.0),2.0)*ep*0.8;
   
   gl_FragColor=vec4(col,1);
@@ -546,49 +511,54 @@ var phaseLoc=gl.getUniformLocation(prog,'phase');
 var resLoc=gl.getUniformLocation(prog,'res');
 
 // ═══ TIMING ═══
-var TOTAL_DURATION=24000;// 24 seconds
+var TOTAL_DURATION=28000;// 28 seconds — longer for the silence to land
 var startTime=Date.now();
 var msgEl=document.getElementById('msg');
 var whiteout=document.getElementById('whiteout');
 var flashEl=document.getElementById('flash');
+var blackout=document.getElementById('blackout');
 
 var messages=[
-  {at:0.0, text:""},
-  {at:0.05, text:"LOOK CLOSER"},
-  {at:0.13, text:"AXON INTERIOR<br>-70mV RESTING"},
-  {at:0.20, text:"Na\u207A CHANNELS OPENING<br>DEPOLARIZATION"},
-  {at:0.28, text:"SALTATORY<br>CONDUCTION"},
-  {at:0.32, text:"SYNAPTIC TERMINAL<br>Ca\u00B2\u207A CASCADE"},
-  {at:0.42, text:"VESICLE FUSION<br>NEUROTRANSMITTER RELEASE"},
-  {at:0.52, text:"SYNAPTIC CLEFT<br>20nm"},
-  {at:0.62, text:"RECEPTOR BINDING<br>POSTSYNAPTIC POTENTIAL"},
-  {at:0.72, text:"\u26A0 FEAR RESPONSE<br>NORMAL \u26A0"},
-  {at:0.80, text:"THEY<br>SEE<br>YOU"},
+  {at:0.00, text:""},
+  {at:0.04, text:"LOOK CLOSER"},
+  {at:0.11, text:"AXON INTERIOR<br>-70mV"},
+  {at:0.18, text:"Na\u207A DEPOLARIZATION<br>SALTATORY CONDUCTION"},
+  {at:0.29, text:"Ca\u00B2\u207A CASCADE<br>VESICLE FUSION"},
+  {at:0.38, text:"SYNAPTIC CLEFT<br>20nm"},
+  {at:0.43, text:"PERIPHERAL VISION<br>FAILING"},
+  {at:0.50, text:"RETINAL GANGLION<br>CELL DEATH"},
+  {at:0.56, text:"GAMMA SURGE<br>130Hz \u2014 CAS1"},
+  {at:0.62, text:"THETA-GAMMA COUPLING<br>CAS2"},
+  {at:0.67, text:"COHERENCE EXCEEDS<br>WAKING STATE"},
+  {at:0.72, text:""},// silence for the silence
+  {at:0.79, text:""},
+  {at:0.82, text:"THEY<br>SEE<br>YOU"},
   {at:0.89, text:"DEFAULT MODE NETWORK<br>INITIALIZING"},
   {at:0.97, text:""}
 ];
 var lastMsg=-1;
 
-function doFlash(){
-  flashEl.style.opacity='0.12';
+function doFlash(a){
+  flashEl.style.opacity=a||'0.1';
   setTimeout(function(){flashEl.style.opacity='0'},60);
 }
 
-var heartbeatRate=1400,lastHeartbeat=0;
+// Heartbeat — slows then stops at silence phase
+var heartbeatRate=1200,lastHeartbeat=0,heartStopped=false;
 function heartbeat(now,progress){
-  heartbeatRate=1400-progress*900;
+  if(progress>0.70)heartStopped=true;// heart stops at gamma surge end
+  if(heartStopped)return;
+  heartbeatRate=1200-progress*600;
   if(now-lastHeartbeat>heartbeatRate){
     lastHeartbeat=now;
     document.getElementById('vignette').style.background=
       'radial-gradient(ellipse at center,transparent 30%,rgba('+
-      Math.floor(20+progress*60)+',0,0,'+(0.3+progress*0.4)+') 100%)';
+      Math.floor(20+progress*50)+',0,0,'+(0.3+progress*0.35)+') 100%)';
     setTimeout(function(){
       document.getElementById('vignette').style.background=
         'radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.7) 100%)';
     },120);
-    return 1.0;
   }
-  return 0.0;
 }
 
 function render(){
@@ -603,30 +573,47 @@ function render(){
   gl.uniform2f(resLoc,W,H);
   gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
   
+  // Messages
   for(var i=messages.length-1;i>=0;i--){
     if(progress>=messages[i].at&&lastMsg!==i){
       lastMsg=i;
       msgEl.style.color='rgba(201,169,78,0)';
       setTimeout(function(txt){
         msgEl.innerHTML=txt;
-        msgEl.style.color='rgba(201,169,78,0.5)';
+        if(txt)msgEl.style.color='rgba(201,169,78,0.5)';
       },150,messages[i].text);
       break;
     }
   }
   
-  // Depolarization flashes — at Nodes of Ranvier timing
-  if(progress>0.15&&progress<0.30&&Math.random()<0.04)doFlash();
-  // Vesicle fusion flashes
-  if(progress>0.40&&progress<0.50&&Math.random()<0.03)doFlash();
-  // Fear phase red flashes
-  if(progress>0.72&&progress<0.88&&Math.random()<0.04){
-    flashEl.style.background='rgba(255,0,0,0.06)';
-    doFlash();
+  // Depolarization flashes at nodes
+  if(progress>0.12&&progress<0.28&&Math.random()<0.035)doFlash('0.06');
+  // Ca2+ flashes
+  if(progress>0.30&&progress<0.40&&Math.random()<0.025)doFlash('0.08');
+  // Gamma surge — rapid flickering
+  if(progress>0.56&&progress<0.70&&Math.random()<0.06)doFlash('0.04');
+  
+  // BLACKOUT — the silence. CSS transition handles the fade.
+  if(progress>0.71&&progress<0.79){
+    var silenceDepth=(progress-0.71)/0.07;
+    blackout.style.opacity=Math.min(0.95,silenceDepth*1.5);
+  }else if(progress>=0.79&&progress<0.83){
+    // Fade back from silence — slowly
+    var fadeBack=(progress-0.79)/0.04;
+    blackout.style.opacity=Math.max(0,0.95-fadeBack*1.2);
+  }else{
+    blackout.style.opacity='0';
+  }
+  
+  // Fear phase — rare red flickers
+  if(progress>0.80&&progress<0.88&&Math.random()<0.03){
+    flashEl.style.background='rgba(255,0,0,0.05)';
+    doFlash('0.08');
     setTimeout(function(){flashEl.style.background='#fff'},150);
   }
   
-  if(progress>0.95){whiteout.style.opacity=Math.min(1,(progress-0.95)/0.05)}
+  // Final whiteout
+  if(progress>0.96){whiteout.style.opacity=Math.min(1,(progress-0.96)/0.04)}
   
   if(progress>=1){
     try{localStorage.setItem('limenTunnelSeen','1')}catch(e){}
