@@ -266,14 +266,18 @@ function drawEye(){
       var drawW=eyeW*2.2;
       var drawH=drawW/imgAspect;
       // If height doesn't cover, scale up by height instead
-      if(drawH<eyeH*2.4){
-        drawH=eyeH*2.4;
+      if(drawH<eyeH*2.6){
+        drawH=eyeH*2.6;
         drawW=drawH*imgAspect;
       }
+      // Pupil is ~8.4% left and ~3.1% above center in the photo
+      // Shift image so pupil aligns with canvas center
+      var pupilOffX=drawW*0.084;
+      var pupilOffY=drawH*0.031;
       // Slight parallax shift — image moves opposite to gaze for depth
       var parallaxX=pxOff*-0.3;
       var parallaxY=pyOff*-0.3;
-      ex.drawImage(eyeImg,cx-drawW/2+parallaxX,cy-drawH/2+parallaxY,drawW,drawH);
+      ex.drawImage(eyeImg,cx-drawW/2+pupilOffX+parallaxX,cy-drawH/2+pupilOffY+parallaxY,drawW,drawH);
     }
     
     // Supernatural overlay — very subtle golden pulse inside the eye
