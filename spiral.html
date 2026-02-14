@@ -87,21 +87,41 @@
       background: linear-gradient(to right, #e8e3d9 0%, transparent 100%);
     }
 
+    /* ═══ PHASE ENVIRONMENTS — Dramatic thematic backgrounds ═══ */
+
+    /* Phase 0: Source — VOID. Pure black. The nothing before everything. */
     .phase0 {
-      background: radial-gradient(ellipse at center, rgba(12, 12, 12, 0.8) 0%, rgba(5, 5, 5, 0.9) 100%);
+      background: radial-gradient(ellipse at center, #080808 0%, #000000 100%);
+      color: #e8e3d9;
     }
 
+    /* Phase 1: Light — BLINDING. White hot center fading to dark edges. */
     .phase1 {
-      background: linear-gradient(to bottom, rgba(28, 28, 28, 0.8) 0%, rgba(21, 21, 21, 0.9) 100%);
+      background: radial-gradient(ellipse at center, #f5f0e0 0%, #c9a94e 15%, #8a6a20 30%, #2a1a08 60%, #0a0604 100%);
+      color: #1a1208;
     }
+    .phase1 h1 { color: #1a1208; }
+    .phase1 .ritual, .phase1 .senses { color: #2a1a08; }
+    .phase1 .scent, .phase1 .light, .phase1 .touch, .phase1 .taste { color: #3a2a18; }
+    .phase1 .symbol { color: #5a4a28; }
 
+    /* Phase 2: Rhythm — DEEP PURPLE. Pulsing, alive. */
     .phase2 {
-      background: linear-gradient(to bottom, rgba(21, 21, 21, 0.8) 0%, rgba(26, 26, 26, 0.9) 100%);
+      background: radial-gradient(ellipse at 30% 50%, #1a0a2a 0%, #120828 30%, #0a0418 60%, #050210 100%);
+      color: #d0c0e0;
     }
+    .phase2 h1 { color: #c090e0; }
+    .phase2 .ritual { color: #b080d0; }
 
+    /* Phase 3: Darkness — ABSOLUTE BLACK. The abyss. */
     .phase3 {
-      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.85) 0%, rgba(10, 10, 10, 0.95) 100%);
+      background: #000000;
+      color: #888;
     }
+    .phase3 h1 { color: #666; }
+    .phase3 .ritual { color: #555; }
+    .phase3 .scent, .phase3 .light, .phase3 .touch, .phase3 .taste { color: #444; }
+    .phase3 .symbol { color: #333; }
     .ritual {
   font-style: italic;
   font-size: 1.1rem;
@@ -123,41 +143,41 @@
   letter-spacing: 1px;
   text-transform: uppercase;
 }
-.phase1 {
-  background: linear-gradient(to bottom, rgba(28, 28, 28, 0.8) 0%, rgba(21, 21, 21, 0.9) 100%);
-}
-
-.phase2 {
-  background: linear-gradient(to bottom, rgba(21, 21, 21, 0.8) 0%, rgba(26, 26, 26, 0.9) 100%);
-}
-
-.phase3 {
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.85) 0%, rgba(10, 10, 10, 0.95) 100%);
-}
+/* Phase 4: Peace — SOFT DAWN. Warm cream and pale gold. */
 .phase4 {
+  background: radial-gradient(ellipse at center, #f0e8d8 0%, #e0d0b8 30%, #c8b898 50%, #8a7a5a 80%, #3a3020 100%);
+  color: #2a2418;
   position: relative;
 }
-
 .phase4::before {
   content: '';
   position: absolute;
   top: 0; left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.3); /* Light transparent black */
+  background: rgba(240,232,216,0.05);
   z-index: 0;
 }
+.phase4 * { position: relative; z-index: 1; }
+.phase4 h1 { color: #3a3020; }
+.phase4 .ritual { color: #4a4030; }
+.phase4 .scent, .phase4 .light, .phase4 .touch, .phase4 .taste { color: #5a5040; }
 
-.phase4 * {
-  position: relative;
-  z-index: 1;
-}
+/* Phase 5: Endurance — IRON AND FIRE. Dark steel with ember glow. */
 .phase5 {
-  background: linear-gradient(to bottom, rgba(32, 36, 40, 0.8), rgba(22, 24, 26, 0.95));
+  background: radial-gradient(ellipse at 70% 80%, #2a1008 0%, #1a0a04 20%, #1a1a1a 50%, #0a0a0a 100%);
+  color: #c0a080;
 }
+.phase5 h1 { color: #e8a040; }
+.phase5 .ritual { color: #c08830; }
+
+/* Phase 6: Order — DEEP BLUE. Architectural precision. */
 .phase6 {
-  background: linear-gradient(to bottom, rgba(26, 22, 18, 0.9), rgba(16, 14, 12, 0.95));
+  background: linear-gradient(170deg, #040810 0%, #0a1020 30%, #081828 50%, #040a14 100%);
+  color: #a0b8d0;
 }
+.phase6 h1 { color: #80a0c8; }
+.phase6 .ritual { color: #6888b0; }
 
 .scent, .light {
   font-style: italic;
@@ -173,19 +193,39 @@
   margin-bottom: 1.2rem;
   letter-spacing: 0.5px;
 }
+/* Phase 7: Separation — SPLIT. Half light, half dark. The blade between worlds. */
 .phase7 {
-  background: linear-gradient(to bottom, rgba(20, 20, 25, 0.9), rgba(12, 12, 18, 0.95));
+  background: linear-gradient(90deg, #e8e0d0 0%, #e8e0d0 48%, #1a1a1a 52%, #0a0a0a 100%);
+  color: #888;
 }
+.phase7 h1 { color: #C9A94E; text-shadow: 0 0 20px rgba(201,169,78,0.3); }
+.phase7 .ritual { color: #999; }
+
+/* Phase 8: Conscience — BLOOD RED. Deep crimson. The mirror that speaks. */
 .phase8 {
-  background: linear-gradient(to bottom, rgba(40, 20, 20, 0.9), rgba(18, 10, 10, 0.95));
+  background: radial-gradient(ellipse at center, #2a0808 0%, #1a0404 40%, #0a0202 70%, #050101 100%);
+  color: #d0a0a0;
 }
+.phase8 h1 { color: #c04040; }
+.phase8 .ritual { color: #a03030; }
+
+/* Phase 9: Threshold — GOLD AND BLACK. The door. Sacred geometry. */
 .phase9 {
-  background: linear-gradient(to bottom, rgba(22, 12, 10, 0.95), rgba(12, 6, 4, 0.98));
+  background: radial-gradient(ellipse at center, #1a1408 0%, #0a0a04 50%, #000000 100%);
+  border-top: 2px solid rgba(201,169,78,0.3);
+  border-bottom: 2px solid rgba(201,169,78,0.3);
+  color: #C9A94E;
 }
+.phase9 h1 { color: #C9A94E; text-shadow: 0 0 30px rgba(201,169,78,0.4); }
+.phase9 .ritual { color: #a08a3e; }
+
+/* Phase 10: Resurrection — SUNRISE. Dark to blazing white-gold. You re-formed. */
 .phase10 {
-  background: linear-gradient(to bottom, rgba(245, 235, 220, 0.1), rgba(12, 12, 12, 0.85));
-  color: #ddd; /* Light gray instead of near-white */
+  background: linear-gradient(to bottom, #000000 0%, #0a0604 15%, #2a1a08 30%, #8a5a18 50%, #c9a94e 65%, #f0e0c0 80%, #fffff0 100%);
+  color: #2a1a08;
 }
+.phase10 h1 { color: #1a1008; text-shadow: 0 0 40px rgba(255,255,240,0.5); }
+.phase10 .ritual { color: #2a1a08; }
 
     /* Floating Phase Echo HUD */
     .phase-hud {
