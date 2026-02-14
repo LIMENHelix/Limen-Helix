@@ -56,7 +56,7 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
 <div id="lock-container"></div>
 <script>
 var PH=[
-{id:0,name:"SOURCE",dmn:"DMN:ACTIVE",neural:"VAGAL.ONSET",wR:12,wG:12,wB:15,aR:120,aG:120,aB:120,mirrors:16,crack:0,ent:0,dis:0,scale:1,grid:0.06,rings:3,pulseSpeed:0.8,particleCount:0,txt:["I AM","I ALWAYS","I NEVER","I SHOULD","I PREDICT","I KNOW","I FEAR","I REMEMBER"]},
+{id:0,name:"SOURCE",dmn:"DMN:ACTIVE",neural:"VAGAL.ONSET",wR:12,wG:12,wB:15,aR:170,aG:170,aB:170,mirrors:16,crack:0,ent:0,dis:0,scale:1,grid:0.06,rings:3,pulseSpeed:0.8,particleCount:0,txt:["I AM","I ALWAYS","I NEVER","I SHOULD","I PREDICT","I KNOW","I FEAR","I REMEMBER"]},
 {id:1,name:"LIGHT",dmn:"SALIENCE:FIRING",neural:"AMYGDALA.ALERT",wR:50,wG:42,wB:18,aR:255,aG:240,aB:200,mirrors:14,crack:0.4,ent:0,dis:0,scale:1,grid:0.12,rings:4,pulseSpeed:1.2,particleCount:30,txt:["WAIT","WHAT IS","THE WALL","WHO BUILT","THERE ARE WALLS"]},
 {id:2,name:"RHYTHM",dmn:"DYAD:ENTRAINED",neural:"OXYTOCIN.SYNC",wR:25,wG:15,wB:45,aR:170,aG:130,aB:220,mirrors:12,crack:0.3,ent:1,dis:0,scale:1.05,grid:0.08,rings:5,pulseSpeed:0.6,particleCount:20,txt:["YOU ARE","WE ARE","SYNC","TOGETHER","NOT ALONE"]},
 {id:3,name:"DARKNESS",dmn:"SHADOW:ACCESSED",neural:"AMYGDALA.FLOOD",wR:6,wG:2,wB:2,aR:160,aG:20,aB:20,mirrors:8,crack:0.7,ent:0,dis:0.15,scale:0.9,grid:0.02,rings:2,pulseSpeed:2.0,particleCount:40,txt:["I BURIED","I WAS AFRAID","I REFUSED","IT HAPPENED"]},
@@ -97,10 +97,10 @@ document.getElementById('pnum').textContent=p.id;
 document.getElementById('pnum').style.color=ac;
 document.getElementById('pname').textContent=p.name;
 document.getElementById('pname').style.color=acD;
-document.getElementById('htl').innerHTML='<span style="color:"+ac+'">'+p.dmn+'</span>';
-document.getElementById('htr').innerHTML='<span style="color:"+ac+'">'+p.neural+'</span>';
-document.getElementById('hbl').innerHTML='<span style="color:"+ac+'">MIR:'+p.mirrors+' FRC:'+Math.round(p.crack*100)+'% DIS:'+Math.round(p.dis*100)+'% ENT:'+p.ent+'</span>';
-document.getElementById('hbr').innerHTML='<span style="color:"+ac+'">SCALE:'+p.scale.toFixed(1)+'x GRID:'+Math.round(p.grid*100)+'</span>'}
+document.getElementById('htl').innerHTML='<span style="color:'+ac+'">'+p.dmn+'</span>';
+document.getElementById('htr').innerHTML='<span style="color:'+ac+'">'+p.neural+'</span>';
+document.getElementById('hbl').innerHTML='<span style="color:'+ac+'">MIR:'+p.mirrors+' FRC:'+Math.round(p.crack*100)+'% DIS:'+Math.round(p.dis*100)+'% ENT:'+p.ent+'</span>';
+document.getElementById('hbr').innerHTML='<span style="color:'+ac+'">SCALE:'+p.scale.toFixed(1)+'x GRID:'+Math.round(p.grid*100)+'</span>'}
 
 // ═══ DRAW ═══
 function draw(){var p=PH[phase];var cx=W/2,cy=H/2,maxD=Math.max(W,H);
