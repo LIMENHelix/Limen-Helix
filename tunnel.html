@@ -9,20 +9,25 @@
 html,body{background:#000;overflow:hidden;height:100%;width:100%}
 canvas{position:fixed;top:0;left:0;width:100%;height:100%}
 #overlay{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;pointer-events:none}
-#msg{font-family:monospace;font-size:clamp(0.5rem,1.5vw,0.7rem);letter-spacing:4px;text-transform:uppercase;color:rgba(201,169,78,0);transition:color 1.5s;text-align:center;line-height:2.5}
+#msg{font-family:monospace;font-size:clamp(0.5rem,1.5vw,0.7rem);letter-spacing:4px;text-transform:uppercase;color:rgba(201,169,78,0);transition:color 1.2s;text-align:center;line-height:2.5}
 #whiteout{position:fixed;inset:0;z-index:20;background:#fff;opacity:0;pointer-events:none;transition:opacity 0.8s}
+#warning{position:fixed;bottom:2rem;left:0;right:0;z-index:15;text-align:center;font-family:monospace;font-size:0.4rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,0,0,0);transition:color 3s;pointer-events:none}
+#vignette{position:fixed;inset:0;z-index:5;pointer-events:none;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.6) 100%)}
+#scanlines{position:fixed;inset:0;z-index:6;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);mix-blend-mode:overlay}
+#flash{position:fixed;inset:0;z-index:8;pointer-events:none;background:#fff;opacity:0}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
+<div id="vignette"></div>
+<div id="scanlines"></div>
+<div id="flash"></div>
 <div id="overlay"><div id="msg"></div></div>
+<div id="warning">PHOTOSENSITIVITY WARNING — LOOK AWAY IF NEEDED</div>
 <div id="whiteout"></div>
 <script>
 var canvas=document.getElementById('c'),gl=canvas.getContext('webgl',{antialias:true,alpha:false});
-if(!gl){
-// Fallback - skip to spiral
-window.location.href='spiral.html'+window.location.search;
-}
+if(!gl){window.location.href='spiral.html'+window.location.search;}
 
 var W,H;
 function resize(){
@@ -33,7 +38,10 @@ gl.viewport(0,0,W*2,H*2);
 window.addEventListener('resize',resize);
 resize();
 
-// ═══ SHADERS ═══
+// Show warning briefly
+setTimeout(function(){document.getElementById('warning').style.color='rgba(255,40,40,0.4)'},500);
+setTimeout(function(){document.getElementById('warning').style.color='rgba(255,0,0,0)'},4000);
+
 var vertSrc=`
 attribute vec2 pos;
 void main(){gl_Position=vec4(pos,0,1);}
@@ -42,16 +50,13 @@ void main(){gl_Position=vec4(pos,0,1);}
 var fragSrc=`
 precision highp float;
 uniform float t;
-uniform float phase; // 0-1 progress through tunnel
+uniform float phase;
 uniform vec2 res;
+uniform float beat;
 
-// Rotation matrix
 mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}
-
-// Hash
 float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 
-// Noise
 float noise(vec2 p){
   vec2 i=floor(p),f=fract(p);
   f=f*f*(3.0-2.0*f);
@@ -59,11 +64,29 @@ float noise(vec2 p){
              mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
 }
 
-// FBM
 float fbm(vec2 p){
   float v=0.0,a=0.5;
-  for(int i=0;i<5;i++){v+=a*noise(p);p=rot(0.37)*p*2.0+vec2(1.7);a*=0.5;}
+  for(int i=0;i<6;i++){v+=a*noise(p);p=rot(0.37)*p*2.0+vec2(1.7);a*=0.5;}
   return v;
+}
+
+float voronoi(vec2 p){
+  vec2 n=floor(p),f=fract(p);
+  float md=8.0;
+  for(int j=-1;j<=1;j++)for(int i=-1;i<=1;i++){
+    vec2 g=vec2(float(i),float(j));
+    vec2 o=vec2(hash(n+g),hash(n+g+vec2(31.0,17.0)));
+    o=0.5+0.5*sin(t*0.5+6.2831*o);
+    vec2 r=g+o-f;
+    float d=dot(r,r);
+    md=min(md,d);
+  }
+  return sqrt(md);
+}
+
+float hexDist(vec2 p){
+  p=abs(p);
+  return max(dot(p,normalize(vec2(1,1.73))),p.x);
 }
 
 void main(){
@@ -72,195 +95,310 @@ void main(){
   
   float time=t;
   float p=phase;
+  float b=beat;
+  vec3 col=vec3(0);
   
-  // === PHASE 0-0.15: THE EYE ===
-  if(p<0.15){
-    float ep=p/0.15;
-    // Iris ring
+  float distort=p*0.15;
+  uv+=vec2(sin(uv.y*10.0+time*3.0),cos(uv.x*10.0+time*2.7))*distort*0.03;
+  
+  // ═══ PHASE 0-0.12: THE EYE — alive, WRONG ═══
+  if(p<0.12){
+    float ep=p/0.12;
     float r=length(uv);
-    float iris=smoothstep(0.35-ep*0.15,0.34-ep*0.15,r)-smoothstep(0.12+ep*0.05,0.13+ep*0.05,r);
-    // Iris color — Coraline's blue
-    vec3 irisCol=mix(vec3(0.15,0.35,0.55),vec3(0.08,0.2,0.4),fbm(uv*8.0+time*0.3));
-    // Iris fibers
-    float fiber=abs(sin(atan(uv.y,uv.x)*20.0+fbm(uv*5.0)*3.0));
-    irisCol+=vec3(0.1,0.15,0.2)*fiber;
-    // Pupil — expanding as we enter
-    float pupil=1.0-smoothstep(0.08+ep*0.35,0.12+ep*0.35,r);
-    // Gold limbal ring
-    float limbal=smoothstep(0.33,0.35,r)-smoothstep(0.35,0.37,r);
-    vec3 gold=vec3(0.78,0.66,0.3);
+    float a=atan(uv.y,uv.x);
+    float breathe=sin(time*1.5)*0.02+sin(time*3.7)*0.008;
+    r+=breathe;
     
-    vec3 col=vec3(0);
+    float iris=smoothstep(0.35-ep*0.15,0.33-ep*0.15,r)-smoothstep(0.12+ep*0.08,0.14+ep*0.08,r);
+    vec3 irisCol=mix(
+      vec3(0.15,0.35,0.55),
+      vec3(0.5,0.1,0.3),
+      fbm(uv*8.0+time*0.4)*ep+sin(time*2.0)*0.3
+    );
+    irisCol=mix(irisCol,vec3(0.78,0.5,0.1),smoothstep(-0.01,0.01,uv.x)*0.4*ep);
+    
+    float fiber=abs(sin(a*24.0+fbm(uv*6.0+time*0.8)*4.0+time*0.5));
+    fiber=pow(fiber,2.0);
+    irisCol+=vec3(0.2,0.15,0.08)*fiber;
+    
+    float veins=fbm(uv*20.0+vec2(time*0.3,-time*0.2));
+    veins=smoothstep(0.45,0.65,veins);
+    
+    float pupilR=0.08+ep*0.4+sin(time*4.0)*0.03;
+    float pupil=1.0-smoothstep(pupilR-0.02,pupilR+0.01,r);
+    
+    float limbal=smoothstep(0.33,0.35,r)-smoothstep(0.36,0.38,r);
+    limbal*=0.7+sin(time*3.0)*0.3;
+    
+    float sclera=smoothstep(0.37,0.5,r)-smoothstep(0.5,0.7,r);
+    vec3 scleraCol=vec3(0.95,0.88,0.85)+vec3(0.15,0.0,0.0)*sin(time*2.0)*0.5;
+    
     col+=irisCol*iris*(1.0-pupil);
-    col+=gold*limbal*0.5;
-    // Sclera hint
-    float sclera=smoothstep(0.37,0.45,r)-smoothstep(0.45,0.6,r);
-    col+=vec3(0.9,0.88,0.85)*sclera*0.15;
-    // Blood vessels in sclera
-    float bv=fbm(uv*15.0+vec2(3.7,1.2));
-    col+=vec3(0.3,0.05,0.02)*sclera*smoothstep(0.5,0.7,bv)*0.3;
-    // Pupil is the void
-    col=mix(col,vec3(0),pupil);
-    // Vignette
-    col*=1.0-smoothstep(0.3,0.8,r);
+    col+=vec3(0.85,0.7,0.3)*limbal*0.8;
+    col+=scleraCol*sclera*0.2;
+    col+=vec3(0.5,0.02,0.02)*veins*sclera*0.4;
     
-    gl_FragColor=vec4(col,1);
-    return;
+    float voidNoise=fbm(uv*30.0+time*2.0);
+    col=mix(col,vec3(0.03,0.0,0.02)+vec3(0.15,0.0,0.08)*voidNoise*pupil,pupil);
+    
+    float spec=pow(max(0.0,1.0-length(uv-vec2(-0.1,-0.12))*6.0),4.0);
+    col+=vec3(1)*spec*0.3*(1.0-pupil);
+    col*=1.0-smoothstep(0.3,0.85,r);
+    
+    gl_FragColor=vec4(col,1);return;
   }
   
-  // === PHASE 0.15-0.45: OPTIC NERVE TUNNEL ===
-  if(p<0.45){
-    float np=(p-0.15)/0.3;
-    vec2 tuv=uv;
-    // Tunnel coordinates
-    float r=length(tuv);
-    float a=atan(tuv.y,tuv.x);
-    // Tunnel depth — flying forward
-    float z=1.0/max(r,0.001)+time*2.0+np*20.0;
+  // ═══ PHASE 0.12-0.35: OPTIC NERVE — biological horror ═══
+  if(p<0.35){
+    float np=(p-0.12)/0.23;
+    float r=length(uv);
+    float a=atan(uv.y,uv.x);
+    float z=1.0/max(r,0.001)+time*3.0+np*25.0;
     
-    // Nerve fiber bundles — bioluminescent
-    vec2 tp=vec2(z*0.3,a*3.0/3.14159);
-    float fibers=fbm(tp*vec2(2.0,8.0));
-    float fiberLines=abs(sin(a*12.0+fibers*2.0));
-    fiberLines=pow(fiberLines,3.0);
+    vec2 tp=vec2(z*0.2,a*2.0/3.14159);
+    float cells=voronoi(tp*vec2(3.0,6.0));
+    float cellWall=smoothstep(0.05,0.12,cells);
     
-    // Myelin sheath shimmer
-    float myelin=sin(z*0.8+a*4.0)*0.5+0.5;
-    myelin*=smoothstep(0.4,0.1,r);
+    float fibers=fbm(tp*vec2(2.0,10.0)+vec2(time*0.5,0));
+    float fiberLines=abs(sin(a*16.0+fibers*3.0+time*0.3));
+    fiberLines=pow(fiberLines,4.0);
     
-    // Neural signal pulses traveling down the nerve
-    float pulse=sin(z*2.0-time*8.0)*0.5+0.5;
-    pulse=pow(pulse,8.0);
+    float pulse1=pow(sin(z*3.0-time*12.0)*0.5+0.5,12.0);
+    float pulse2=pow(sin(z*2.0-time*8.0+1.5)*0.5+0.5,10.0);
+    float pulse3=pow(sin(z*5.0-time*15.0+3.0)*0.5+0.5,16.0);
     
-    // Color — bioluminescent blue-white with gold accents
-    vec3 col=vec3(0);
-    vec3 nerveCol=mix(vec3(0.1,0.2,0.4),vec3(0.2,0.4,0.6),fibers);
-    col+=nerveCol*fiberLines*smoothstep(0.5,0.05,r)*0.6;
-    col+=vec3(0.4,0.6,0.8)*myelin*0.15;
-    col+=vec3(0.9,0.95,1.0)*pulse*smoothstep(0.3,0.02,r)*0.4;
-    // Gold sparks
-    float sparks=pow(hash(floor(tp*10.0)+floor(time*3.0)),20.0);
-    col+=vec3(0.78,0.66,0.3)*sparks*2.0;
+    float myelin=sin(z*1.2+a*6.0+time*0.8)*0.5+0.5;
+    myelin*=smoothstep(0.5,0.08,r);
     
-    // Tunnel walls glow
-    float wall=smoothstep(0.02,0.15,r)*smoothstep(0.5,0.2,r);
-    col+=vec3(0.05,0.1,0.15)*wall;
+    vec3 nerveCol=mix(vec3(0.1,0.2,0.5),vec3(0.5,0.05,0.15),np);
+    nerveCol+=vec3(0.2,0.0,0.3)*sin(z*0.5+time)*0.5;
+    nerveCol+=vec3(0.0,0.3,0.2)*cos(z*0.7+time*1.3)*0.3;
     
-    // Speed lines
-    float speed=pow(max(0.0,sin(z*4.0-time*12.0)),16.0)*smoothstep(0.5,0.1,r);
-    col+=vec3(0.6,0.7,0.9)*speed*0.3;
+    float wallDist=smoothstep(0.5,0.04,r);
+    col+=nerveCol*cellWall*wallDist*0.5;
+    col+=vec3(0.6,0.15,0.1)*fiberLines*wallDist*0.4;
+    col+=vec3(0.3,0.6,0.9)*myelin*0.2;
+    col+=vec3(0.9,0.95,1.0)*pulse1*smoothstep(0.3,0.01,r)*0.5;
+    col+=vec3(1.0,0.3,0.5)*pulse2*smoothstep(0.25,0.01,r)*0.3;
+    col+=vec3(0.3,1.0,0.6)*pulse3*smoothstep(0.2,0.01,r)*0.2;
     
-    gl_FragColor=vec4(col,1);
-    return;
+    float sparks=pow(hash(floor(tp*12.0)+floor(time*4.0)),25.0);
+    col+=vec3(1.0,0.8,0.2)*sparks*3.0;
+    float redSparks=pow(hash(floor(tp*8.0+vec2(7.0,3.0))+floor(time*5.0)),30.0);
+    col+=vec3(1.0,0.1,0.05)*redSparks*2.0*np;
+    
+    float speed=pow(max(0.0,sin(z*5.0-time*16.0)),20.0)*smoothstep(0.5,0.08,r);
+    col+=vec3(0.7,0.8,1.0)*speed*0.4;
+    
+    float wallPulse=sin(time*2.5+a*3.0)*0.5+0.5;
+    col+=vec3(0.4,0.05,0.08)*(1.0-cellWall)*wallDist*wallPulse*0.3;
+    
+    col+=vec3(0.15,0.0,0.08)*smoothstep(0.08,0.0,r);
+    
+    gl_FragColor=vec4(col,1);return;
   }
   
-  // === PHASE 0.45-0.75: FRACTAL KALEIDOSCOPE ===
+  // ═══ PHASE 0.35-0.55: SYNAPTIC STORM — full overload ═══
+  if(p<0.55){
+    float sp=(p-0.35)/0.2;
+    float r=length(uv);
+    float a=atan(uv.y,uv.x);
+    uv*=rot(time*0.3+sp*2.0);
+    
+    float z1=1.0/max(length(uv),0.001)+time*4.0+sp*30.0;
+    float z2=1.0/max(length(uv*rot(0.5)),0.001)+time*3.0+sp*20.0;
+    float z3=1.0/max(length(uv*rot(-0.8)),0.001)+time*5.0+sp*25.0;
+    
+    float storm1=fbm(vec2(z1*0.3,a*2.0)+time);
+    float storm2=fbm(vec2(z2*0.4,a*3.0)-time*0.7);
+    float storm3=fbm(vec2(z3*0.2,a*1.5)+time*1.3);
+    
+    float wallDist=smoothstep(0.6,0.02,r);
+    col+=vec3(1.0,0.3,0.1)*storm1*wallDist*0.4;
+    col+=vec3(0.2,0.5,1.0)*storm2*wallDist*0.35;
+    col+=vec3(0.1,0.9,0.3)*storm3*wallDist*0.25;
+    col+=vec3(1.0,1.0,0.2)*pow(storm1*storm2,2.0)*wallDist*0.5;
+    col+=vec3(0.8,0.1,0.9)*(storm2*storm3)*wallDist*0.3;
+    
+    float rings=pow(sin(z1*3.0)*0.5+0.5,8.0+sp*12.0);
+    col+=vec3(1.0,0.9,0.7)*rings*smoothstep(0.4,0.02,r)*0.6;
+    
+    vec2 huv=uv*8.0;huv*=rot(time*0.5);
+    float hx=hexDist(huv);
+    float hexGrid=smoothstep(0.02,0.0,abs(fract(hx)-0.5)-0.47);
+    col+=vec3(0.78,0.66,0.3)*hexGrid*sp*0.4;
+    
+    float flash=pow(hash(floor(vec2(a*8.0,z1*4.0))+floor(time*6.0)),40.0);
+    vec3 flashCol=vec3(
+      hash(floor(vec2(time*3.0,a))),
+      hash(floor(vec2(time*3.0+1.0,a))),
+      hash(floor(vec2(time*3.0+2.0,a)))
+    );
+    col+=flashCol*flash*4.0;
+    
+    col+=vec3(1)*pow(max(0.0,1.0-r*5.0),3.0)*(0.3+sin(time*6.0)*0.2);
+    
+    gl_FragColor=vec4(col,1);return;
+  }
+  
+  // ═══ PHASE 0.55-0.75: FRACTAL KALEIDOSCOPE — sacred geometry on DMT ═══
   if(p<0.75){
-    float kp=(p-0.45)/0.3;
+    float kp=(p-0.55)/0.2;
     vec2 kuv=uv;
+    kuv*=rot(time*0.4);
     
-    // Kaleidoscope fold — sacred geometry
+    float segments=6.0+floor(kp*6.0);
     float ka=atan(kuv.y,kuv.x);
     float kr=length(kuv);
-    float segments=6.0;// hexagonal
-    ka=mod(ka,3.14159*2.0/segments);
+    ka=mod(ka,6.28318/segments);
     ka=abs(ka-3.14159/segments);
     kuv=vec2(cos(ka),sin(ka))*kr;
     
-    // Fractal iteration
-    vec2 z2=kuv*3.0;
-    float iter=0.0;
-    for(int i=0;i<8;i++){
-      z2=abs(z2)/dot(z2,z2)-vec2(0.8+sin(time*0.3)*0.2,0.5+cos(time*0.2)*0.15);
-      z2*=rot(time*0.1+float(i)*0.2);
-      iter+=exp(-3.0*length(z2));
+    vec2 kuv2=kuv*3.0;kuv2*=rot(-time*0.2);
+    float ka2=atan(kuv2.y,kuv2.x);
+    float kr2=length(kuv2);
+    ka2=mod(ka2,6.28318/8.0);
+    ka2=abs(ka2-3.14159/8.0);
+    kuv2=vec2(cos(ka2),sin(ka2))*kr2;
+    
+    vec2 z2=kuv*3.0;float iter=0.0;
+    for(int i=0;i<12;i++){
+      z2=abs(z2);
+      z2=z2*z2/dot(z2,z2)-vec2(0.8+sin(time*0.3+float(i)*0.1)*0.3,0.5+cos(time*0.25+float(i)*0.15)*0.25);
+      z2*=rot(time*0.08+float(i)*0.15);
+      iter+=exp(-2.5*length(z2));
     }
     
-    // Color — gold and sacred
-    vec3 col=vec3(0);
-    col+=vec3(0.78,0.66,0.3)*iter*0.08;
-    col+=vec3(0.4,0.3,0.15)*pow(iter*0.1,2.0);
-    // Blue accents
-    col+=vec3(0.1,0.2,0.5)*sin(iter*0.5+time)*0.1;
-    // White hot center
-    col+=vec3(1)*pow(max(0.0,1.0-kr*3.0),3.0)*0.2*(0.5+sin(time*2.0)*0.5);
+    vec2 z3=kuv2;float iter2=0.0;
+    for(int i=0;i<8;i++){
+      z3=vec2(z3.x*z3.x-z3.y*z3.y,2.0*abs(z3.x*z3.y));
+      z3+=vec2(-0.6+sin(time*0.2)*0.1,0.4);
+      iter2+=exp(-3.0*length(z3));
+    }
     
-    // Tunnel zoom effect
-    float tz=1.0/(kr+0.01)+time*3.0+kp*15.0;
-    float tunnelRing=pow(abs(sin(tz*1.5)),20.0)*smoothstep(0.5,0.1,kr);
-    col+=vec3(0.78,0.66,0.3)*tunnelRing*0.3;
+    float hue=iter*0.15+time*0.1+kp*2.0;
+    vec3 col1;
+    col1.r=0.5+0.5*sin(hue*6.28);
+    col1.g=0.5+0.5*sin(hue*6.28+2.09);
+    col1.b=0.5+0.5*sin(hue*6.28+4.19);
+    col1*=iter*0.12;
     
-    // Sacred geometry overlay — rotating hexagon
-    float hex=cos(ka*segments)*kr;
-    float hexLine=smoothstep(0.01,0.0,abs(hex-0.2-sin(time)*0.05));
-    col+=vec3(0.78,0.66,0.3)*hexLine*0.2;
+    float hue2=iter2*0.2+time*0.15;
+    vec3 col2;
+    col2.r=0.5+0.5*sin(hue2*6.28+1.0);
+    col2.g=0.5+0.5*sin(hue2*6.28+3.0);
+    col2.b=0.5+0.5*sin(hue2*6.28+5.0);
+    col2*=iter2*0.08;
     
-    // Dissolving edges as we approach DMN
-    col*=smoothstep(0.8,0.3,kr);
-    col*=1.0+kp*0.5;// brighten toward end
+    col=col1+col2;
     
-    gl_FragColor=vec4(col,1);
-    return;
+    float geoR=kr*8.0;
+    float geo=abs(sin(geoR+time))*abs(cos(ka*segments+time*0.5));
+    col+=vec3(0.85,0.7,0.3)*pow(geo,4.0)*0.3*(0.5+kp);
+    
+    float tz=1.0/(kr+0.01)+time*4.0+kp*20.0;
+    col+=vec3(1.0,0.85,0.5)*pow(abs(sin(tz*2.0)),24.0)*smoothstep(0.6,0.08,kr)*0.4;
+    col+=vec3(1.0,0.9,0.8)*pow(max(0.0,1.0-kr*3.0),2.0)*0.3*(1.0+sin(time*4.0)*0.3);
+    col*=smoothstep(0.9,0.25,kr);
+    col*=1.0+kp*0.8;
+    
+    gl_FragColor=vec4(col,1);return;
   }
   
-  // === PHASE 0.75-1.0: EMERGENCE INTO DMN SPACE ===
-  float ep2=(p-0.75)/0.25;
-  vec2 euv=uv;
+  // ═══ PHASE 0.75-0.90: THE FEAR — reality breaks ═══
+  if(p<0.90){
+    float fp=(p-0.75)/0.15;
+    float r=length(uv);
+    float a=atan(uv.y,uv.x);
+    
+    uv+=vec2(sin(uv.y*15.0+time*3.0),cos(uv.x*15.0+time*2.5))*0.05*fp;
+    
+    float z=1.0/max(length(uv),0.001)+time*2.0+fp*15.0;
+    
+    // Tunnel of EYES
+    vec2 eyeGrid=fract(vec2(z*0.5,a*4.0/6.28))-0.5;
+    float eyeDist=length(eyeGrid);
+    float eyeIris=smoothstep(0.2,0.18,eyeDist)-smoothstep(0.08,0.06,eyeDist);
+    float eyePupil=1.0-smoothstep(0.04+sin(time*3.0+z)*0.02,0.06+sin(time*3.0+z)*0.02,eyeDist);
+    
+    float eyeHue=hash(floor(vec2(z*0.5,a*4.0/6.28)));
+    vec3 eyeCol;
+    eyeCol.r=0.3+0.7*sin(eyeHue*6.28);
+    eyeCol.g=0.3+0.7*sin(eyeHue*6.28+2.09);
+    eyeCol.b=0.3+0.7*sin(eyeHue*6.28+4.19);
+    
+    float wallDist=smoothstep(0.6,0.03,r);
+    col+=eyeCol*eyeIris*wallDist*0.6;
+    col+=vec3(0.02,0.0,0.01)*eyePupil*wallDist;
+    
+    // Veins throbbing
+    float veinPattern=abs(sin(a*8.0+fbm(vec2(z*0.3,a*2.0)+time*0.5)*5.0));
+    veinPattern=1.0-pow(veinPattern,0.3);
+    float throb=0.5+0.5*sin(time*2.5-z*0.5);
+    col+=vec3(0.6,0.02,0.05)*veinPattern*wallDist*throb*fp*0.5;
+    
+    // Red warning pulses
+    col+=vec3(0.8,0.0,0.0)*pow(max(0.0,sin(time*4.0-r*10.0)),4.0)*fp*0.3;
+    
+    // Matrix wireframe underneath
+    float wireframe=0.0;
+    for(int i=1;i<=3;i++){
+      float fi=float(i);
+      wireframe+=smoothstep(0.02,0.0,abs(fract(r*fi*4.0+time*fi*0.5)-0.5)-0.47)*0.3/fi;
+      wireframe+=smoothstep(0.02,0.0,abs(fract(a/6.28*6.0*fi+time*fi*0.3)-0.5)-0.47)*0.2/fi;
+    }
+    col+=vec3(0.3,0.8,0.4)*wireframe*fp*0.5;
+    
+    // Expanding void
+    float voidR=0.15*fp;
+    float voidEdge=smoothstep(voidR+0.05,voidR,r);
+    col=mix(col,vec3(0),voidEdge*0.8);
+    col+=vec3(0.15,0.0,0.05)*fbm(uv*40.0+time*3.0)*voidEdge;
+    
+    gl_FragColor=vec4(col,1);return;
+  }
   
-  // Fading kaleidoscope
-  float ka2=atan(euv.y,euv.x);
-  float kr2=length(euv);
-  float fadeK=1.0-ep2;
+  // ═══ PHASE 0.90-1.0: EMERGENCE — DMN initialization ═══
+  float ep=(p-0.90)/0.10;
+  float r=length(uv);
+  float convergence=smoothstep(0.5,0.0,r)*ep;
   
-  // Remnant fractal, fading
-  float segments2=6.0;
-  float ka2m=mod(ka2,3.14159*2.0/segments2);
-  ka2m=abs(ka2m-3.14159/segments2);
-  vec2 kp2=vec2(cos(ka2m),sin(ka2m))*kr2*3.0;
-  float remnant=fbm(kp2+time*0.5)*fadeK;
-  
-  // DMN node hints appearing
-  vec3 col=vec3(0);
-  col+=vec3(0.78,0.66,0.3)*remnant*0.1;
-  
-  // Node positions fading in (matching spiral.html DMN_NODES)
   float nodeGlow=0.0;
   vec2 nodes[5];
-  nodes[0]=vec2(0.0,-0.28);// mPFC
-  nodes[1]=vec2(0.0,0.05);// PCC
-  nodes[2]=vec2(-0.28,-0.08);// LTC_L
-  nodes[3]=vec2(0.28,-0.08);// LTC_R
-  nodes[4]=vec2(0.0,-0.18);// ACC
+  nodes[0]=vec2(0.0,-0.28);
+  nodes[1]=vec2(0.0,0.05);
+  nodes[2]=vec2(-0.28,-0.08);
+  nodes[3]=vec2(0.28,-0.08);
+  nodes[4]=vec2(0.0,-0.18);
   for(int i=0;i<5;i++){
-    float nd=length(euv-nodes[i]);
-    nodeGlow+=exp(-nd*20.0)*ep2;
+    float nd=length(uv-nodes[i]);
+    nodeGlow+=exp(-nd*15.0)*ep;
+    for(int j=0;j<5;j++){
+      if(i!=j){
+        vec2 ab=nodes[j]-nodes[i];
+        float tl=dot(uv-nodes[i],ab)/dot(ab,ab);
+        tl=clamp(tl,0.0,1.0);
+        float ld=length(uv-(nodes[i]+ab*tl));
+        nodeGlow+=exp(-ld*40.0)*ep*0.3;
+      }
+    }
   }
-  col+=vec3(0.5,0.55,0.6)*nodeGlow*0.5;
-  
-  // Connection lines appearing
-  float connGlow=0.0;
-  // mPFC to PCC
-  float d01=abs((euv.y+0.28)/(0.33)-euv.x/0.001);// vertical line approx
-  // Simplified: just add radial glow expanding
-  float expand=ep2*0.5;
-  col+=vec3(0.3,0.35,0.4)*smoothstep(expand+0.1,expand,kr2)*ep2*0.15;
-  
-  // White convergence at center
-  col+=vec3(1)*pow(max(0.0,1.0-kr2*4.0),2.0)*(1.0-ep2)*0.3;
-  
-  // Final fade to the DMN room (dark with node hints)
-  col=mix(col,vec3(0.02,0.02,0.03),ep2*0.5);
+  col+=vec3(0.5,0.55,0.65)*nodeGlow*0.6;
+  col+=vec3(0.78,0.66,0.3)*nodeGlow*0.3;
+  col+=vec3(0.2,0.1,0.3)*fbm(uv*5.0+time)*(1.0-ep)*0.1;
+  col+=vec3(0.85,0.7,0.3)*convergence*0.4;
+  col+=vec3(1)*pow(max(0.0,1.0-r*3.0),2.0)*ep*0.8;
   
   gl_FragColor=vec4(col,1);
 }
 `;
 
-// ═══ COMPILE SHADERS ═══
+// ═══ COMPILE ═══
 function createShader(type,src){
   var s=gl.createShader(type);
   gl.shaderSource(s,src);gl.compileShader(s);
   if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){
-    console.error(gl.getShaderInfoLog(s));return null;}
+    console.error('Shader error:',gl.getShaderInfoLog(s));return null;}
   return s;
 }
 var vs=createShader(gl.VERTEX_SHADER,vertSrc);
@@ -275,7 +413,6 @@ if(!gl.getProgramParameter(prog,gl.LINK_STATUS)){
 }
 gl.useProgram(prog);
 
-// Fullscreen quad
 var buf=gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER,buf);
 gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
@@ -286,65 +423,96 @@ gl.vertexAttribPointer(posLoc,2,gl.FLOAT,false,0,0);
 var tLoc=gl.getUniformLocation(prog,'t');
 var phaseLoc=gl.getUniformLocation(prog,'phase');
 var resLoc=gl.getUniformLocation(prog,'res');
+var beatLoc=gl.getUniformLocation(prog,'beat');
 
 // ═══ TIMING ═══
-var TOTAL_DURATION=18000;// 18 seconds total journey
+var TOTAL_DURATION=22000;
 var startTime=Date.now();
 var msgEl=document.getElementById('msg');
 var whiteout=document.getElementById('whiteout');
+var flashEl=document.getElementById('flash');
 
 var messages=[
   {at:0.0, text:""},
-  {at:0.08, text:"ENTERING"},
-  {at:0.18, text:"OPTIC NERVE\nSIGNAL PATHWAY"},
-  {at:0.35, text:"LATERAL GENICULATE\nNUCLEUS"},
-  {at:0.48, text:"VISUAL CORTEX\nTRANSITION"},
-  {at:0.6, text:"CROSSING\nTHRESHOLD"},
-  {at:0.78, text:"DEFAULT MODE NETWORK\nINITIALIZING"},
-  {at:0.92, text:"PHASE 0\nSOURCE"}
+  {at:0.05, text:"LOOK CLOSER"},
+  {at:0.13, text:"ENTERING<br>OPTIC NERVE"},
+  {at:0.25, text:"SIGNAL PATHWAY<br>ACCELERATING"},
+  {at:0.36, text:"SYNAPTIC<br>STORM"},
+  {at:0.48, text:"ALL CHANNELS<br>OPEN"},
+  {at:0.56, text:"CROSSING<br>THRESHOLD"},
+  {at:0.68, text:"SACRED<br>GEOMETRY<br>DETECTED"},
+  {at:0.76, text:"\u26A0 FEAR RESPONSE<br>NORMAL \u26A0"},
+  {at:0.82, text:"THEY<br>SEE<br>YOU"},
+  {at:0.91, text:"DEFAULT MODE NETWORK<br>INITIALIZING"},
+  {at:0.97, text:""}
 ];
 var lastMsg=-1;
 
+function doFlash(){
+  flashEl.style.opacity='0.15';
+  setTimeout(function(){flashEl.style.opacity='0'},80);
+}
+
+var heartbeatRate=1200,lastHeartbeat=0;
+function heartbeat(now,progress){
+  heartbeatRate=1200-progress*800;
+  if(now-lastHeartbeat>heartbeatRate){
+    lastHeartbeat=now;
+    document.getElementById('vignette').style.background=
+      'radial-gradient(ellipse at center,transparent 30%,rgba('+
+      Math.floor(40+progress*80)+',0,0,'+(0.4+progress*0.3)+') 100%)';
+    setTimeout(function(){
+      document.getElementById('vignette').style.background=
+        'radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.6) 100%)';
+    },150);
+    return 1.0;
+  }
+  return 0.0;
+}
+
 function render(){
-  var elapsed=Date.now()-startTime;
+  var now=Date.now();
+  var elapsed=now-startTime;
   var progress=Math.min(1,elapsed/TOTAL_DURATION);
   var time=elapsed*0.001;
+  var beat=heartbeat(now,progress);
   
   gl.uniform1f(tLoc,time);
   gl.uniform1f(phaseLoc,progress);
   gl.uniform2f(resLoc,W,H);
+  gl.uniform1f(beatLoc,beat);
   gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
   
-  // Messages
   for(var i=messages.length-1;i>=0;i--){
     if(progress>=messages[i].at&&lastMsg!==i){
       lastMsg=i;
       msgEl.style.color='rgba(201,169,78,0)';
       setTimeout(function(txt){
-        msgEl.innerHTML=txt.replace('\n','<br>');
-        msgEl.style.color='rgba(201,169,78,0.5)';
-      },200,messages[i].text);
+        msgEl.innerHTML=txt;
+        msgEl.style.color='rgba(201,169,78,0.6)';
+      },150,messages[i].text);
       break;
     }
   }
   
-  // End — whiteout then redirect
-  if(progress>0.95){
-    whiteout.style.opacity=Math.min(1,(progress-0.95)/0.05);
+  if(progress>0.35&&progress<0.75&&Math.random()<0.03)doFlash();
+  if(progress>0.75&&progress<0.9&&Math.random()<0.05){
+    flashEl.style.background='rgba(255,0,0,0.1)';
+    doFlash();
+    setTimeout(function(){flashEl.style.background='#fff'},200);
   }
   
+  if(progress>0.95){whiteout.style.opacity=Math.min(1,(progress-0.95)/0.05)}
+  
   if(progress>=1){
-    // Mark tunnel as seen
     try{localStorage.setItem('limenTunnelSeen','1')}catch(e){}
     setTimeout(function(){
       window.location.href='spiral.html'+window.location.search.replace('&v=tunnel','');
     },800);
     return;
   }
-  
   requestAnimationFrame(render);
 }
-
 render();
 </script>
 </body>
