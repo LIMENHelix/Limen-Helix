@@ -82,7 +82,7 @@ body{background:#000;overflow:hidden;height:100vh;width:100vw;font-family:Georgi
       <p class="cts">What you offer here feeds the pattern.<br>What returns to you is the architecture of your own becoming.</p>
       <p style="font-size:0.45rem;color:rgba(201,169,78,0.35);letter-spacing:3px;text-transform:uppercase;font-family:monospace;margin-top:0.8rem;margin-bottom:0.3rem">11 phases · 1 recursive system · your default mode network holds the key</p>
       <div class="og">
-        <a href="spiral.html" class="oc" onclick="event.stopPropagation()"><span class="oi">⊘</span><span class="on">The Spiral</span><span class="od">Phases · Knowledge · Spells</span></a>
+        <a href="#" class="oc" onclick="event.stopPropagation();enterSpiral()"><span class="oi">⊘</span><span class="on">The Spiral</span><span class="od">Phases · Knowledge · Spells</span></a>
         <a href="ceremony.html" class="oc" onclick="event.stopPropagation()"><span class="oi">☽</span><span class="on">Ceremony</span><span class="od">Sacred Events · Rituals</span></a>
         <a href="https://chapel-pos-v2.vercel.app" target="_blank" rel="noopener" class="oc" onclick="event.stopPropagation()"><span class="oi">⊕</span><span class="on">Consultation</span><span class="od">1-on-1 · Guidance</span></a>
         <a href="https://chapel-pos-v2.vercel.app" target="_blank" rel="noopener" class="oc" onclick="event.stopPropagation()"><span class="oi">✦</span><span class="on">The Offering</span><span class="od">Tithe · Unlock Phases</span></a>
@@ -449,6 +449,22 @@ window.addEventListener('resize',function(){
   for(var i=0;i<cols;i++){drops[i]=Math.random()*-100;colWords[i]=Math.random()<0.4?words[Math.floor(Math.random()*words.length)]:'';colCharIdx[i]=0}
   resizeEye();
 });
+
+// ═══ SPIRAL ENTRY — tunnel on first visit, direct on return ═══
+function enterSpiral(){
+  var qs=window.location.search||'';
+  var isAdmin=qs.indexOf('limen=spiral99')!==-1||qs.indexOf('limen=helix33')!==-1;
+  var seenTunnel=false;
+  try{seenTunnel=localStorage.getItem('limenTunnelSeen')==='1'}catch(e){}
+  
+  if(!seenTunnel||isAdmin){
+    // First time or admin — go through the death tunnel
+    window.location.href='tunnel.html'+qs;
+  }else{
+    // Already died once — go direct
+    window.location.href='spiral.html'+qs;
+  }
+}
 
 // ═══ PORTAL CONTROLS ═══
 function openThreshold(){
