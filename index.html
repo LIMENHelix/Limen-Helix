@@ -162,6 +162,10 @@ var eyeTarget=0;
 var eyeT=0;
 var eyeClicked=false;
 
+// Load the eye photograph
+var eyeImg=new Image();
+eyeImg.src='eye-cropped.jpg';
+
 // Pupil tracking
 var pupilX=0,pupilY=0; // -1 to 1 range
 var pupilTargetX=0,pupilTargetY=0;
@@ -255,172 +259,61 @@ function drawEye(){
     ex.closePath();
     ex.clip();
     
-    var maxR=Math.max(eyeW,eyeH)*1.4;
+    // Draw the actual photograph — shifted slightly by pupil tracking for parallax
+    if(eyeImg&&eyeImg.complete&&eyeImg.naturalWidth>0){
+      var imgW=eyeW*2.4;
+      var imgH=imgW*(eyeImg.naturalHeight/eyeImg.naturalWidth);
+      // Slight parallax shift — image moves opposite to gaze for depth
+      var parallaxX=pxOff*-0.3;
+      var parallaxY=pyOff*-0.3;
+      ex.drawImage(eyeImg,cx-imgW/2+parallaxX,cy-imgH/2+parallaxY,imgW,imgH);
+    }
     
-    // ═══ ANATOMICAL EYEBALL ═══
-    
-    // SCLERA — white of the eye with subtle pink/cream tone
-    var scleraGrad=ex.createRadialGradient(cx+pxOff*0.3,cy+pyOff*0.3,0,cx,cy,maxR);
-    scleraGrad.addColorStop(0,'rgba(245,238,230,'+(0.98*eyeOpen)+')');
-    scleraGrad.addColorStop(0.5,'rgba(240,232,222,'+(0.95*eyeOpen)+')');
-    scleraGrad.addColorStop(0.75,'rgba(225,215,205,'+(0.9*eyeOpen)+')');
-    scleraGrad.addColorStop(1,'rgba(180,165,155,'+(0.8*eyeOpen)+')');
-    ex.fillStyle=scleraGrad;
+    // Supernatural overlay — very subtle golden pulse inside the eye
+    var superAlpha=0.04*eyeOpen*Math.abs(Math.sin(eyeT*0.8));
+    var superGlow=ex.createRadialGradient(cx+pxOff,cy+pyOff,0,cx,cy,eyeW*0.8);
+    superGlow.addColorStop(0,'rgba(201,169,78,'+superAlpha*2+')');
+    superGlow.addColorStop(0.4,'rgba(100,150,220,'+superAlpha+')');
+    superGlow.addColorStop(1,'rgba(0,0,0,0)');
+    ex.fillStyle=superGlow;
     ex.fillRect(0,0,w,h);
     
-    // BLOOD VESSELS — thin red/pink lines across sclera
-    for(var bv=0;bv<18;bv++){
-      var bvAngle=(bv/18)*Math.PI*2+bv*0.3;
-      var bvStartR=maxR*0.55;
-      var bvSx=cx+Math.cos(bvAngle)*bvStartR;
-      var bvSy=cy+Math.sin(bvAngle)*bvStartR;
-      ex.beginPath();
-      ex.moveTo(bvSx,bvSy);
-      var bvX=bvSx,bvY=bvSy;
-      var bvSegs=4+bv%3;
-      for(var bvs=0;bvs<bvSegs;bvs++){
-        var toward=Math.atan2(cy-bvY,cx-bvX);
-        bvX+=Math.cos(toward+Math.sin(bv*2.7+bvs*1.8)*0.6)*maxR*0.12;
-        bvY+=Math.sin(toward+Math.cos(bv*1.9+bvs*2.3)*0.5)*maxR*0.1;
-        ex.lineTo(bvX,bvY);
-      }
-      var bvAlpha=(0.08+Math.sin(bv*1.7)*0.04)*eyeOpen;
-      ex.strokeStyle='rgba(180,60,60,'+bvAlpha+')';
-      ex.lineWidth=0.5+Math.sin(bv*3.1)*0.3;
-      ex.stroke();
-      // Tiny branch
-      if(bv%3===0&&bvSegs>2){
-        ex.beginPath();ex.moveTo(bvX,bvY);
-        ex.lineTo(bvX+Math.cos(bvAngle+0.8)*maxR*0.06,bvY+Math.sin(bvAngle+0.8)*maxR*0.06);
-        ex.strokeStyle='rgba(190,80,80,'+(0.05*eyeOpen)+')';
-        ex.lineWidth=0.3;ex.stroke();
-      }
-    }
-    
-    // IRIS — large colored ring with fiber texture
-    var irisR=eyeH*0.65;
-    var iCx=cx+pxOff,iCy=cy+pyOff;
-    if(irisR>5){
-      // Iris base — deep amber/gold with depth
-      var irisGrad=ex.createRadialGradient(iCx,iCy,irisR*0.2,iCx,iCy,irisR);
-      irisGrad.addColorStop(0,'rgba(60,30,10,'+(0.98*eyeOpen)+')');
-      irisGrad.addColorStop(0.2,'rgba(120,70,20,'+(0.95*eyeOpen)+')');
-      irisGrad.addColorStop(0.45,'rgba(160,110,30,'+(0.9*eyeOpen)+')');
-      irisGrad.addColorStop(0.65,'rgba(180,140,50,'+(0.85*eyeOpen)+')');
-      irisGrad.addColorStop(0.8,'rgba(140,100,35,'+(0.9*eyeOpen)+')');
-      irisGrad.addColorStop(0.95,'rgba(80,50,15,'+(0.95*eyeOpen)+')');
-      irisGrad.addColorStop(1,'rgba(40,25,10,'+(0.98*eyeOpen)+')');
-      ex.beginPath();ex.arc(iCx,iCy,irisR,0,Math.PI*2);
-      ex.fillStyle=irisGrad;ex.fill();
-      
-      // Iris fiber striations — radial lines like a real iris
-      for(var fib=0;fib<90;fib++){
-        var fa=(fib/90)*Math.PI*2+Math.sin(fib*0.7)*0.03;
-        var fibInner=irisR*0.22;
-        var fibOuter=irisR*(0.85+Math.sin(fib*3.7+eyeT*0.5)*0.12);
-        ex.beginPath();
-        ex.moveTo(iCx+Math.cos(fa)*fibInner,iCy+Math.sin(fa)*fibInner);
-        // Slight curve to fibers
-        var fibMid=irisR*0.55;
-        var drift=Math.sin(fib*2.1)*irisR*0.02;
-        ex.quadraticCurveTo(
-          iCx+Math.cos(fa+0.01)*fibMid+drift,iCy+Math.sin(fa+0.01)*fibMid+drift,
-          iCx+Math.cos(fa)*fibOuter,iCy+Math.sin(fa)*fibOuter
-        );
-        // Vary color — some gold, some dark, some amber
-        var fibMod=fib%5;
-        if(fibMod===0) ex.strokeStyle='rgba(200,160,60,'+(0.25*eyeOpen)+')';
-        else if(fibMod===1) ex.strokeStyle='rgba(100,60,15,'+(0.3*eyeOpen)+')';
-        else if(fibMod===2) ex.strokeStyle='rgba(180,130,40,'+(0.2*eyeOpen)+')';
-        else if(fibMod===3) ex.strokeStyle='rgba(80,45,10,'+(0.35*eyeOpen)+')';
-        else ex.strokeStyle='rgba(220,180,80,'+(0.15*eyeOpen)+')';
-        ex.lineWidth=0.6+Math.sin(fib*1.3)*0.3;
-        ex.stroke();
-      }
-      
-      // Iris outer ring — limbal ring (dark edge)
-      ex.beginPath();ex.arc(iCx,iCy,irisR,0,Math.PI*2);
-      ex.strokeStyle='rgba(30,15,5,'+(0.7*eyeOpen)+')';
-      ex.lineWidth=irisR*0.08;ex.stroke();
-      
-      // Iris inner ring — collarette
-      ex.beginPath();ex.arc(iCx,iCy,irisR*0.42,0,Math.PI*2);
-      ex.strokeStyle='rgba(180,140,60,'+(0.2*eyeOpen)+')';
-      ex.lineWidth=1.5;ex.stroke();
-      
-      // Supernatural overlay: faint golden glow inside iris
-      var superGlow=ex.createRadialGradient(iCx,iCy,irisR*0.1,iCx,iCy,irisR*0.7);
-      superGlow.addColorStop(0,'rgba(201,169,78,'+(0.08*eyeOpen*Math.abs(Math.sin(eyeT*0.8)))+')');
-      superGlow.addColorStop(1,'rgba(201,169,78,0)');
-      ex.beginPath();ex.arc(iCx,iCy,irisR*0.7,0,Math.PI*2);
-      ex.fillStyle=superGlow;ex.fill();
-    }
-    
-    // PUPIL — deep black void with blue corona
-    var pupilR=Math.max(irisR*0.28,4);
+    // Micro lightning around pupil area — very subtle supernatural hints
+    var pupilArea=eyeH*0.18;
     var pCx=cx+pxOff*1.2,pCy=cy+pyOff*1.2;
-    
-    // Pupil glow — supernatural blue corona barely visible
-    var corona=ex.createRadialGradient(pCx,pCy,pupilR*0.8,pCx,pCy,pupilR*2);
-    corona.addColorStop(0,'rgba(0,0,0,'+(0.99*eyeOpen)+')');
-    corona.addColorStop(0.5,'rgba(10,20,40,'+(0.4*eyeOpen)+')');
-    corona.addColorStop(0.8,'rgba(40,80,140,'+(0.1*eyeOpen)+')');
-    corona.addColorStop(1,'rgba(80,140,200,0)');
-    ex.beginPath();ex.arc(pCx,pCy,pupilR*2,0,Math.PI*2);
-    ex.fillStyle=corona;ex.fill();
-    
-    // The void itself
-    ex.beginPath();ex.arc(pCx,pCy,pupilR,0,Math.PI*2);
-    ex.fillStyle='rgba(0,0,0,'+(0.995*eyeOpen)+')';ex.fill();
-    
-    // Micro lightning — very subtle, just hints of supernatural
-    for(var arc=0;arc<12;arc++){
-      var aa=(arc/12)*Math.PI*2+eyeT*2.5;
+    for(var arc=0;arc<8;arc++){
+      var aa=(arc/8)*Math.PI*2+eyeT*2.5;
       var flickr=Math.abs(Math.sin(eyeT*6+arc*2.1));
-      if(flickr>0.65){
+      if(flickr>0.7){
         ex.beginPath();
-        ex.moveTo(pCx+Math.cos(aa)*pupilR,pCy+Math.sin(aa)*pupilR);
-        ex.lineTo(pCx+Math.cos(aa+0.08)*(pupilR*1.5+Math.sin(eyeT*9+arc)*4),pCy+Math.sin(aa+0.08)*(pupilR*1.5+Math.sin(eyeT*9+arc)*4));
-        ex.strokeStyle='rgba(100,170,230,'+(0.2*eyeOpen*flickr)+')';
-        ex.lineWidth=0.6;ex.shadowColor='rgba(80,150,220,0.5)';ex.shadowBlur=3;
+        ex.moveTo(pCx+Math.cos(aa)*pupilArea,pCy+Math.sin(aa)*pupilArea);
+        ex.lineTo(pCx+Math.cos(aa+0.08)*(pupilArea*1.6+Math.sin(eyeT*9+arc)*4),pCy+Math.sin(aa+0.08)*(pupilArea*1.6+Math.sin(eyeT*9+arc)*4));
+        ex.strokeStyle='rgba(100,170,230,'+(0.12*eyeOpen*flickr)+')';
+        ex.lineWidth=0.5;ex.shadowColor='rgba(80,150,220,0.4)';ex.shadowBlur=3;
         ex.stroke();ex.shadowBlur=0;
       }
     }
     
-    // Light reflections — classic eyeball catchlights
-    // Main reflection (window shape)
-    ex.beginPath();ex.arc(pCx-pupilR*0.6-pxOff*0.3,pCy-pupilR*0.5-pyOff*0.3,pupilR*0.35,0,Math.PI*2);
-    ex.fillStyle='rgba(255,255,255,'+(0.8*eyeOpen)+')';ex.fill();
-    // Secondary smaller reflection
-    ex.beginPath();ex.arc(pCx+pupilR*0.4-pxOff*0.2,pCy+pupilR*0.3-pyOff*0.2,pupilR*0.15,0,Math.PI*2);
-    ex.fillStyle='rgba(255,255,255,'+(0.45*eyeOpen)+')';ex.fill();
-    // Edge highlight on iris
-    ex.beginPath();ex.arc(iCx-irisR*0.3-pxOff*0.15,iCy-irisR*0.3-pyOff*0.15,irisR*0.15,0,Math.PI*2);
-    ex.fillStyle='rgba(255,255,240,'+(0.12*eyeOpen)+')';ex.fill();
-    }
-    
     ex.restore();
     
-    // Eyelid edge — anatomical skin tone with hint of supernatural
+    // Eyelid edge — skin tone with subtle supernatural glow
     ex.beginPath();
     ex.moveTo(cx-eyeW,cy);
     ex.bezierCurveTo(cx-eyeW*0.55,cy-eyeH*1.1,cx+eyeW*0.55,cy-eyeH*1.1,cx+eyeW,cy);
     ex.bezierCurveTo(cx+eyeW*0.55,cy+eyeH*1.1,cx-eyeW*0.55,cy+eyeH*1.1,cx-eyeW,cy);
     ex.closePath();
-    // Skin-toned lid edge
-    ex.strokeStyle='rgba(80,55,35,'+(0.6+eyeOpen*0.3)+')';
-    ex.lineWidth=3+eyeOpen*2;
-    // Subtle golden glow — the supernatural leaking through
-    ex.shadowColor='rgba(201,169,78,'+(0.3*eyeOpen)+')';
-    ex.shadowBlur=20+eyeOpen*30;
+    ex.strokeStyle='rgba(80,55,35,'+(0.5+eyeOpen*0.3)+')';
+    ex.lineWidth=2+eyeOpen*2;
+    ex.shadowColor='rgba(201,169,78,'+(0.2*eyeOpen)+')';
+    ex.shadowBlur=15+eyeOpen*20;
     ex.stroke();
-    // Inner lash line
-    ex.strokeStyle='rgba(30,20,10,'+(0.7*eyeOpen)+')';
-    ex.lineWidth=1.5;
-    ex.shadowColor='rgba(0,0,0,'+(0.4*eyeOpen)+')';
-    ex.shadowBlur=8;
+    ex.strokeStyle='rgba(30,20,10,'+(0.6*eyeOpen)+')';
+    ex.lineWidth=1;
+    ex.shadowColor='rgba(0,0,0,'+(0.3*eyeOpen)+')';
+    ex.shadowBlur=6;
     ex.stroke();
     ex.shadowBlur=0;
+  }
   
   // Closed slit — with breathing pulse
   if(eyeOpen<0.7){
