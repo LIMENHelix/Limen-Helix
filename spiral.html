@@ -746,5 +746,127 @@ body {
   <script src="scrollAnimations.js"></script>
   <script src="phaseTextFade.js"></script>
 
+  <!-- ═══ ACCESS GATING SYSTEM ═══ -->
+  <style>
+    .phase-locked{position:relative;overflow:hidden;min-height:60vh}
+    .phase-locked>*:not(.lock-overlay){filter:blur(12px);pointer-events:none;user-select:none}
+    .lock-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      background:radial-gradient(ellipse at center,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.9) 100%);z-index:100;text-align:center;padding:2rem}
+    .lock-icon{font-size:3rem;margin-bottom:1rem;opacity:0.6}
+    .lock-title{font-size:1.3rem;color:#C9A94E;letter-spacing:3px;text-transform:uppercase;font-family:monospace;margin-bottom:0.5rem}
+    .lock-sub{font-size:0.9rem;color:#888;margin-bottom:1.5rem;max-width:400px;font-style:italic}
+    .lock-tier{font-size:0.7rem;color:#666;letter-spacing:2px;text-transform:uppercase;font-family:monospace;margin-bottom:1rem}
+    .lock-btn{display:inline-block;padding:12px 30px;border:1px solid rgba(201,169,78,0.4);color:#C9A94E;text-decoration:none;
+      font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;font-family:monospace;transition:all 0.3s;border-radius:3px}
+    .lock-btn:hover{background:rgba(201,169,78,0.1);border-color:rgba(201,169,78,0.7)}
+    .access-bar{position:fixed;top:0;left:0;right:0;z-index:2000;background:rgba(0,0,0,0.9);border-bottom:1px solid rgba(201,169,78,0.2);
+      padding:0.5rem 1rem;display:flex;align-items:center;justify-content:space-between;font-family:monospace;font-size:0.65rem}
+    .access-tier{color:#C9A94E;letter-spacing:2px;text-transform:uppercase}
+    .access-total{color:#666;letter-spacing:1px}
+    .access-upgrade{color:#C9A94E;text-decoration:none;border:1px solid rgba(201,169,78,0.3);padding:4px 12px;border-radius:3px;letter-spacing:2px;text-transform:uppercase}
+    .access-upgrade:hover{background:rgba(201,169,78,0.1)}
+  </style>
+  <script>
+  (function(){
+    // ═══ TIER DEFINITIONS ═══
+    var TIERS = [
+      {tier:0, min:5,    label:'Initiate',        phases:[0],         color:'#888'},
+      {tier:1, min:20,   label:'Seeker',           phases:[0,1],       color:'#9a8a5a'},
+      {tier:2, min:50,   label:'Acolyte',          phases:[0,1,2],     color:'#a89050'},
+      {tier:3, min:100,  label:'Disciple',         phases:[0,1,2,3],   color:'#b89840'},
+      {tier:4, min:200,  label:'Adept',            phases:[0,1,2,3,4], color:'#c8a030'},
+      {tier:5, min:500,  label:'Oracle',           phases:[0,1,2,3,4,5], color:'#d0a828'},
+      {tier:6, min:1000, label:'Architect',        phases:[0,1,2,3,4,5,6], color:'#d8b020'},
+      {tier:7, min:2500, label:'Hierophant',       phases:[0,1,2,3,4,5,6,7], color:'#e0b818'},
+      {tier:8, min:5000, label:'Threshold Keeper', phases:[0,1,2,3,4,5,6,7,8], color:'#e8c010'},
+      {tier:9, min:10000,label:'Phase Walker',     phases:[0,1,2,3,4,5,6,7,8,9], color:'#f0c808'},
+      {tier:10,min:25000,label:'Source Aligned',   phases:[0,1,2,3,4,5,6,7,8,9,10], color:'#f8d000'},
+      {tier:11,min:50000,label:'Resurrected',      phases:[0,1,2,3,4,5,6,7,8,9,10], color:'#ffd700'}
+    ];
+
+    var TIER_NAMES = {
+      0:'Phase 0 – Source',1:'Phase 1 – Light',2:'Phase 2 – Rhythm',3:'Phase 3 – Darkness',
+      4:'Phase 4 – Peace',5:'Phase 5 – Endurance',6:'Phase 6 – Order',7:'Phase 7 – Separation',
+      8:'Phase 8 – Conscience',9:'Phase 9 – Threshold',10:'Phase 10 – Resurrection'
+    };
+
+    // Check admin bypass
+    var params=new URLSearchParams(window.location.search);
+    var isAdmin=params.get('limen')==='helix33';
+
+    // Read access data
+    var access;
+    try{access=JSON.parse(localStorage.getItem('limenAccess'))||{totalPaid:0,tier:-1}}catch(e){access={totalPaid:0,tier:-1}}
+    
+    var userTier=isAdmin?11:access.tier;
+    var userTotal=isAdmin?99999:access.totalPaid;
+    var currentTierData=TIERS[Math.max(0,Math.min(userTier,11))]||TIERS[0];
+    var nextTierData=TIERS[Math.min(userTier+1,11)];
+
+    // If no access at all (never paid, not admin)
+    if(userTier<0&&!isAdmin){
+      document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:2rem;background:#000;font-family:Georgia,serif">'+
+        '<div style="font-size:3rem;margin-bottom:1rem;opacity:0.4">⊘</div>'+
+        '<h1 style="font-size:1.5rem;color:#C9A94E;letter-spacing:4px;text-transform:uppercase;font-family:monospace;margin-bottom:1rem">Access Required</h1>'+
+        '<p style="color:#888;font-size:0.95rem;max-width:400px;margin-bottom:0.5rem;font-style:italic">The spiral reveals itself only to those who offer.</p>'+
+        '<p style="color:#666;font-size:0.75rem;margin-bottom:2rem">Minimum offering: $5 to enter Phase 0</p>'+
+        '<a href="https://chapel-pos-v2.vercel.app" style="display:inline-block;padding:14px 35px;border:1px solid rgba(201,169,78,0.4);color:#C9A94E;text-decoration:none;font-size:0.7rem;letter-spacing:3px;text-transform:uppercase;font-family:monospace;border-radius:3px">✦ Make an Offering</a>'+
+        '<a href="https://www.limenhelix.com" style="display:block;margin-top:1.5rem;color:#555;font-size:0.6rem;text-decoration:none;letter-spacing:2px">← Return to Gate</a>'+
+      '</div>';
+      return;
+    }
+
+    // Build access bar
+    var bar=document.createElement('div');
+    bar.className='access-bar';
+    bar.innerHTML='<span class="access-tier" style="color:'+currentTierData.color+'">⟐ '+currentTierData.label+(isAdmin?' (Admin)':'')+'</span>'+
+      '<span class="access-total">'+(isAdmin?'Full Access':'$'+userTotal.toFixed(0)+' offered · '+currentTierData.phases.length+'/11 phases')+'</span>'+
+      (userTier<11&&!isAdmin?'<a href="https://chapel-pos-v2.vercel.app" class="access-upgrade">↑ Upgrade</a>':'');
+    document.body.insertBefore(bar,document.body.firstChild);
+    // Adjust body padding for access bar
+    document.body.style.paddingTop='2.5rem';
+
+    // Lock/unlock phases
+    for(var p=0;p<=10;p++){
+      var section=document.getElementById('phase'+p);
+      if(!section)continue;
+      
+      var unlocked=isAdmin||currentTierData.phases.indexOf(p)!==-1;
+      
+      if(!unlocked){
+        section.classList.add('phase-locked');
+        // Find the tier needed to unlock this phase
+        var neededTier=TIERS.find(function(t){return t.phases.indexOf(p)!==-1});
+        var neededAmount=neededTier?neededTier.min:50000;
+        var remaining=neededAmount-userTotal;
+        
+        var overlay=document.createElement('div');
+        overlay.className='lock-overlay';
+        overlay.innerHTML='<div class="lock-icon">🔒</div>'+
+          '<div class="lock-title">'+TIER_NAMES[p]+'</div>'+
+          '<div class="lock-sub">This phase awakens at the <span style="color:'+neededTier.color+'">'+neededTier.label+'</span> level</div>'+
+          '<div class="lock-tier">Requires $'+neededAmount.toLocaleString()+' total offering'+(remaining>0?' · $'+remaining.toLocaleString()+' more needed':'')+'</div>'+
+          '<a href="https://chapel-pos-v2.vercel.app" class="lock-btn">✦ Offer to Unlock</a>';
+        section.appendChild(overlay);
+      }
+    }
+
+    // Hide phase nav links for locked phases
+    var navLinks=document.querySelectorAll('.phase-nav a');
+    navLinks.forEach(function(link){
+      var href=link.getAttribute('href');
+      if(!href)return;
+      var match=href.match(/phase(\d+)/);
+      if(match){
+        var phaseNum=parseInt(match[1]);
+        if(!isAdmin&&currentTierData.phases.indexOf(phaseNum)===-1){
+          link.style.opacity='0.25';
+          link.style.pointerEvents='none';
+        }
+      }
+    });
+  })();
+  </script>
+-e 
 </body>
 </html>
