@@ -162,6 +162,42 @@ var eyeTarget=0;
 var eyeT=0;
 var eyeClicked=false;
 
+// Pupil tracking
+var pupilX=0,pupilY=0; // -1 to 1 range
+var pupilTargetX=0,pupilTargetY=0;
+var breathPhase=0; // Breathing pulse for closed eye
+
+// Track mouse position relative to eye
+document.addEventListener('mousemove',function(e){
+  var cont=document.getElementById('eye-container');
+  if(!cont)return;
+  var r=cont.getBoundingClientRect();
+  var centerX=r.left+r.width/2;
+  var centerY=r.top+r.height/2;
+  var dx=(e.clientX-centerX)/(window.innerWidth/2);
+  var dy=(e.clientY-centerY)/(window.innerHeight/2);
+  var dist=Math.sqrt(dx*dx+dy*dy);
+  var maxDist=0.7;// limit how far pupil can move
+  if(dist>maxDist){dx=dx/dist*maxDist;dy=dy/dist*maxDist;}
+  pupilTargetX=dx;pupilTargetY=dy;
+});
+
+// Track touch position
+document.addEventListener('touchmove',function(e){
+  if(!e.touches[0])return;
+  var cont=document.getElementById('eye-container');
+  if(!cont)return;
+  var r=cont.getBoundingClientRect();
+  var centerX=r.left+r.width/2;
+  var centerY=r.top+r.height/2;
+  var dx=(e.touches[0].clientX-centerX)/(window.innerWidth/2);
+  var dy=(e.touches[0].clientY-centerY)/(window.innerHeight/2);
+  var dist=Math.sqrt(dx*dx+dy*dy);
+  var maxDist=0.7;
+  if(dist>maxDist){dx=dx/dist*maxDist;dy=dy/dist*maxDist;}
+  pupilTargetX=dx;pupilTargetY=dy;
+},{passive:true});
+
 function resizeEye(){
   var cont=document.getElementById('eye-container');
   ec.width=cont.offsetWidth*2;ec.height=cont.offsetHeight*2;// 2x for retina
@@ -173,9 +209,22 @@ function drawEye(){
   ex.clearRect(0,0,w,h);
   eyeOpen+=(eyeTarget-eyeOpen)*0.05;
   eyeT+=0.015;
+  breathPhase+=0.02;
+  
+  // Smooth pupil tracking
+  pupilX+=(pupilTargetX-pupilX)*0.08;
+  pupilY+=(pupilTargetY-pupilY)*0.08;
+  
+  // Pupil offset in canvas coords — scales with eye openness
+  var maxPupilOffset=w*0.06*eyeOpen;
+  var pxOff=pupilX*maxPupilOffset;
+  var pyOff=pupilY*maxPupilOffset*0.6;// less vertical range
   
   var eyeW=w*0.45;
   var eyeH=h*0.42*eyeOpen;
+  
+  // Breathing pulse on closed slit
+  var breathGlow=0.15+Math.sin(breathPhase)*0.1;
   
   // ALL-SEEING EYE RAYS — visible even when closed, radiating from behind
   if(eyeOpen>0.01||true){
@@ -331,36 +380,38 @@ function drawEye(){
       }
     }
     
-    // LAYER 6: Inner iris golden ring
+    // LAYER 6: Inner iris golden ring — follows gaze
     var irisR=eyeH*0.5;
+    var iCx=cx+pxOff,iCy=cy+pyOff;
     if(irisR>5){
-      ex.beginPath();ex.arc(cx,cy,irisR,0,Math.PI*2);
+      ex.beginPath();ex.arc(iCx,iCy,irisR,0,Math.PI*2);
       ex.strokeStyle='rgba(201,169,78,'+(0.15*eyeOpen)+')';
       ex.lineWidth=2;ex.stroke();
       // Iris threads
       for(var i=0;i<30;i++){
         var a=(i/30)*Math.PI*2+eyeT*0.4;
         ex.beginPath();
-        ex.moveTo(cx+Math.cos(a)*irisR*0.15,cy+Math.sin(a)*irisR*0.15);
-        ex.lineTo(cx+Math.cos(a+Math.sin(eyeT+i)*0.05)*irisR*1.2,cy+Math.sin(a+Math.sin(eyeT+i)*0.05)*irisR*1.2);
+        ex.moveTo(iCx+Math.cos(a)*irisR*0.15,iCy+Math.sin(a)*irisR*0.15);
+        ex.lineTo(iCx+Math.cos(a+Math.sin(eyeT+i)*0.05)*irisR*1.2,iCy+Math.sin(a+Math.sin(eyeT+i)*0.05)*irisR*1.2);
         ex.strokeStyle='rgba(201,169,78,'+(0.06*eyeOpen)+')';
         ex.lineWidth=0.8;ex.stroke();
       }
     }
     
-    // LAYER 7: PUPIL — the forbidden void
+    // LAYER 7: PUPIL — the forbidden void — follows gaze
     var pupilR=Math.max(eyeH*0.16,4);
+    var pCx=cx+pxOff*1.2,pCy=cy+pyOff*1.2;// pupil moves slightly more than iris
     // Blue corona
-    var corona=ex.createRadialGradient(cx,cy,pupilR*0.6,cx,cy,pupilR*2.5);
+    var corona=ex.createRadialGradient(pCx,pCy,pupilR*0.6,pCx,pCy,pupilR*2.5);
     corona.addColorStop(0,'rgba(0,0,5,'+(0.97*eyeOpen)+')');
     corona.addColorStop(0.4,'rgba(15,30,60,'+(0.6*eyeOpen)+')');
     corona.addColorStop(0.7,'rgba(50,100,180,'+(0.25*eyeOpen)+')');
     corona.addColorStop(1,'rgba(100,180,255,'+(0.03*eyeOpen)+')');
-    ex.beginPath();ex.arc(cx,cy,pupilR*2.5,0,Math.PI*2);
+    ex.beginPath();ex.arc(pCx,pCy,pupilR*2.5,0,Math.PI*2);
     ex.fillStyle=corona;ex.fill();
     
     // Void
-    ex.beginPath();ex.arc(cx,cy,pupilR,0,Math.PI*2);
+    ex.beginPath();ex.arc(pCx,pCy,pupilR,0,Math.PI*2);
     ex.fillStyle='rgba(0,0,0,'+(0.99*eyeOpen)+')';ex.fill();
     
     // Micro lightning around pupil
@@ -369,18 +420,18 @@ function drawEye(){
       var flickr=Math.abs(Math.sin(eyeT*6+arc*2.1));
       if(flickr>0.5){
         ex.beginPath();
-        ex.moveTo(cx+Math.cos(aa)*pupilR,cy+Math.sin(aa)*pupilR);
-        ex.lineTo(cx+Math.cos(aa+0.1)*(pupilR*1.8+Math.sin(eyeT*9+arc)*6),cy+Math.sin(aa+0.1)*(pupilR*1.8+Math.sin(eyeT*9+arc)*6));
+        ex.moveTo(pCx+Math.cos(aa)*pupilR,pCy+Math.sin(aa)*pupilR);
+        ex.lineTo(pCx+Math.cos(aa+0.1)*(pupilR*1.8+Math.sin(eyeT*9+arc)*6),pCy+Math.sin(aa+0.1)*(pupilR*1.8+Math.sin(eyeT*9+arc)*6));
         ex.strokeStyle='rgba(130,200,255,'+(0.4*eyeOpen*flickr)+')';
         ex.lineWidth=0.8;ex.shadowColor='rgba(80,170,255,0.9)';ex.shadowBlur=4;
         ex.stroke();ex.shadowBlur=0;
       }
     }
     
-    // Light reflections
-    ex.beginPath();ex.arc(cx-pupilR*0.45,cy-pupilR*0.4,pupilR*0.25,0,Math.PI*2);
+    // Light reflections — offset opposite to gaze for realism
+    ex.beginPath();ex.arc(pCx-pupilR*0.45-pxOff*0.3,pCy-pupilR*0.4-pyOff*0.3,pupilR*0.25,0,Math.PI*2);
     ex.fillStyle='rgba(220,240,255,'+(0.65*eyeOpen)+')';ex.fill();
-    ex.beginPath();ex.arc(cx+pupilR*0.3,cy+pupilR*0.2,pupilR*0.12,0,Math.PI*2);
+    ex.beginPath();ex.arc(pCx+pupilR*0.3-pxOff*0.2,pCy+pupilR*0.2-pyOff*0.2,pupilR*0.12,0,Math.PI*2);
     ex.fillStyle='rgba(255,255,255,'+(0.35*eyeOpen)+')';ex.fill();
     
     ex.restore();
@@ -404,18 +455,45 @@ function drawEye(){
     ex.shadowBlur=0;
   }
   
-  // Closed slit
+  // Closed slit — with breathing pulse
   if(eyeOpen<0.7){
     var la=1-eyeOpen/0.7;
+    // Breathing glow — pulses like something alive behind the lid
+    var bGlow=0.15+Math.sin(breathPhase)*0.12;
+    var bWidth=1.5+Math.sin(breathPhase)*0.8;
+    
+    // Subtle glow behind closed lid
     ex.beginPath();
     ex.moveTo(cx-eyeW,cy);
     ex.bezierCurveTo(cx-eyeW*0.5,cy-eyeW*0.02*la,cx+eyeW*0.5,cy-eyeW*0.02*la,cx+eyeW,cy);
-    ex.strokeStyle='rgba(201,169,78,'+(0.55*la)+')';
-    ex.lineWidth=2.5;
+    ex.strokeStyle='rgba(100,170,255,'+(bGlow*0.3*la)+')';
+    ex.lineWidth=8+Math.sin(breathPhase)*4;
+    ex.shadowColor='rgba(80,140,255,'+(bGlow*0.5*la)+')';
+    ex.shadowBlur=30+Math.sin(breathPhase)*15;
+    ex.stroke();
+    ex.shadowBlur=0;
+    
+    // Main slit line
+    ex.beginPath();
+    ex.moveTo(cx-eyeW,cy);
+    ex.bezierCurveTo(cx-eyeW*0.5,cy-eyeW*0.02*la,cx+eyeW*0.5,cy-eyeW*0.02*la,cx+eyeW,cy);
+    ex.strokeStyle='rgba(201,169,78,'+(0.4*la+bGlow*0.15)+')';
+    ex.lineWidth=2.5+bWidth*0.3;
     ex.shadowColor='rgba(140,210,255,'+(0.35*la)+')';
     ex.shadowBlur=25;
     ex.stroke();
     ex.shadowBlur=0;
+    
+    // Tiny pupil glow peeking through slit — follows cursor even when closed
+    if(eyeOpen<0.15){
+      var peekAlpha=(0.15-eyeOpen)/0.15*la;
+      var peekX=cx+pupilX*eyeW*0.15;
+      ex.beginPath();ex.arc(peekX,cy,3+Math.sin(breathPhase)*1.5,0,Math.PI*2);
+      ex.fillStyle='rgba(130,200,255,'+(peekAlpha*bGlow*2)+')';
+      ex.shadowColor='rgba(100,180,255,'+(peekAlpha*0.5)+')';
+      ex.shadowBlur=12;
+      ex.fill();ex.shadowBlur=0;
+    }
   }
   
   requestAnimationFrame(drawEye);
