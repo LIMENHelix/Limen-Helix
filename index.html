@@ -257,203 +257,170 @@ function drawEye(){
     
     var maxR=Math.max(eyeW,eyeH)*1.4;
     
-    // LAYER 1: Cosmic nebula base
-    var baseGrad=ex.createRadialGradient(cx,cy,0,cx,cy,maxR);
-    baseGrad.addColorStop(0,'rgba(255,255,255,'+(1.0*eyeOpen)+')');
-    baseGrad.addColorStop(0.03,'rgba(220,240,255,'+(0.97*eyeOpen)+')');
-    baseGrad.addColorStop(0.08,'rgba(140,210,255,'+(0.9*eyeOpen)+')');
-    baseGrad.addColorStop(0.18,'rgba(80,140,255,'+(0.75*eyeOpen)+')');
-    baseGrad.addColorStop(0.3,'rgba(180,100,220,'+(0.5*eyeOpen)+')');
-    baseGrad.addColorStop(0.45,'rgba(220,160,60,'+(0.35*eyeOpen)+')');
-    baseGrad.addColorStop(0.6,'rgba(180,40,80,'+(0.2*eyeOpen)+')');
-    baseGrad.addColorStop(0.8,'rgba(40,15,80,'+(0.15*eyeOpen)+')');
-    baseGrad.addColorStop(1,'rgba(5,2,15,'+(0.05*eyeOpen)+')');
-    ex.fillStyle=baseGrad;
+    // ═══ ANATOMICAL EYEBALL ═══
+    
+    // SCLERA — white of the eye with subtle pink/cream tone
+    var scleraGrad=ex.createRadialGradient(cx+pxOff*0.3,cy+pyOff*0.3,0,cx,cy,maxR);
+    scleraGrad.addColorStop(0,'rgba(245,238,230,'+(0.98*eyeOpen)+')');
+    scleraGrad.addColorStop(0.5,'rgba(240,232,222,'+(0.95*eyeOpen)+')');
+    scleraGrad.addColorStop(0.75,'rgba(225,215,205,'+(0.9*eyeOpen)+')');
+    scleraGrad.addColorStop(1,'rgba(180,165,155,'+(0.8*eyeOpen)+')');
+    ex.fillStyle=scleraGrad;
     ex.fillRect(0,0,w,h);
     
-    // LAYER 2: Asymmetric nebula clouds
-    for(var neb=0;neb<6;neb++){
-      var nx=cx+Math.sin(neb*2.1+eyeT*0.3)*maxR*0.4;
-      var ny=cy+Math.cos(neb*1.7+eyeT*0.2)*maxR*0.3;
-      var nr=maxR*(0.15+neb*0.06);
-      var nebGrad=ex.createRadialGradient(nx,ny,0,nx,ny,nr);
-      var nebColors=[
-        ['rgba(100,180,255,','rgba(60,120,200,'],
-        ['rgba(200,130,255,','rgba(140,60,180,'],
-        ['rgba(255,180,120,','rgba(200,120,60,'],
-        ['rgba(120,255,200,','rgba(60,180,140,'],
-        ['rgba(255,130,180,','rgba(200,80,130,'],
-        ['rgba(180,220,255,','rgba(120,160,200,']
-      ][neb];
-      nebGrad.addColorStop(0,nebColors[0]+(0.12*eyeOpen)+')');
-      nebGrad.addColorStop(0.5,nebColors[1]+(0.06*eyeOpen)+')');
-      nebGrad.addColorStop(1,'rgba(0,0,0,0)');
-      ex.fillStyle=nebGrad;
-      ex.fillRect(0,0,w,h);
-    }
-    
-    // LAYER 3: 80 crystalline fractal shards — golden angle distribution
-    var seed=137.508;
-    for(var shard=0;shard<80;shard++){
-      var baseA=shard*seed*(Math.PI/180)+eyeT*0.12;
-      var shardLen=maxR*(0.1+((shard*17+11)%29)/29*0.7);
-      baseA+=Math.sin(shard*2.3+eyeT*0.6)*0.5;
-      
+    // BLOOD VESSELS — thin red/pink lines across sclera
+    for(var bv=0;bv<18;bv++){
+      var bvAngle=(bv/18)*Math.PI*2+bv*0.3;
+      var bvStartR=maxR*0.55;
+      var bvSx=cx+Math.cos(bvAngle)*bvStartR;
+      var bvSy=cy+Math.sin(bvAngle)*bvStartR;
       ex.beginPath();
-      var pts=[];
-      ex.moveTo(cx,cy);
-      var segs=3+shard%6;
-      for(var seg=0;seg<segs;seg++){
-        var ratio=(seg+1)/segs;
-        var drift=Math.sin(eyeT*1.2+shard*1.9+seg*3.7)*(25-ratio*20);
-        var nx=cx+Math.cos(baseA)*(shardLen*ratio)+Math.cos(baseA+1.57)*drift;
-        var ny=cy+Math.sin(baseA)*(shardLen*ratio)+Math.sin(baseA+1.57)*drift;
-        ex.lineTo(nx,ny);
-        pts.push({x:nx,y:ny});
+      ex.moveTo(bvSx,bvSy);
+      var bvX=bvSx,bvY=bvSy;
+      var bvSegs=4+bv%3;
+      for(var bvs=0;bvs<bvSegs;bvs++){
+        var toward=Math.atan2(cy-bvY,cx-bvX);
+        bvX+=Math.cos(toward+Math.sin(bv*2.7+bvs*1.8)*0.6)*maxR*0.12;
+        bvY+=Math.sin(toward+Math.cos(bv*1.9+bvs*2.3)*0.5)*maxR*0.1;
+        ex.lineTo(bvX,bvY);
       }
-      
-      var colors=[
-        'rgba(180,235,255,','rgba(255,225,140,','rgba(210,150,255,',
-        'rgba(255,170,200,','rgba(140,255,220,','rgba(255,255,255,',
-        'rgba(100,200,255,','rgba(255,200,100,'
-      ];
-      var alpha=(0.06+Math.sin(eyeT*1.8+shard*0.7)*0.04)*eyeOpen;
-      ex.strokeStyle=colors[(shard*7)%colors.length]+alpha+')';
-      ex.lineWidth=0.8+((shard*3)%5)*0.3;
-      ex.shadowColor=ex.strokeStyle.replace(alpha+'',Math.min(alpha*4,0.4)+'');
-      ex.shadowBlur=6;
+      var bvAlpha=(0.08+Math.sin(bv*1.7)*0.04)*eyeOpen;
+      ex.strokeStyle='rgba(180,60,60,'+bvAlpha+')';
+      ex.lineWidth=0.5+Math.sin(bv*3.1)*0.3;
       ex.stroke();
-      ex.shadowBlur=0;
-      
-      // Branches
-      if(shard%3===0&&pts.length>1){
-        var bp=pts[Math.floor(pts.length/2)];
-        var brA=baseA+((shard%2===0)?0.7:-0.6)+Math.sin(eyeT+shard)*0.4;
-        var brL=shardLen*0.3;
-        ex.beginPath();ex.moveTo(bp.x,bp.y);
-        ex.lineTo(bp.x+Math.cos(brA)*brL+Math.sin(eyeT*2+shard)*6,bp.y+Math.sin(brA)*brL+Math.cos(eyeT*2+shard)*6);
-        ex.strokeStyle='rgba(180,220,255,'+(0.04*eyeOpen)+')';
-        ex.lineWidth=0.6;ex.stroke();
-      }
-      
-      // Crystal tip sparks
-      if(shard%5===0&&pts.length>0){
-        var tip=pts[pts.length-1];
-        var tp=Math.abs(Math.sin(eyeT*2.5+shard*1.3));
-        ex.beginPath();ex.arc(tip.x,tip.y,1+tp*3,0,Math.PI*2);
-        ex.fillStyle='rgba(200,240,255,'+(0.35*eyeOpen*tp)+')';
-        ex.shadowColor='rgba(150,220,255,0.8)';ex.shadowBlur=10;
-        ex.fill();ex.shadowBlur=0;
+      // Tiny branch
+      if(bv%3===0&&bvSegs>2){
+        ex.beginPath();ex.moveTo(bvX,bvY);
+        ex.lineTo(bvX+Math.cos(bvAngle+0.8)*maxR*0.06,bvY+Math.sin(bvAngle+0.8)*maxR*0.06);
+        ex.strokeStyle='rgba(190,80,80,'+(0.05*eyeOpen)+')';
+        ex.lineWidth=0.3;ex.stroke();
       }
     }
     
-    // LAYER 4: Electric arcs crackling across
-    for(var e=0;e<10;e++){
-      var ea=eyeT*1.5+e*seed*2*(Math.PI/180);
-      var er=maxR*(0.2+Math.sin(eyeT*0.8+e)*0.2);
-      ex.beginPath();
-      var ax=cx+Math.cos(ea)*er,ay=cy+Math.sin(ea)*er;
-      ex.moveTo(ax,ay);
-      for(var zag=0;zag<5;zag++){
-        ax+=Math.sin(eyeT*10+e*4+zag*3)*18;
-        ay+=Math.cos(eyeT*8+e*3+zag*4)*14;
-        ex.lineTo(ax,ay);
-      }
-      ex.strokeStyle='rgba(100,190,255,'+(0.1*eyeOpen*Math.abs(Math.sin(eyeT*4+e)))+')';
-      ex.lineWidth=1.2;ex.shadowColor='rgba(80,170,255,0.7)';ex.shadowBlur=8;
-      ex.stroke();ex.shadowBlur=0;
-    }
-    
-    // LAYER 5: 35 floating knowledge particles — multi-color, multi-size
-    for(var sp=0;sp<35;sp++){
-      var sa=eyeT*0.35+sp*0.251+Math.sin(sp*1.3)*0.8;
-      var sr=maxR*(0.06+((sp*13)%30)/30*0.8);
-      var sx=cx+Math.cos(sa)*sr+Math.sin(eyeT*1.9+sp*1.1)*15;
-      var sy=cy+Math.sin(sa)*sr+Math.cos(eyeT*1.4+sp*0.8)*15;
-      var ss=0.4+((sp*7)%6)*0.5+Math.sin(eyeT*2.5+sp)*0.8;
-      if(ss>0.3){
-        ex.beginPath();ex.arc(sx,sy,ss,0,Math.PI*2);
-        var spColors=['rgba(200,240,255,','rgba(255,225,160,','rgba(210,160,255,','rgba(160,255,220,','rgba(255,180,200,'];
-        ex.fillStyle=spColors[sp%5]+(0.45*eyeOpen*Math.abs(Math.sin(eyeT*2.5+sp)))+')';
-        ex.shadowColor='rgba(180,220,255,0.5)';ex.shadowBlur=5;
-        ex.fill();ex.shadowBlur=0;
-      }
-    }
-    
-    // LAYER 6: Inner iris golden ring — follows gaze
-    var irisR=eyeH*0.5;
+    // IRIS — large colored ring with fiber texture
+    var irisR=eyeH*0.65;
     var iCx=cx+pxOff,iCy=cy+pyOff;
     if(irisR>5){
+      // Iris base — deep amber/gold with depth
+      var irisGrad=ex.createRadialGradient(iCx,iCy,irisR*0.2,iCx,iCy,irisR);
+      irisGrad.addColorStop(0,'rgba(60,30,10,'+(0.98*eyeOpen)+')');
+      irisGrad.addColorStop(0.2,'rgba(120,70,20,'+(0.95*eyeOpen)+')');
+      irisGrad.addColorStop(0.45,'rgba(160,110,30,'+(0.9*eyeOpen)+')');
+      irisGrad.addColorStop(0.65,'rgba(180,140,50,'+(0.85*eyeOpen)+')');
+      irisGrad.addColorStop(0.8,'rgba(140,100,35,'+(0.9*eyeOpen)+')');
+      irisGrad.addColorStop(0.95,'rgba(80,50,15,'+(0.95*eyeOpen)+')');
+      irisGrad.addColorStop(1,'rgba(40,25,10,'+(0.98*eyeOpen)+')');
       ex.beginPath();ex.arc(iCx,iCy,irisR,0,Math.PI*2);
-      ex.strokeStyle='rgba(201,169,78,'+(0.15*eyeOpen)+')';
-      ex.lineWidth=2;ex.stroke();
-      // Iris threads
-      for(var i=0;i<30;i++){
-        var a=(i/30)*Math.PI*2+eyeT*0.4;
+      ex.fillStyle=irisGrad;ex.fill();
+      
+      // Iris fiber striations — radial lines like a real iris
+      for(var fib=0;fib<90;fib++){
+        var fa=(fib/90)*Math.PI*2+Math.sin(fib*0.7)*0.03;
+        var fibInner=irisR*0.22;
+        var fibOuter=irisR*(0.85+Math.sin(fib*3.7+eyeT*0.5)*0.12);
         ex.beginPath();
-        ex.moveTo(iCx+Math.cos(a)*irisR*0.15,iCy+Math.sin(a)*irisR*0.15);
-        ex.lineTo(iCx+Math.cos(a+Math.sin(eyeT+i)*0.05)*irisR*1.2,iCy+Math.sin(a+Math.sin(eyeT+i)*0.05)*irisR*1.2);
-        ex.strokeStyle='rgba(201,169,78,'+(0.06*eyeOpen)+')';
-        ex.lineWidth=0.8;ex.stroke();
+        ex.moveTo(iCx+Math.cos(fa)*fibInner,iCy+Math.sin(fa)*fibInner);
+        // Slight curve to fibers
+        var fibMid=irisR*0.55;
+        var drift=Math.sin(fib*2.1)*irisR*0.02;
+        ex.quadraticCurveTo(
+          iCx+Math.cos(fa+0.01)*fibMid+drift,iCy+Math.sin(fa+0.01)*fibMid+drift,
+          iCx+Math.cos(fa)*fibOuter,iCy+Math.sin(fa)*fibOuter
+        );
+        // Vary color — some gold, some dark, some amber
+        var fibMod=fib%5;
+        if(fibMod===0) ex.strokeStyle='rgba(200,160,60,'+(0.25*eyeOpen)+')';
+        else if(fibMod===1) ex.strokeStyle='rgba(100,60,15,'+(0.3*eyeOpen)+')';
+        else if(fibMod===2) ex.strokeStyle='rgba(180,130,40,'+(0.2*eyeOpen)+')';
+        else if(fibMod===3) ex.strokeStyle='rgba(80,45,10,'+(0.35*eyeOpen)+')';
+        else ex.strokeStyle='rgba(220,180,80,'+(0.15*eyeOpen)+')';
+        ex.lineWidth=0.6+Math.sin(fib*1.3)*0.3;
+        ex.stroke();
       }
+      
+      // Iris outer ring — limbal ring (dark edge)
+      ex.beginPath();ex.arc(iCx,iCy,irisR,0,Math.PI*2);
+      ex.strokeStyle='rgba(30,15,5,'+(0.7*eyeOpen)+')';
+      ex.lineWidth=irisR*0.08;ex.stroke();
+      
+      // Iris inner ring — collarette
+      ex.beginPath();ex.arc(iCx,iCy,irisR*0.42,0,Math.PI*2);
+      ex.strokeStyle='rgba(180,140,60,'+(0.2*eyeOpen)+')';
+      ex.lineWidth=1.5;ex.stroke();
+      
+      // Supernatural overlay: faint golden glow inside iris
+      var superGlow=ex.createRadialGradient(iCx,iCy,irisR*0.1,iCx,iCy,irisR*0.7);
+      superGlow.addColorStop(0,'rgba(201,169,78,'+(0.08*eyeOpen*Math.abs(Math.sin(eyeT*0.8)))+')');
+      superGlow.addColorStop(1,'rgba(201,169,78,0)');
+      ex.beginPath();ex.arc(iCx,iCy,irisR*0.7,0,Math.PI*2);
+      ex.fillStyle=superGlow;ex.fill();
     }
     
-    // LAYER 7: PUPIL — the forbidden void — follows gaze
-    var pupilR=Math.max(eyeH*0.16,4);
-    var pCx=cx+pxOff*1.2,pCy=cy+pyOff*1.2;// pupil moves slightly more than iris
-    // Blue corona
-    var corona=ex.createRadialGradient(pCx,pCy,pupilR*0.6,pCx,pCy,pupilR*2.5);
-    corona.addColorStop(0,'rgba(0,0,5,'+(0.97*eyeOpen)+')');
-    corona.addColorStop(0.4,'rgba(15,30,60,'+(0.6*eyeOpen)+')');
-    corona.addColorStop(0.7,'rgba(50,100,180,'+(0.25*eyeOpen)+')');
-    corona.addColorStop(1,'rgba(100,180,255,'+(0.03*eyeOpen)+')');
-    ex.beginPath();ex.arc(pCx,pCy,pupilR*2.5,0,Math.PI*2);
+    // PUPIL — deep black void with blue corona
+    var pupilR=Math.max(irisR*0.28,4);
+    var pCx=cx+pxOff*1.2,pCy=cy+pyOff*1.2;
+    
+    // Pupil glow — supernatural blue corona barely visible
+    var corona=ex.createRadialGradient(pCx,pCy,pupilR*0.8,pCx,pCy,pupilR*2);
+    corona.addColorStop(0,'rgba(0,0,0,'+(0.99*eyeOpen)+')');
+    corona.addColorStop(0.5,'rgba(10,20,40,'+(0.4*eyeOpen)+')');
+    corona.addColorStop(0.8,'rgba(40,80,140,'+(0.1*eyeOpen)+')');
+    corona.addColorStop(1,'rgba(80,140,200,0)');
+    ex.beginPath();ex.arc(pCx,pCy,pupilR*2,0,Math.PI*2);
     ex.fillStyle=corona;ex.fill();
     
-    // Void
+    // The void itself
     ex.beginPath();ex.arc(pCx,pCy,pupilR,0,Math.PI*2);
-    ex.fillStyle='rgba(0,0,0,'+(0.99*eyeOpen)+')';ex.fill();
+    ex.fillStyle='rgba(0,0,0,'+(0.995*eyeOpen)+')';ex.fill();
     
-    // Micro lightning around pupil
-    for(var arc=0;arc<16;arc++){
-      var aa=(arc/16)*Math.PI*2+eyeT*2.5;
+    // Micro lightning — very subtle, just hints of supernatural
+    for(var arc=0;arc<12;arc++){
+      var aa=(arc/12)*Math.PI*2+eyeT*2.5;
       var flickr=Math.abs(Math.sin(eyeT*6+arc*2.1));
-      if(flickr>0.5){
+      if(flickr>0.65){
         ex.beginPath();
         ex.moveTo(pCx+Math.cos(aa)*pupilR,pCy+Math.sin(aa)*pupilR);
-        ex.lineTo(pCx+Math.cos(aa+0.1)*(pupilR*1.8+Math.sin(eyeT*9+arc)*6),pCy+Math.sin(aa+0.1)*(pupilR*1.8+Math.sin(eyeT*9+arc)*6));
-        ex.strokeStyle='rgba(130,200,255,'+(0.4*eyeOpen*flickr)+')';
-        ex.lineWidth=0.8;ex.shadowColor='rgba(80,170,255,0.9)';ex.shadowBlur=4;
+        ex.lineTo(pCx+Math.cos(aa+0.08)*(pupilR*1.5+Math.sin(eyeT*9+arc)*4),pCy+Math.sin(aa+0.08)*(pupilR*1.5+Math.sin(eyeT*9+arc)*4));
+        ex.strokeStyle='rgba(100,170,230,'+(0.2*eyeOpen*flickr)+')';
+        ex.lineWidth=0.6;ex.shadowColor='rgba(80,150,220,0.5)';ex.shadowBlur=3;
         ex.stroke();ex.shadowBlur=0;
       }
     }
     
-    // Light reflections — offset opposite to gaze for realism
-    ex.beginPath();ex.arc(pCx-pupilR*0.45-pxOff*0.3,pCy-pupilR*0.4-pyOff*0.3,pupilR*0.25,0,Math.PI*2);
-    ex.fillStyle='rgba(220,240,255,'+(0.65*eyeOpen)+')';ex.fill();
-    ex.beginPath();ex.arc(pCx+pupilR*0.3-pxOff*0.2,pCy+pupilR*0.2-pyOff*0.2,pupilR*0.12,0,Math.PI*2);
-    ex.fillStyle='rgba(255,255,255,'+(0.35*eyeOpen)+')';ex.fill();
+    // Light reflections — classic eyeball catchlights
+    // Main reflection (window shape)
+    ex.beginPath();ex.arc(pCx-pupilR*0.6-pxOff*0.3,pCy-pupilR*0.5-pyOff*0.3,pupilR*0.35,0,Math.PI*2);
+    ex.fillStyle='rgba(255,255,255,'+(0.8*eyeOpen)+')';ex.fill();
+    // Secondary smaller reflection
+    ex.beginPath();ex.arc(pCx+pupilR*0.4-pxOff*0.2,pCy+pupilR*0.3-pyOff*0.2,pupilR*0.15,0,Math.PI*2);
+    ex.fillStyle='rgba(255,255,255,'+(0.45*eyeOpen)+')';ex.fill();
+    // Edge highlight on iris
+    ex.beginPath();ex.arc(iCx-irisR*0.3-pxOff*0.15,iCy-irisR*0.3-pyOff*0.15,irisR*0.15,0,Math.PI*2);
+    ex.fillStyle='rgba(255,255,240,'+(0.12*eyeOpen)+')';ex.fill();
+    }
     
     ex.restore();
     
-    // Eye outline — double glow
+    // Eyelid edge — anatomical skin tone with hint of supernatural
     ex.beginPath();
     ex.moveTo(cx-eyeW,cy);
     ex.bezierCurveTo(cx-eyeW*0.55,cy-eyeH*1.1,cx+eyeW*0.55,cy-eyeH*1.1,cx+eyeW,cy);
     ex.bezierCurveTo(cx+eyeW*0.55,cy+eyeH*1.1,cx-eyeW*0.55,cy+eyeH*1.1,cx-eyeW,cy);
     ex.closePath();
-    ex.strokeStyle='rgba(201,169,78,'+(0.5+eyeOpen*0.5)+')';
-    ex.lineWidth=2.5+eyeOpen*2;
-    ex.shadowColor='rgba(140,210,255,'+(0.7*eyeOpen)+')';
-    ex.shadowBlur=50+eyeOpen*60;
+    // Skin-toned lid edge
+    ex.strokeStyle='rgba(80,55,35,'+(0.6+eyeOpen*0.3)+')';
+    ex.lineWidth=3+eyeOpen*2;
+    // Subtle golden glow — the supernatural leaking through
+    ex.shadowColor='rgba(201,169,78,'+(0.3*eyeOpen)+')';
+    ex.shadowBlur=20+eyeOpen*30;
     ex.stroke();
-    ex.strokeStyle='rgba(255,230,170,'+(0.25*eyeOpen)+')';
-    ex.lineWidth=1;
-    ex.shadowColor='rgba(255,210,120,'+(0.5*eyeOpen)+')';
-    ex.shadowBlur=25;
+    // Inner lash line
+    ex.strokeStyle='rgba(30,20,10,'+(0.7*eyeOpen)+')';
+    ex.lineWidth=1.5;
+    ex.shadowColor='rgba(0,0,0,'+(0.4*eyeOpen)+')';
+    ex.shadowBlur=8;
     ex.stroke();
     ex.shadowBlur=0;
-  }
   
   // Closed slit — with breathing pulse
   if(eyeOpen<0.7){
