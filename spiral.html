@@ -452,14 +452,14 @@ var tn=DMN_NODES[tappedNode];
 var tnInfo=NODE_INFO[tn.name];
 if(tnInfo){
 var isMobile=W<600;
-var fontSize=isMobile?10:13;
-var titleSize=isMobile?14:18;
-var popSize=isMobile?9:12;
-var lineH=isMobile?16:22;
-var padding=isMobile?10:14;
+var fontSize=isMobile?13:14;
+var titleSize=isMobile?18:20;
+var popSize=isMobile?12:13;
+var lineH=isMobile?22:24;
+var padding=isMobile?14:16;
 var popLines=tnInfo.pop.split('\n');
 var hasPhase7=phase===7&&tnInfo.phase7;
-var panelW=Math.min(isMobile?W*0.78:380,W*0.55);
+var panelW=Math.min(isMobile?W*0.88:420,W*0.6);
 
 // ── PASS 1: Measure actual content height ──
 var measuredH=0;
@@ -592,7 +592,7 @@ yOff+=lineH;
 
 // Phase 7 warning
 if(hasPhase7){
-ctx.font='bold '+(isMobile?11:14)+'px monospace';
+ctx.font='bold '+(isMobile?14:16)+'px monospace';
 ctx.fillStyle='rgba(255,60,60,'+(pAlpha*0.85)+')';
 ctx.fillText('\u26a0 '+tnInfo.phase7,panelX,yOff+12);
 }
