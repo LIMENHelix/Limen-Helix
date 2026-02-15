@@ -410,14 +410,7 @@ ctx.beginPath();ctx.moveTo(W-8-bL,H-8);ctx.lineTo(W-8,H-8);ctx.lineTo(W-8,H-8-bL
 
 // === USER PROXIMITY — nodes react to cursor/finger ===
 hoveredNode=-1;
-if(mouseX>0&&mouseY>0){
-// Draw user presence indicator — faint ripple at cursor
-var userG=ctx.createRadialGradient(mouseX,mouseY,0,mouseX,mouseY,60);
-userG.addColorStop(0,'rgba(255,255,255,0.03)');
-userG.addColorStop(0.5,'rgba('+aRGB+',0.02)');
-userG.addColorStop(1,'rgba(0,0,0,0)');
-ctx.fillStyle=userG;ctx.beginPath();ctx.arc(mouseX,mouseY,60,0,Math.PI*2);ctx.fill();
-
+if(mouseX>0&&mouseY>0&&t%3===0){// only check every 3rd frame
 // Check proximity to each node
 for(var ui=0;ui<DMN_NODES.length;ui++){
 var un=DMN_NODES[ui];
@@ -429,52 +422,16 @@ if(udist<proxThresh){
 var proxStrength=1-udist/proxThresh;
 hoveredNode=ui;
 
-// Node REACTS — brightens, pulses harder
-var reactG=ctx.createRadialGradient(unx,uny,0,unx,uny,30+proxStrength*40);
-reactG.addColorStop(0,'rgba(255,255,255,'+(proxStrength*0.2)+')');
-reactG.addColorStop(0.4,'rgba('+aRGB+','+(proxStrength*0.15)+')');
+// Node glow on hover
+var reactG=ctx.createRadialGradient(unx,uny,0,unx,uny,30+proxStrength*30);
+reactG.addColorStop(0,'rgba(255,255,255,'+(proxStrength*0.15)+')');
 reactG.addColorStop(1,'rgba(0,0,0,0)');
-ctx.fillStyle=reactG;ctx.beginPath();ctx.arc(unx,uny,30+proxStrength*40,0,Math.PI*2);ctx.fill();
-
-// Dendrites REACH toward the cursor
-var reachAngle=Math.atan2(mouseY-uny,mouseX-unx);
-ctx.beginPath();ctx.moveTo(unx,uny);
-var rMid=udist*0.5;
-ctx.quadraticCurveTo(unx+Math.cos(reachAngle)*rMid,uny+Math.sin(reachAngle)*rMid,mouseX,mouseY);
-ctx.strokeStyle='rgba('+aRGB+','+(proxStrength*0.1)+')';ctx.lineWidth=0.8;ctx.stroke();
-// Tiny sparks along the reaching dendrite
-for(var rk=0;rk<5;rk++){
-var rkP=rk/5;
-var rkX=unx+(mouseX-unx)*rkP+Math.sin(t*0.01+rk)*4;
-var rkY=uny+(mouseY-uny)*rkP+Math.cos(t*0.01+rk)*4;
-if(Math.random()<proxStrength*0.3){
-ctx.beginPath();ctx.arc(rkX,rkY,1.5,0,Math.PI*2);
-ctx.fillStyle='rgba(255,255,255,'+(proxStrength*0.4)+')';ctx.fill();
-}}
-
-// Highlight connected fiber tracts
-for(var hc=0;hc<DMN_CONNECTIONS.length;hc++){
-var hconn=DMN_CONNECTIONS[hc];
-if(hconn[0]===ui||hconn[1]===ui){
-var hn1=DMN_NODES[hconn[0]],hn2=DMN_NODES[hconn[1]];
-var hx1=hn1.x*W,hy1=hn1.y*H,hx2=hn2.x*W,hy2=hn2.y*H;
-var hmX=(hx1+hx2)/2+Math.sin(hc*2.3)*30;
-var hmY=(hy1+hy2)/2+Math.cos(hc*1.7)*20;
-ctx.beginPath();ctx.moveTo(hx1,hy1);ctx.quadraticCurveTo(hmX,hmY,hx2,hy2);
-ctx.strokeStyle='rgba('+aRGB+','+(proxStrength*0.25)+')';ctx.lineWidth=2;ctx.stroke();
-}}
-
-// Fire extra APs from proximity
-if(Math.random()<proxStrength*0.08){
-for(var pfc=0;pfc<DMN_CONNECTIONS.length;pfc++){
-if((DMN_CONNECTIONS[pfc][0]===ui||DMN_CONNECTIONS[pfc][1]===ui)&&Math.random()<0.2){
-fireAP(pfc,p);break;}}}
+ctx.fillStyle=reactG;ctx.beginPath();ctx.arc(unx,uny,30+proxStrength*30,0,Math.PI*2);ctx.fill();
 
 // Show node name on hover
 ctx.font='14px monospace';ctx.textAlign='center';
 ctx.fillStyle='rgba('+aRGB+','+(proxStrength*0.7)+')';
 ctx.fillText(un.name,unx,uny-35-proxStrength*10);
-// Show function
 ctx.font='11px monospace';
 ctx.fillStyle='rgba('+aRGB+','+(proxStrength*0.45)+')';
 var info=NODE_INFO[un.name];
