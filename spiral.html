@@ -484,7 +484,7 @@ break;// only one hovered node
 
 // === TAPPED NODE INFO PANEL ===
 if(tappedNode>=0&&tapFade>0){
-tapFade-=0.003;
+//tapFade stays until dismissed
 if(tapFade<=0){tappedNode=-1;tapFade=0;}
 else{
 var tn=DMN_NODES[tappedNode];
@@ -636,6 +636,12 @@ ctx.fillStyle='rgba(255,60,60,'+(pAlpha*0.85)+')';
 ctx.fillText('\u26a0 '+tnInfo.phase7,panelX,yOff+12);
 }
 
+// Close hint ✕
+ctx.font=(isMobile?12:13)+'px monospace';ctx.textAlign='right';
+ctx.fillStyle='rgba('+aRGB+','+(pAlpha*0.35)+')';
+ctx.fillText('\u2715',panelX+panelW+6,panelY+12);
+ctx.textAlign='left';
+
 // Pulse ring
 var pulseExpand=1-tapFade;
 ctx.beginPath();ctx.arc(tn.x*W,tn.y*H,20+pulseExpand*80,0,Math.PI*2);
@@ -674,7 +680,7 @@ if(immersiveMode){
 for(var ni=0;ni<DMN_NODES.length;ni++){
 var nd=DMN_NODES[ni],ndx=nd.x*W,ndy=nd.y*H;
 var dist=Math.sqrt((mouseX-ndx)*(mouseX-ndx)+(mouseY-ndy)*(mouseY-ndy));
-if(dist<W*0.06){tappedNode=ni;tapFade=1;
+if(dist<W*0.06){if(tappedNode===ni){tappedNode=-1;tapFade=0;return;}tappedNode=ni;tapFade=1;
 // Fire action potentials from tapped node
 for(var fc=0;fc<DMN_CONNECTIONS.length;fc++){
 if(DMN_CONNECTIONS[fc][0]===ni||DMN_CONNECTIONS[fc][1]===ni)fireAP(fc,PH[phase]);}
@@ -711,7 +717,7 @@ var tx=e.changedTouches[0].clientX,ty=e.changedTouches[0].clientY;
 for(var ni=0;ni<DMN_NODES.length;ni++){
 var nd=DMN_NODES[ni],ndx=nd.x*W,ndy=nd.y*H;
 var dist2=Math.sqrt((tx-ndx)*(tx-ndx)+(ty-ndy)*(ty-ndy));
-if(dist2<W*0.08){tappedNode=ni;tapFade=1;
+if(dist2<W*0.08){if(tappedNode===ni){tappedNode=-1;tapFade=0;return;}tappedNode=ni;tapFade=1;
 for(var fc=0;fc<DMN_CONNECTIONS.length;fc++){
 if(DMN_CONNECTIONS[fc][0]===ni||DMN_CONNECTIONS[fc][1]===ni)fireAP(fc,PH[phase]);}
 break;}}

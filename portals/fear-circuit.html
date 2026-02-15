@@ -313,7 +313,7 @@ function draw(){
   
   // Tapped node info
   if(tappedNode>=0&&tapFade>0){
-    tapFade-=0.004;
+    //tapFade stays until dismissed
     if(tapFade<=0){tappedNode=-1;tapFade=0;}
     else{
       var tn2=NODES[tappedNode];
@@ -337,10 +337,15 @@ function draw(){
       ctx.fillText(tn2.role.substring(0,50),panelX,panelY+38);
       if(tn2.role.length>50)ctx.fillText(tn2.role.substring(50),panelX,panelY+55);
       
-      // Pulse ring
-      var pe=1-tapFade;
-      ctx.beginPath();ctx.arc(tn2.x*W,tn2.y*H,15+pe*60,0,Math.PI*2);
-      ctx.strokeStyle='rgba(255,255,255,'+(tapFade*0.12)+')';ctx.lineWidth=1.5;ctx.stroke();
+      // Close hint ✕
+      ctx.font=(isMob?12:13)+'px monospace';ctx.textAlign='right';
+      ctx.fillStyle='rgba('+aRGB+','+(pAlpha*0.35)+')';
+      ctx.fillText('\u2715',panelX+panelW+6,panelY+12);
+      ctx.textAlign='left';
+      
+      // Steady ring (no fade)
+      ctx.beginPath();ctx.arc(tn2.x*W,tn2.y*H,18,0,Math.PI*2);
+      ctx.strokeStyle='rgba(255,255,255,0.12)';ctx.lineWidth=1.5;ctx.stroke();
     }
   }
   
@@ -407,6 +412,7 @@ canvas.addEventListener('click',function(e){
   for(var ni=0;ni<NODES.length;ni++){
     var nd=NODES[ni],dx2=mouseX-nd.x*W,dy2=mouseY-nd.y*H;
     if(Math.sqrt(dx2*dx2+dy2*dy2)<W*0.06){
+      if(tappedNode===ni){tappedNode=-1;tapFade=0;return;}
       tappedNode=ni;tapFade=1;
       for(var fc=0;fc<CONNECTIONS.length;fc++){
         if(CONNECTIONS[fc][0]===ni)fireAP(fc);
@@ -432,6 +438,7 @@ canvas.addEventListener('touchend',function(e){
   for(var ni=0;ni<NODES.length;ni++){
     var nd=NODES[ni],dx2=tx-nd.x*W,dy2=ty-nd.y*H;
     if(Math.sqrt(dx2*dx2+dy2*dy2)<W*0.08){
+      if(tappedNode===ni){tappedNode=-1;tapFade=0;return;}
       tappedNode=ni;tapFade=1;
       for(var fc=0;fc<CONNECTIONS.length;fc++){
         if(CONNECTIONS[fc][0]===ni)fireAP(fc);
