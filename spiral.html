@@ -1047,6 +1047,7 @@ var HOTSPOT_DATA={
 ],
 3:[
   {trigger:"thalamus",label:"THREAT RELAY",angle:Math.PI*0.5,dist:0.7,
+    portal:"portals/fear-circuit.html",
     teaser:{title:"LeDoux 2000 · Low Road",line:"The thalamus sends threat data to your amygdala 12ms before your cortex knows"},
     mid:{study:"<a href='https://doi.org/10.1146/annurev.neuro.23.1.155' target='_blank' style='color:rgba(120,180,220,0.7)'>LeDoux JE (2000). Emotion circuits in the brain. Annu Rev Neurosci 23:155-184.</a>\n\n<a href='https://doi.org/10.1016/j.psyneuen.2005.03.014' target='_blank' style='color:rgba(120,180,220,0.7)'>Öhman A (2005). The amygdala in human fear. Psychoneuroendocrinology 30(10):953-958.</a>",protocol:"TRIGGER MAP: Identify 3 situations where you react before you think. That's the thalamo-amygdala low road. Write: trigger → body reaction → time to cortical awareness."},
     high:{protocol:"EXPOSURE PROTOCOL (CONTROLLED):\n1. Rate target fear 1-10 (Subjective Units of Distress)\n2. Begin at 3/10 intensity\n3. Hold exposure 90 seconds (extinction learning window)\n4. Maintain breath regulation (Phase 4 prerequisite)\n5. Increase by 1 unit per session\n6. Never exceed 7/10 without clinical support\n\nRef: Foa EB & Kozak MJ (1986). Emotional processing of fear. Psychological Bulletin",direction:"Phase 3 material feeds directly into Phase 8 (CONSCIENCE) — the fears you face here become the empathic data for moral recalibration"},
@@ -1158,6 +1159,13 @@ function closeDrawer(){
 }
 
 function openDrawer(hotspotData){
+  // Portal hotspot — navigate to sub-world instead of drawer
+  if(hotspotData.portal){
+    document.body.style.transition='opacity 1.5s';
+    document.body.style.opacity='0';
+    setTimeout(function(){window.location.href=hotspotData.portal},1600);
+    return;
+  }
   var ct=getContentTier();
   var d=document.getElementById('drawer-content');
   var html='';
@@ -1557,11 +1565,16 @@ function drawImmersive(ctx,p,W,H,t){
     ctx.fillStyle='rgba(201,169,78,'+(hsAlpha*0.7)+')';
     ctx.fillText(hs.label,hx,hy+hsR*2.5+12);
     
-    // Tier indicator — small lock or checkmark
+    // Tier indicator — portal or content
     var ct=getContentTier();
-    var tierIcon=ct>=1?'◈':'⊘';
-    ctx.font=(isMob2?'7':'8')+'px monospace';
-    ctx.fillStyle='rgba(201,169,78,'+(hsAlpha*0.4)+')';
+    var isPortal=phaseData[0]&&false;// check from data
+    // Check if this specific hotspot has a portal
+    var hsData2=null;
+    for(var pd=0;pd<phaseData.length;pd++){if(phaseData[pd].trigger===hs.trigger)hsData2=phaseData[pd];}
+    var tierIcon=(hsData2&&hsData2.portal)?'⊘ ENTER':'◈';
+    var iconAlpha=(hsData2&&hsData2.portal)?(hsAlpha*0.9):(hsAlpha*0.4);
+    ctx.font=(isMob2?'8':'9')+'px monospace';
+    ctx.fillStyle='rgba(201,169,78,'+iconAlpha+')';
     ctx.fillText(tierIcon,hx,hy+hsR*2.5+22);
   }
 

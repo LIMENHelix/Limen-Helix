@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>LIMEN HELIX · FEAR CIRCUIT</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#000;color:#e8e3d9;font-family:monospace;overflow:hidden;height:100%;width:100%;-webkit-user-select:none;user-select:none}
+canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
+.scanline{position:fixed;top:0;left:0;right:0;bottom:0;z-index:5;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.02) 2px,rgba(0,0,0,0.02) 4px)}
+
+/* BREADCRUMB — shows depth */
+#breadcrumb{position:fixed;top:12px;left:14px;z-index:200;font-size:clamp(0.55rem,1.8vw,0.7rem);letter-spacing:3px;text-transform:uppercase}
+#breadcrumb a{color:rgba(180,30,30,0.3);text-decoration:none;transition:color 0.3s}
+#breadcrumb a:active{color:rgba(180,30,30,0.7)}
+#breadcrumb span{color:rgba(180,30,30,0.6)}
+
+/* SUB-PHASE NAV */
+.sub-nav{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:200;display:flex;gap:6px}
+.sub-nav button{padding:6px 14px;font-family:monospace;font-size:clamp(0.5rem,1.5vw,0.65rem);letter-spacing:3px;border:1px solid rgba(180,30,30,0.15);background:transparent;color:rgba(180,30,30,0.3);cursor:pointer;text-transform:uppercase;transition:all 0.5s}
+.sub-nav button.act{border-color:rgba(180,30,30,0.5);color:rgba(180,30,30,0.9);box-shadow:0 0 12px rgba(180,30,30,0.1)}
+
+/* CENTER LABEL */
+.phase-label{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:50;text-align:center;pointer-events:none;transition:opacity 0.8s}
+.phase-num{font-size:clamp(2rem,8vw,5rem);font-weight:100;letter-spacing:clamp(4px,2vw,15px);opacity:0.08;font-family:Georgia,serif;color:rgba(180,30,30,1)}
+.phase-name{font-size:clamp(0.6rem,2vw,0.85rem);letter-spacing:clamp(4px,2vw,12px);text-transform:uppercase;opacity:0.5;margin-top:-4px;color:rgba(180,30,30,0.5)}
+
+/* HUD */
+.hud{position:fixed;z-index:100;font-size:clamp(0.35rem,1vw,0.45rem);letter-spacing:2px;text-transform:uppercase;color:rgba(180,30,30,0.4)}
+.hud-tl{top:40px;left:14px}.hud-tr{top:40px;right:14px;text-align:right}
+.hud-bl{bottom:50px;left:14px}.hud-br{bottom:50px;right:14px;text-align:right}
+
+/* CONTENT DRAWER */
+#content-drawer{position:fixed;bottom:0;left:0;right:0;z-index:400;max-height:70vh;background:rgba(0,0,0,0.96);border-top:1px solid rgba(180,30,30,0.2);transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 16px 40px}
+#content-drawer.open{transform:translateY(0)}
+#content-drawer .close{position:absolute;top:10px;right:14px;color:rgba(180,30,30,0.4);font-size:1.2rem;cursor:pointer;padding:8px;font-family:monospace}
+.drawer-title{font-family:monospace;font-size:clamp(1.1rem,4vw,1.5rem);letter-spacing:4px;color:rgba(180,30,30,0.8);margin-bottom:8px;text-transform:uppercase}
+.drawer-body{font-family:Georgia,serif;font-size:clamp(1rem,3.2vw,1.15rem);color:rgba(255,255,255,0.55);line-height:1.8;margin:12px 0}
+.drawer-chapel{font-family:Georgia,serif;font-size:clamp(1.05rem,3.4vw,1.2rem);color:rgba(180,120,80,0.7);line-height:1.9;margin:12px 0;font-style:italic;border-left:2px solid rgba(180,30,30,0.15);padding-left:12px}
+.drawer-protocol{font-family:monospace;font-size:clamp(1rem,3.2vw,1.15rem);color:rgba(180,30,30,0.6);line-height:1.8;margin:12px 0;white-space:pre-wrap;border-left:2px solid rgba(180,30,30,0.15);padding-left:12px}
+.drawer-study{font-family:Georgia,serif;font-size:clamp(0.9rem,3vw,1.05rem);color:rgba(255,255,255,0.4);line-height:1.7;margin:12px 0}
+.drawer-study a{color:rgba(120,180,220,0.7);text-decoration:none;border-bottom:1px solid rgba(120,180,220,0.2)}
+.drawer-divider{height:1px;background:rgba(180,30,30,0.08);margin:16px 0}
+
+/* ENTRY FADE */
+#entry-veil{position:fixed;inset:0;z-index:500;background:#000;pointer-events:none;transition:opacity 2s}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="scanline"></div>
+<div id="entry-veil"></div>
+
+<div id="breadcrumb">
+  <a href="../spiral.html">HELIX</a> <span>›</span>
+  <a href="../spiral.html" onclick="history.back();return false">PHASE 3 · DARKNESS</a> <span>›</span>
+  <span>FEAR CIRCUIT</span>
+</div>
+
+<div class="phase-label" id="plabel">
+  <div class="phase-num" id="pnum">⊘</div>
+  <div class="phase-name" id="pname">THE FEAR CIRCUIT</div>
+</div>
+
+<div class="hud hud-tl" id="htl">BLA → CeA PATHWAY</div>
+<div class="hud hud-tr" id="htr">AMYGDALA · SUBCORTICAL</div>
+<div class="hud hud-bl" id="hbl"></div>
+<div class="hud hud-br" id="hbr"></div>
+
+<div class="sub-nav" id="subnav"></div>
+
+<div id="content-drawer">
+  <span class="close" onclick="closeDrawer()">✕</span>
+  <div id="drawer-content"></div>
+</div>
+
+<script>
+// ═══ FEAR CIRCUIT SUB-PHASES ═══
+var SUBPH=[
+  {id:0,name:"CONDITIONING",label:"HOW FEAR IS LEARNED",
+   aR:200,aG:40,aB:40,nodeActivity:1.2,connectivity:0.9,chaos:0.3,fireRate:2.0,
+   desc:"A neutral stimulus gets wired to your threat response. One pairing is enough. The amygdala never forgets — it was designed not to.",
+   chapel:"Every scar your body carries is a lesson it learned in a single heartbeat. The amygdala does not reason. It encodes. What was present when you were hurt becomes the hurt itself."},
+  {id:1,name:"GENERALIZATION",label:"HOW ONE FEAR BECOMES MANY",
+   aR:180,aG:50,aB:50,nodeActivity:1.5,connectivity:0.7,chaos:0.5,fireRate:3.0,
+   desc:"The fear spreads. The dog that bit you becomes all dogs. The voice that screamed becomes all raised voices. Pattern completion run amok.",
+   chapel:"The shadow does not stay where you buried it. It seeps. It finds every crack in your architecture and whispers: this too is dangerous. This too will hurt you."},
+  {id:2,name:"EXPRESSION",label:"FREEZE · FIGHT · FLIGHT",
+   aR:220,aG:30,aB:30,nodeActivity:1.8,connectivity:1.0,chaos:0.6,fireRate:4.0,
+   desc:"The Central Amygdala picks the output. PAG activation → freeze. Hypothalamus → fight/flight. BNST → sustained anxiety. Your body decides before you do.",
+   chapel:"You did not choose to freeze. You did not choose to run. Something older than language, older than thought, older than you — it chose for you. And it was right. You survived."},
+  {id:3,name:"EXTINCTION",label:"HOW FEAR IS UNLEARNED",
+   aR:160,aG:80,aB:80,nodeActivity:0.8,connectivity:1.2,chaos:0.1,fireRate:0.5,
+   desc:"Extinction is not erasure. The original fear memory persists. Extinction creates a NEW memory that inhibits the old one. The mPFC learns to quiet the amygdala.",
+   chapel:"You do not kill the darkness. You cannot. It lives in circuits too old to reach with words. But you can build something stronger on top of it. A new path. A new default. The old road remains — you simply stop walking it."},
+  {id:4,name:"RECONSOLIDATION",label:"THE WINDOW WHERE MEMORY REWRITES",
+   aR:180,aG:100,aB:60,nodeActivity:1.0,connectivity:1.1,chaos:0.2,fireRate:1.0,
+   desc:"When a memory is reactivated, it becomes labile for ~6 hours. During this window, the memory can be updated with new information. This is the mechanism behind EMDR, psychedelic therapy, and reconsolidation-based treatments.",
+   chapel:"There is a door that opens when you remember. For six hours after the remembering, the memory is wet clay again. You can reshape it. Not the facts — the meaning. This is the most sacred window in all of neuroscience. This is where the Helix does its deepest work."}
+];
+
+// ═══ FEAR CIRCUIT NODES — amygdala-scale neuroanatomy ═══
+var NODES=[
+  {name:"BLA",label:"BASOLATERAL\nAMYGDALA",x:0.35,y:0.4,r:1.0,role:"Fear learning — where CS-US associations form"},
+  {name:"CeA",label:"CENTRAL\nAMYGDALA",x:0.65,y:0.4,r:0.85,role:"Fear output — commands freeze/fight/flight responses"},
+  {name:"BNST",label:"BED NUCLEUS\nSTRIA TERMINALIS",x:0.5,y:0.25,r:0.6,role:"Sustained anxiety — the 'worry' center vs acute fear"},
+  {name:"PAG",label:"PERIAQUEDUCTAL\nGRAY",x:0.7,y:0.65,r:0.7,role:"Freeze response — tonic immobility, dissociation"},
+  {name:"THAL",label:"THALAMIC\nRELAY",x:0.25,y:0.25,r:0.55,role:"12ms shortcut — raw sensory data bypasses cortex"},
+  {name:"mPFC",label:"PREFRONTAL\nBRAKE",x:0.5,y:0.7,r:0.75,role:"Top-down inhibition — fails in PTSD, strengthens in therapy"},
+  {name:"HYP",label:"HYPOTHALAMUS",x:0.3,y:0.6,r:0.5,role:"Fight/flight output — HPA axis, cortisol, adrenaline"},
+  {name:"HIPP",label:"HIPPOCAMPUS",x:0.75,y:0.25,r:0.55,role:"Context — tells amygdala WHERE and WHEN to be afraid"}
+];
+
+var CONNECTIONS=[
+  [4,0],[0,1],[1,3],[1,6],[0,2],[5,0],[5,1],[7,0],[7,1],[2,1],[3,5]
+];
+
+// ═══ HOTSPOT CONTENT — Chapel voice + clinical ═══
+var HOTSPOTS={
+0:[// CONDITIONING
+  {node:0,label:"FEAR LEARNING",
+   chapel:"The first time fire touched skin, the amygdala encoded everything present — the smell, the sound, the light, the face nearby. All of it became fire. This is Pavlovian conditioning at the synaptic level: long-term potentiation in the lateral amygdala strengthens the connection between a neutral cue and the threat response. One trial is sufficient. Evolution does not give second chances.",
+   protocol:"CONDITIONING AUDIT:\n1. Identify your strongest fear response\n2. Trace backward: what was the ORIGINAL pairing?\n3. List everything present during the event\n4. Notice: which of those neutral elements still trigger you?\n5. Those are your conditioned stimuli",
+   study:"<a href='https://doi.org/10.1101/cshperspect.a021865' target='_blank' style='color:rgba(120,180,220,0.7)'>Johansen JP et al. (2011). Molecular mechanisms of fear learning and memory. Cell 147(1):111-122.</a>"},
+  {node:4,label:"THE LOW ROAD",
+   chapel:"Twelve milliseconds. That is all it takes for the thalamus to alert the amygdala that something in the visual field matches a stored threat pattern. Your cortex — the part that thinks, reasons, contextualizes — will not receive this information for another 30 milliseconds. You are already afraid before you know what you are afraid of. This is not a flaw. This is the architecture that kept your ancestors alive.",
+   protocol:"LOW ROAD AWARENESS:\n1. Next time you startle, FREEZE (don't react)\n2. Count: how many seconds before your cortex catches up?\n3. That gap = thalamo-amygdala latency\n4. With practice, you can learn to widen this gap\n5. This is the foundation of impulse control",
+   study:"<a href='https://doi.org/10.1146/annurev.neuro.23.1.155' target='_blank' style='color:rgba(120,180,220,0.7)'>LeDoux JE (2000). Emotion circuits in the brain. Annu Rev Neurosci 23:155-184.</a>"}
+],
+1:[// GENERALIZATION
+  {node:0,label:"PATTERN COMPLETION",
+   chapel:"The amygdala is a pattern-completion engine running without supervision. It receives a fragment — a tone, a scent, the angle of a jaw — and completes the pattern from memory. The completion is always the worst case. A raised hand becomes every raised hand. A closed door becomes every abandonment. This is not pathology. This is survival hardware misapplied to a world that has changed.",
+   protocol:"GENERALIZATION MAP:\n1. Choose one active fear\n2. List ALL triggers (even 'irrational' ones)\n3. Find the COMMON FEATURE across triggers\n4. That feature is the conditioned stimulus — not the triggers themselves\n5. Extinction targets this feature, not each trigger individually",
+   study:"<a href='https://doi.org/10.1016/j.biopsych.2011.11.017' target='_blank' style='color:rgba(120,180,220,0.7)'>Lissek S et al. (2014). Overgeneralization of conditioned fear as a pathogenic marker of panic disorder. Am J Psychiatry 171(1):47-56.</a>"}
+],
+2:[// EXPRESSION
+  {node:1,label:"CENTRAL COMMAND",
+   chapel:"The Central Amygdala is the general who receives intelligence and issues orders. Freeze: activate PAG, drop heart rate, stop breathing. Flight: activate hypothalamus, flood adrenaline, redirect blood to legs. Fight: same cascade, different motor program. The general does not deliberate. The general executes. Your cortex is a civilian advisor who arrives after the battle has already begun.",
+   protocol:"RESPONSE IDENTIFICATION:\n1. In your last 3 fear responses, which output fired?\n   - Freeze (couldn't move, went blank, dissociated)\n   - Flight (left, avoided, scrolled away, changed subject)\n   - Fight (argued, tensed, clenched, raised voice)\n2. Your DEFAULT output = your CeA's preferred pathway\n3. This is not personality. This is wiring. It can be changed.",
+   study:"<a href='https://doi.org/10.1038/nrn3381' target='_blank' style='color:rgba(120,180,220,0.7)'>Tovote P et al. (2015). Neuronal circuits for fear and anxiety. Nat Rev Neurosci 16:317-331.</a>"},
+  {node:3,label:"THE FREEZE",
+   chapel:"Tonic immobility. The oldest defense. When flight fails and fight fails, the body chooses death — or the appearance of death. Heart rate drops. Muscles lock. Consciousness narrows to a pinpoint. This is not weakness. This is the periaqueductal gray executing a program 400 million years old. Every mammal, every reptile, every creature that has ever been prey — carries this circuit. If you have ever frozen when you should have moved, now you know: something ancient was protecting you the only way it knew how.",
+   protocol:"FREEZE RECOVERY:\n1. If you notice a freeze state: orient to the room (name 5 things you see)\n2. Move extremities SLOWLY — fingers first, then hands, then arms\n3. This re-engages the motor cortex and breaks PAG inhibition\n4. Do NOT force fast movement — it can trigger a panic rebound\n5. The freeze breaks from the periphery inward, not the center outward",
+   study:"<a href='https://doi.org/10.1016/j.neubiorev.2017.09.004' target='_blank' style='color:rgba(120,180,220,0.7)'>Kozlowska K et al. (2015). Fear and the defense cascade. Harv Rev Psychiatry 23(4):263-287.</a>"}
+],
+3:[// EXTINCTION
+  {node:5,label:"THE PREFRONTAL BRAKE",
+   chapel:"Extinction is the mPFC learning to say 'not now' to the amygdala. Not 'never.' Not 'that didn't happen.' Just: 'not now. You are safe now.' The memory remains. The response changes. This is what every form of exposure therapy, every meditation practice, every act of courage in the face of known fear actually is at the synaptic level: the infralimbic cortex building inhibitory projections to the BLA. You are literally growing new connections every time you face what frightens you and survive.",
+   protocol:"EXTINCTION PROTOCOL:\n1. Identify conditioned stimulus (from Conditioning audit)\n2. Expose yourself IN A SAFE CONTEXT (this is critical)\n3. Hold exposure for 90 seconds minimum (extinction learning window)\n4. Maintain vagal regulation (Phase 4 breathing)\n5. Repeat across multiple contexts (extinction is context-dependent)\n6. Session spacing: daily for acute fears, weekly for chronic\n\nWARNING: Never exceed 7/10 distress without clinical support",
+   study:"<a href='https://doi.org/10.1016/j.neuron.2012.03.028' target='_blank' style='color:rgba(120,180,220,0.7)'>Milad MR & Quirk GJ (2012). Fear extinction as a model for translational neuroscience. Neuron 72(6):930-941.</a>"}
+],
+4:[// RECONSOLIDATION
+  {node:7,label:"THE MEMORY WINDOW",
+   chapel:"In the year 2000, Karim Nader proved that stable memories become unstable when reactivated. For approximately six hours after recall, the memory requires new protein synthesis to restabilize. During this window — this sacred, fragile window — the memory can be updated. New emotional valence can be written into the old trace. This is the mechanism behind every breakthrough in trauma therapy in the last two decades. EMDR. Propranolol-assisted reconsolidation. Psilocybin-assisted psychotherapy. They all exploit this window. The Helix was designed around it.",
+   protocol:"RECONSOLIDATION PROTOCOL:\n1. Activate the target memory (full sensory recall, 5 minutes)\n2. Introduce PREDICTION ERROR within 10 minutes\n   (New information, new context, new emotional state)\n3. Allow 6-hour reconsolidation window\n   (No sleep, no alcohol, no benzodiazepines — these block reconsolidation)\n4. Re-access memory at 24 hours — test if emotional valence has shifted\n5. Repeat if needed across 3-5 sessions\n\nRef: The window is real. The science is settled. But the content of the update — that is your work.",
+   study:"<a href='https://doi.org/10.1038/35021052' target='_blank' style='color:rgba(120,180,220,0.7)'>Nader K et al. (2000). Fear memories require protein synthesis in the amygdala for reconsolidation. Nature 406:722-726.</a>"}
+]
+};
+
+// ═══ STATE ═══
+var subPhase=0,t=0,canvas=document.getElementById('c'),ctx=canvas.getContext('2d'),W,H;
+var mouseX=-1,mouseY=-1,tappedNode=-1,tapFade=0,actionPotentials=[];
+var hoveredNode=-1;
+
+function resize(){W=window.innerWidth;H=window.innerHeight;canvas.width=W*2;canvas.height=H*2;ctx.setTransform(2,0,0,2,0,0)}
+window.addEventListener('resize',resize);resize();
+
+// ═══ NAV ═══
+function buildNav(){
+  var nav=document.getElementById('subnav');nav.innerHTML='';
+  for(var i=0;i<SUBPH.length;i++){
+    var b=document.createElement('button');
+    b.textContent=SUBPH[i].name;
+    b.className=i===subPhase?'act':'';
+    b.onclick=(function(idx){return function(){setSubPhase(idx)}})(i);
+    nav.appendChild(b);
+  }
+}
+
+function setSubPhase(n){
+  if(n===subPhase)return;subPhase=n;buildNav();updateHUD();closeDrawer();
+  document.getElementById('pnum').textContent=SUBPH[n].id;
+  document.getElementById('pname').textContent=SUBPH[n].name;
+}
+
+function updateHUD(){
+  var sp=SUBPH[subPhase];
+  document.getElementById('htl').textContent=sp.label;
+  document.getElementById('hbl').textContent='FIRE:'+sp.fireRate.toFixed(1)+'Hz CHAOS:'+Math.round(sp.chaos*100)+'%';
+  document.getElementById('hbr').textContent='CONNECTIVITY:'+Math.round(sp.connectivity*100)+'%';
+}
+
+// ═══ DRAWER ═══
+function closeDrawer(){document.getElementById('content-drawer').classList.remove('open')}
+function openDrawer(data){
+  var html='<div class="drawer-title">'+data.label+'</div>';
+  html+='<div class="drawer-chapel">'+data.chapel+'</div>';
+  html+='<div class="drawer-divider"></div>';
+  html+='<div class="drawer-title" style="font-size:0.7rem;opacity:0.5">PROTOCOL</div>';
+  html+='<div class="drawer-protocol">'+data.protocol+'</div>';
+  html+='<div class="drawer-divider"></div>';
+  html+='<div class="drawer-study">'+data.study+'</div>';
+  document.getElementById('drawer-content').innerHTML=html;
+  document.getElementById('content-drawer').classList.add('open');
+}
+
+// ═══ ACTION POTENTIALS ═══
+function fireAP(ci){
+  if(actionPotentials.length>=30)return;
+  var c=CONNECTIONS[ci%CONNECTIONS.length];
+  actionPotentials.push({from:c[0],to:c[1],progress:0,speed:0.01+Math.random()*0.015});
+}
+
+// ═══ MAIN DRAW ═══
+function draw(){
+  var sp=SUBPH[subPhase];
+  var cx=W/2,cy=H/2,maxD=Math.max(W,H);
+  var aRGB=sp.aR+','+sp.aG+','+sp.aB;
+  ctx.clearRect(0,0,W,H);
+  
+  // Background — deep red-black
+  var bg=ctx.createRadialGradient(cx,cy,0,cx,cy,maxD*0.7);
+  bg.addColorStop(0,'rgba('+Math.floor(sp.aR*0.05)+','+Math.floor(sp.aG*0.03)+','+Math.floor(sp.aB*0.03)+',1)');
+  bg.addColorStop(1,'rgba(0,0,0,1)');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  
+  // Oscillatory waves — faster, more aggressive than main spiral
+  for(var wv=0;wv<3;wv++){
+    var freq=[0.005,0.012,0.03][wv];
+    var amp=sp.fireRate*[15,10,5][wv];
+    var wAlpha=[0.04,0.03,0.02][wv]*sp.nodeActivity;
+    if(wAlpha<0.003)continue;
+    ctx.beginPath();
+    for(var wx=0;wx<W;wx+=2){
+      var wy=cy+Math.sin(wx*freq+t*0.003*(wv+1))*amp+Math.sin(wx*freq*2.7+t*0.004)*amp*0.4;
+      if(wx===0)ctx.moveTo(wx,wy);else ctx.lineTo(wx,wy);
+    }
+    ctx.strokeStyle='rgba('+aRGB+','+wAlpha+')';ctx.lineWidth=0.8;ctx.stroke();
+  }
+  
+  // Connections
+  for(var ci=0;ci<CONNECTIONS.length;ci++){
+    var from=NODES[CONNECTIONS[ci][0]],to=NODES[CONNECTIONS[ci][1]];
+    var ca=0.06*sp.connectivity;
+    ctx.beginPath();ctx.moveTo(from.x*W,from.y*H);
+    var midX=(from.x+to.x)/2*W+Math.sin(ci*2.3)*20;
+    var midY=(from.y+to.y)/2*H+Math.cos(ci*1.7)*15;
+    ctx.quadraticCurveTo(midX,midY,to.x*W,to.y*H);
+    ctx.strokeStyle='rgba('+aRGB+','+ca+')';ctx.lineWidth=1;ctx.stroke();
+  }
+  
+  // Nodes
+  for(var ni=0;ni<NODES.length;ni++){
+    var nd=NODES[ni];
+    var nx=nd.x*W,ny=nd.y*H;
+    var nodeR=8+nd.r*12;
+    var jx=nx+Math.sin(t*0.005*sp.chaos+ni*3.7)*maxD*0.008*sp.chaos;
+    var jy=ny+Math.cos(t*0.004*sp.chaos+ni*2.3)*maxD*0.008*sp.chaos;
+    
+    var firePhase=(t*sp.fireRate*0.01+ni*1.5)%(Math.PI*2);
+    var firing=Math.max(0,Math.sin(firePhase));
+    var nodeAlpha=0.2+firing*0.5;
+    var coreR=nodeR*(0.8+firing*0.4);
+    
+    // Glow
+    var glow=ctx.createRadialGradient(jx,jy,0,jx,jy,nodeR*3);
+    glow.addColorStop(0,'rgba('+aRGB+','+(0.12*nodeAlpha)+')');
+    glow.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=glow;ctx.beginPath();ctx.arc(jx,jy,nodeR*3,0,Math.PI*2);ctx.fill();
+    
+    // Core
+    var coreGrad=ctx.createRadialGradient(jx,jy,0,jx,jy,coreR);
+    coreGrad.addColorStop(0,'rgba(255,255,255,'+(nodeAlpha*0.6)+')');
+    coreGrad.addColorStop(0.5,'rgba('+aRGB+','+(nodeAlpha)+')');
+    coreGrad.addColorStop(1,'rgba('+aRGB+','+(nodeAlpha*0.2)+')');
+    ctx.fillStyle=coreGrad;ctx.beginPath();ctx.arc(jx,jy,coreR,0,Math.PI*2);ctx.fill();
+    
+    // Label
+    if(nodeAlpha>0.1){
+      ctx.font='10px monospace';ctx.textAlign='center';
+      ctx.fillStyle='rgba('+aRGB+','+(nodeAlpha*0.4)+')';
+      ctx.fillText(nd.name,jx,jy+nodeR*3+12);
+    }
+    
+    // Fire APs
+    if(firing>0.95&&Math.random()<sp.fireRate*0.12){
+      for(var fc=0;fc<CONNECTIONS.length;fc++){
+        if(CONNECTIONS[fc][0]===ni&&Math.random()<0.3)fireAP(fc);
+      }
+    }
+  }
+  
+  // Action potentials
+  for(var api=actionPotentials.length-1;api>=0;api--){
+    var ap=actionPotentials[api];ap.progress+=ap.speed;
+    if(ap.progress>1){actionPotentials.splice(api,1);continue;}
+    var fn=NODES[ap.from],tn=NODES[ap.to];
+    var ci3=ap.from*13+ap.to*7;
+    var t2=ap.progress;
+    var midOff=Math.sin(ci3*2.3)*20;
+    var curX=(1-t2)*(1-t2)*fn.x*W+2*(1-t2)*t2*((fn.x*W+tn.x*W)/2+midOff)+t2*t2*tn.x*W;
+    var curY=(1-t2)*(1-t2)*fn.y*H+2*(1-t2)*t2*((fn.y*H+tn.y*H)/2+Math.cos(ci3)*15)+t2*t2*tn.y*H;
+    var apA=Math.sin(ap.progress*Math.PI)*0.8;
+    var apG=ctx.createRadialGradient(curX,curY,0,curX,curY,10);
+    apG.addColorStop(0,'rgba(255,255,255,'+apA+')');
+    apG.addColorStop(0.4,'rgba('+aRGB+','+(apA*0.6)+')');
+    apG.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=apG;ctx.beginPath();ctx.arc(curX,curY,10,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(curX,curY,2,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,'+apA+')';ctx.fill();
+  }
+  
+  // Tapped node info
+  if(tappedNode>=0&&tapFade>0){
+    tapFade-=0.004;
+    if(tapFade<=0){tappedNode=-1;tapFade=0;}
+    else{
+      var tn2=NODES[tappedNode];
+      var pAlpha=Math.min(tapFade,0.85);
+      var isMob=W<600;
+      var panelW=Math.min(isMob?W*0.88:380,W*0.6);
+      var panelH=80;
+      var panelX=Math.max(8,Math.min(W-panelW-8,(tn2.x*W)-panelW/2));
+      var panelY=tn2.y<0.5?Math.max(8,tn2.y*H+35):Math.max(8,tn2.y*H-panelH-55);
+      
+      ctx.fillStyle='rgba(0,0,0,'+(pAlpha*0.93)+')';
+      ctx.strokeStyle='rgba('+aRGB+','+(pAlpha*0.3)+')';ctx.lineWidth=1;
+      ctx.beginPath();ctx.rect(panelX-10,panelY-10,panelW+20,panelH+20);ctx.fill();ctx.stroke();
+      
+      ctx.font='bold '+(isMob?14:16)+'px monospace';ctx.textAlign='left';
+      ctx.fillStyle='rgba('+aRGB+','+(pAlpha)+')';
+      ctx.fillText(tn2.name,panelX,panelY+16);
+      
+      ctx.font=(isMob?11:13)+'px Georgia';
+      ctx.fillStyle='rgba(255,255,255,'+(pAlpha*0.5)+')';
+      ctx.fillText(tn2.role.substring(0,50),panelX,panelY+38);
+      if(tn2.role.length>50)ctx.fillText(tn2.role.substring(50),panelX,panelY+55);
+      
+      // Pulse ring
+      var pe=1-tapFade;
+      ctx.beginPath();ctx.arc(tn2.x*W,tn2.y*H,15+pe*60,0,Math.PI*2);
+      ctx.strokeStyle='rgba(255,255,255,'+(tapFade*0.12)+')';ctx.lineWidth=1.5;ctx.stroke();
+    }
+  }
+  
+  // ── HOTSPOT INDICATORS on relevant nodes ──
+  var phaseHotspots=HOTSPOTS[subPhase];
+  if(phaseHotspots){
+    for(var hi=0;hi<phaseHotspots.length;hi++){
+      var hs=phaseHotspots[hi];
+      var hnd=NODES[hs.node];
+      var hx=hnd.x*W,hy=hnd.y*H;
+      var hPulse=0.4+Math.sin(t*0.04+hi*2.1)*0.15;
+      // Outer ring
+      ctx.beginPath();ctx.arc(hx,hy,22+Math.sin(t*0.03+hi)*3,0,Math.PI*2);
+      ctx.strokeStyle='rgba(201,169,78,'+hPulse+')';ctx.lineWidth=1.5;ctx.stroke();
+      // Label below
+      ctx.font='9px monospace';ctx.textAlign='center';
+      ctx.fillStyle='rgba(201,169,78,'+(hPulse*0.7)+')';
+      var labelY=hy+(hnd.y<0.5?35:-25);
+      ctx.fillText('◈ '+hs.label,hx,labelY);
+    }
+  }
+  
+  // Corner brackets
+  var bA=0.12;
+  ctx.strokeStyle='rgba('+aRGB+','+bA+')';ctx.lineWidth=0.8;var bL=30;
+  ctx.beginPath();ctx.moveTo(8,8+bL);ctx.lineTo(8,8);ctx.lineTo(8+bL,8);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(W-8-bL,8);ctx.lineTo(W-8,8);ctx.lineTo(W-8,8+bL);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(8,H-8-bL);ctx.lineTo(8,H-8);ctx.lineTo(8+bL,H-8);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(W-8-bL,H-8);ctx.lineTo(W-8,H-8);ctx.lineTo(W-8,H-8-bL);ctx.stroke();
+  
+  // Description text — subtle, floating
+  if(SUBPH[subPhase].desc){
+    ctx.font=Math.round(Math.min(13,W*0.02))+'px Georgia';
+    ctx.textAlign='center';
+    ctx.fillStyle='rgba('+aRGB+',0.12)';
+    // Word wrap
+    var words=SUBPH[subPhase].desc.split(' '),line='',ly=H*0.85;
+    for(var wi=0;wi<words.length;wi++){
+      var test=line+(line?' ':'')+words[wi];
+      if(ctx.measureText(test).width>W*0.7){
+        ctx.fillText(line,cx,ly);ly+=16;line=words[wi];
+      }else{line=test;}
+    }
+    if(line)ctx.fillText(line,cx,ly);
+  }
+  
+  t+=16;requestAnimationFrame(draw);
+}
+
+// ═══ INTERACTION ═══
+canvas.addEventListener('click',function(e){
+  mouseX=e.clientX;mouseY=e.clientY;
+  // Check hotspot taps first
+  var phaseHotspots=HOTSPOTS[subPhase];
+  if(phaseHotspots){
+    for(var hi=0;hi<phaseHotspots.length;hi++){
+      var hs=phaseHotspots[hi];
+      var hnd=NODES[hs.node];
+      var dx=mouseX-hnd.x*W,dy=mouseY-hnd.y*H;
+      if(Math.sqrt(dx*dx+dy*dy)<40){openDrawer(hs);return;}
+    }
+  }
+  // Then node taps
+  for(var ni=0;ni<NODES.length;ni++){
+    var nd=NODES[ni],dx2=mouseX-nd.x*W,dy2=mouseY-nd.y*H;
+    if(Math.sqrt(dx2*dx2+dy2*dy2)<W*0.06){
+      tappedNode=ni;tapFade=1;
+      for(var fc=0;fc<CONNECTIONS.length;fc++){
+        if(CONNECTIONS[fc][0]===ni)fireAP(fc);
+      }
+      return;
+    }
+  }
+  tappedNode=-1;tapFade=0;
+});
+
+canvas.addEventListener('touchend',function(e){
+  var tx=e.changedTouches[0].clientX,ty=e.changedTouches[0].clientY;
+  // Check hotspot taps
+  var phaseHotspots=HOTSPOTS[subPhase];
+  if(phaseHotspots){
+    for(var hi=0;hi<phaseHotspots.length;hi++){
+      var hs=phaseHotspots[hi];
+      var hnd=NODES[hs.node];
+      var dx=tx-hnd.x*W,dy=ty-hnd.y*H;
+      if(Math.sqrt(dx*dx+dy*dy)<50){openDrawer(hs);return;}
+    }
+  }
+  for(var ni=0;ni<NODES.length;ni++){
+    var nd=NODES[ni],dx2=tx-nd.x*W,dy2=ty-nd.y*H;
+    if(Math.sqrt(dx2*dx2+dy2*dy2)<W*0.08){
+      tappedNode=ni;tapFade=1;
+      for(var fc=0;fc<CONNECTIONS.length;fc++){
+        if(CONNECTIONS[fc][0]===ni)fireAP(fc);
+      }
+      return;
+    }
+  }
+});
+
+// ═══ ENTRY ═══
+buildNav();updateHUD();
+// Fade in from black
+setTimeout(function(){document.getElementById('entry-veil').style.opacity='0'},100);
+setTimeout(function(){document.getElementById('entry-veil').style.display='none'},2200);
+draw();
+</script>
+</body>
+</html>
