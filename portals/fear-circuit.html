@@ -163,7 +163,8 @@ var subPhase=0,t=0,canvas=document.getElementById('c'),ctx=canvas.getContext('2d
 var mouseX=-1,mouseY=-1,tappedNode=-1,tapFade=0,actionPotentials=[];
 var hoveredNode=-1;
 
-function resize(){W=window.innerWidth;H=window.innerHeight;canvas.width=W*2;canvas.height=H*2;ctx.setTransform(2,0,0,2,0,0)}
+var DPR=Math.min(window.devicePixelRatio||1,1.5);
+function resize(){W=window.innerWidth;H=window.innerHeight;canvas.width=W*DPR;canvas.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0)}
 window.addEventListener('resize',resize);resize();
 
 // ═══ NAV ═══
@@ -207,7 +208,7 @@ function openDrawer(data){
 
 // ═══ ACTION POTENTIALS ═══
 function fireAP(ci){
-  if(actionPotentials.length>=30)return;
+  if(actionPotentials.length>=12)return;
   var c=CONNECTIONS[ci%CONNECTIONS.length];
   actionPotentials.push({from:c[0],to:c[1],progress:0,speed:0.01+Math.random()*0.015});
 }

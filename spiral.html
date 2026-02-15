@@ -112,7 +112,7 @@ var DMN_CONNECTIONS=[
 
 // Action potentials in transit
 var actionPotentials=[];
-var AP_MAX=60;
+var AP_MAX=25;
 
 // ═══ USER INTERACTION STATE ═══
 var mouseX=-1,mouseY=-1,touchActive=false,hoveredNode=-1,tappedNode=-1,tapFade=0;
@@ -167,7 +167,8 @@ var enterTimer=null;
 function showEnterBtn(){var el=document.getElementById('penter');if(el&&isUnlocked(phase))el.classList.add('vis')}
 function hideEnterBtn(){var el=document.getElementById('penter');if(el)el.classList.remove('vis');clearTimeout(enterTimer)}
 setTimeout(showEnterBtn,2500);
-function resize(){W=window.innerWidth;H=window.innerHeight;canvas.width=W*2;canvas.height=H*2;ctx.setTransform(2,0,0,2,0,0)}
+var DPR=Math.min(window.devicePixelRatio||1,1.5);
+function resize(){W=window.innerWidth;H=window.innerHeight;canvas.width=W*DPR;canvas.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0)}
 window.addEventListener('resize',resize);resize();
 
 function buildNav(){var nav=document.getElementById('nav');nav.innerHTML='';for(var i=0;i<PH.length;i++){var b=document.createElement('button');b.textContent=i;b.className=i===phase?'act':(!isUnlocked(i)?'locked':'');b.onclick=(function(idx){return function(){if(isUnlocked(idx))setPhase(idx)}})(i);nav.appendChild(b)}}
