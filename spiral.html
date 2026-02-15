@@ -485,6 +485,7 @@ break;// only one hovered node
 // === TAPPED NODE INFO PANEL ===
 if(tappedNode>=0&&tapFade>0){
 //tapFade stays until dismissed
+if(tapFade>0)tapFade-=0.0004;// ~42 seconds visible
 if(tapFade<=0){tappedNode=-1;tapFade=0;}
 else{
 var tn=DMN_NODES[tappedNode];

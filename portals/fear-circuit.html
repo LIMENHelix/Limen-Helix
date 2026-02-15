@@ -283,10 +283,10 @@ function draw(){
       ctx.fillText(nd.name,jx,jy+nodeR*3+12);
     }
     
-    // Fire APs
-    if(firing>0.95&&Math.random()<sp.fireRate*0.12){
+    // Fire APs (throttled)
+    if(firing>0.95&&Math.random()<sp.fireRate*0.03&&actionPotentials.length<15){
       for(var fc=0;fc<CONNECTIONS.length;fc++){
-        if(CONNECTIONS[fc][0]===ni&&Math.random()<0.3)fireAP(fc);
+        if(CONNECTIONS[fc][0]===ni&&Math.random()<0.15)fireAP(fc);
       }
     }
   }
@@ -314,6 +314,7 @@ function draw(){
   // Tapped node info
   if(tappedNode>=0&&tapFade>0){
     //tapFade stays until dismissed
+    if(tapFade>0)tapFade-=0.0004;
     if(tapFade<=0){tappedNode=-1;tapFade=0;}
     else{
       var tn2=NODES[tappedNode];
