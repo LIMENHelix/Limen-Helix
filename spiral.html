@@ -164,9 +164,26 @@ var phase=0,t=0,canvas=document.getElementById('c'),ctx=canvas.getContext('2d'),
 var immersiveMode=false,immersiveT=0,immersiveZoom=0,immersiveFocusNode=0;
 // Show ENTER button after 2 seconds on each phase
 var enterTimer=null;
-function showEnterBtn(){var el=document.getElementById('penter');if(el&&isUnlocked(phase))el.classList.add('vis')}
+function showEnterBtn(){var el=document.getElementById('penter');if(el&&isUnlocked(phase)&&PHASE_EXP[phase])el.classList.add('vis')}
 function hideEnterBtn(){var el=document.getElementById('penter');if(el)el.classList.remove('vis');clearTimeout(enterTimer)}
-setTimeout(showEnterBtn,2500);
+enterTimer=setTimeout(showEnterBtn,2500);
+
+// Reset state when returning from portal (bfcache)
+window.addEventListener('pageshow',function(e){
+  if(e.persisted||immersiveMode){
+    immersiveMode=false;immersiveZoom=0;immHotspots=[];immActiveInputs=[];immAssembledWords=[];
+    document.getElementById('plabel').style.opacity='1';
+    document.getElementById('nav').style.opacity='1';
+    document.getElementById('htl').style.opacity='1';
+    document.getElementById('htr').style.opacity='1';
+    document.getElementById('hbl').style.opacity='1';
+    document.getElementById('hbr').style.opacity='1';
+    document.getElementById('immersive-exit').classList.remove('vis');
+    document.body.style.opacity='1';document.body.style.transition='';
+    clearTimeout(enterTimer);
+    enterTimer=setTimeout(showEnterBtn,1500);
+  }
+});
 var DPR=Math.min(window.devicePixelRatio||1,1.5);
 function resize(){W=window.innerWidth;H=window.innerHeight;canvas.width=W*DPR;canvas.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0)}
 window.addEventListener('resize',resize);resize();
