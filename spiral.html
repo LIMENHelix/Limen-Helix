@@ -33,6 +33,17 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
 #immersive-exit{position:fixed;top:14px;right:14px;z-index:320;font-family:monospace;font-size:0.5rem;letter-spacing:3px;color:rgba(201,169,78,0);cursor:pointer;transition:color 0.5s;text-transform:uppercase;padding:8px}
 #immersive-exit.vis{color:rgba(201,169,78,0.3);pointer-events:auto}
 #immersive-exit.vis:hover{color:rgba(201,169,78,0.7)}
+#content-drawer{position:fixed;bottom:0;left:0;right:0;z-index:400;max-height:70vh;background:rgba(0,0,0,0.96);border-top:1px solid rgba(201,169,78,0.2);transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 16px 40px}
+#content-drawer.open{transform:translateY(0)}
+#content-drawer .drawer-close{position:absolute;top:10px;right:14px;color:rgba(201,169,78,0.4);font-size:1.2rem;cursor:pointer;padding:8px;font-family:monospace}
+#content-drawer .drawer-title{font-family:monospace;font-size:clamp(0.8rem,2.5vw,1.1rem);letter-spacing:4px;color:rgba(201,169,78,0.8);margin-bottom:8px;text-transform:uppercase}
+#content-drawer .drawer-study{font-family:Georgia,serif;font-size:clamp(0.7rem,2vw,0.85rem);color:rgba(255,255,255,0.5);line-height:1.7;margin:12px 0;white-space:pre-wrap}
+#content-drawer .drawer-protocol{font-family:monospace;font-size:clamp(0.65rem,1.8vw,0.8rem);color:rgba(201,169,78,0.6);line-height:1.8;margin:12px 0;white-space:pre-wrap;border-left:2px solid rgba(201,169,78,0.15);padding-left:12px}
+#content-drawer .drawer-direction{font-family:Georgia,serif;font-size:clamp(0.65rem,1.8vw,0.8rem);color:rgba(160,180,200,0.5);line-height:1.7;margin:12px 0;white-space:pre-wrap}
+#content-drawer .drawer-method{font-family:monospace;font-size:clamp(0.6rem,1.6vw,0.75rem);color:rgba(201,169,78,0.4);line-height:1.8;margin:12px 0;white-space:pre-wrap;border:1px solid rgba(201,169,78,0.1);padding:12px;background:rgba(201,169,78,0.02)}
+#content-drawer .drawer-lock{font-family:monospace;font-size:clamp(0.6rem,1.6vw,0.75rem);letter-spacing:3px;color:rgba(201,169,78,0.25);text-align:center;margin:16px 0;padding:12px;border:1px dashed rgba(201,169,78,0.1)}
+#content-drawer .drawer-lock a{color:rgba(201,169,78,0.5);text-decoration:none}
+#content-drawer .drawer-divider{height:1px;background:rgba(201,169,78,0.08);margin:16px 0}
 </style>
 </head>
 <body>
@@ -50,6 +61,7 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
 <div id="immersive-narration"></div>
 <div id="immersive-source"></div>
 <div id="immersive-exit" onclick="exitPhaseExperience()">✕ EXIT</div>
+<div id="content-drawer"><span class="drawer-close" onclick="closeDrawer()">✕</span><div id="drawer-content"></div></div>
 <script>
 // ═══ PHASE DATA ═══
 var PH=[
@@ -650,6 +662,12 @@ canvas.addEventListener('mousemove',function(e){mouseX=e.clientX;mouseY=e.client
 canvas.addEventListener('mouseleave',function(){mouseX=-1;mouseY=-1;hoveredNode=-1});
 canvas.addEventListener('click',function(e){
 mouseX=e.clientX;mouseY=e.clientY;
+// Immersive mode: check hotspots
+if(immersiveMode){
+  var somaR2=Math.min(W,H)*0.3;
+  if(checkHotspotTap(e.clientX,e.clientY,W/2,H/2,somaR2))return;
+  return;
+}
 // Check if near a node
 for(var ni=0;ni<DMN_NODES.length;ni++){
 var nd=DMN_NODES[ni],ndx=nd.x*W,ndy=nd.y*H;
@@ -675,13 +693,18 @@ canvas.addEventListener('touchend',function(e){
 var dx=e.changedTouches[0].clientX-touchStartX;
 var dy=e.changedTouches[0].clientY-touchStartY;
 var dt=Date.now()-touchStartTime;
+// Immersive mode: check hotspot taps
+if(immersiveMode&&dt<300&&Math.abs(dx)<20&&Math.abs(dy)<20){
+  var somaR3=Math.min(W,H)*0.3;
+  if(checkHotspotTap(e.changedTouches[0].clientX,e.changedTouches[0].clientY,W/2,H/2,somaR3))return;
+}
 // Swipe nav (long horizontal swipe)
-if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*2&&dt<500){
+if(!immersiveMode&&Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*2&&dt<500){
 if(dx<-60&&phase<10&&isUnlocked(phase+1))setPhase(phase+1);
 if(dx>60&&phase>0)setPhase(phase-1);
 }
 // Tap (short press, small movement)
-else if(dt<300&&Math.abs(dx)<20&&Math.abs(dy)<20){
+else if(!immersiveMode&&dt<300&&Math.abs(dx)<20&&Math.abs(dy)<20){
 var tx=e.changedTouches[0].clientX,ty=e.changedTouches[0].clientY;
 for(var ni=0;ni<DMN_NODES.length;ni++){
 var nd=DMN_NODES[ni],ndx=nd.x*W,ndy=nd.y*H;
@@ -962,6 +985,121 @@ var PHASE_EXP={
 var immActiveInputs=[];// signals currently arriving
 var immAssembledWords=[];// narrative fragments that have been bound
 var immLastSeqIdx=-1;
+var immHotspots=[];// active floating hotspots
+var immActiveDrawer=null;// currently open content drawer
+var immDrawerAlpha=0;// drawer fade
+
+// Content tier thresholds
+var CONTENT_TIERS={ENTRY:1,MID:2,HIGH:5,INNER:8};
+function getContentTier(){
+  if(userTier>=CONTENT_TIERS.INNER)return 3;// inner circle
+  if(userTier>=CONTENT_TIERS.HIGH)return 2;// high
+  if(userTier>=CONTENT_TIERS.MID)return 1;// mid
+  return 0;// entry
+}
+
+// ═══ HOTSPOT CONTENT DATABASE ═══
+// Each phase has hotspots that appear when signals arrive
+// Content tiers: 0=teaser, 1=studies+basic, 2=protocols, 3=full methodology
+var HOTSPOT_DATA={
+0:[
+  {trigger:"hippo",label:"EPISODIC MEMORY",angle:Math.PI*0.8,dist:0.7,
+    teaser:{title:"Tulving 1972 · Episodic Memory",line:"Memory encoding is reconstructive, not playback"},
+    mid:{study:"Tulving E (1972). Episodic and semantic memory. Organization of Memory. London: Academic Press.\n\nNadel L & Moscovitch M (1997). Memory consolidation, retrograde amnesia, and the hippocampal complex. Current Opinion in Neurobiology 7(2):217-227.",protocol:"RECALL AUDIT: Write 3 core memories. Note: emotional tone, sensory detail, narrative structure. These are your mPFC's raw inputs."},
+    high:{protocol:"MEMORY RECONSOLIDATION PROTOCOL:\n1. Select target memory (high emotional valence)\n2. Activate fully — engage all sensory channels\n3. Introduce prediction error (reframe, new context)\n4. Allow 6-hour reconsolidation window\n5. Re-access with new frame\n\nTiming: Best performed 10-60min after activation\nRef: Nader K (2003) Nature Reviews Neuroscience",direction:"Connects to Phase 3 (DARKNESS): suppressed memories stored in amygdala bypass hippocampal contextualization → implicit fear without narrative"},
+    inner:{method:"LIMEN HELIX APPLICATION: Phase 0 memory audit establishes baseline self-narrative topology. Map each memory to DMN input source. Identify which narratives are hippocampal (experienced) vs confabulated (mPFC-generated). This distinction is the foundation of all subsequent phase work."}},
+  {trigger:"amyg",label:"THREAT VALENCE",angle:Math.PI*1.3,dist:0.65,
+    teaser:{title:"LeDoux 1996 · The Emotional Brain",line:"Fear is computed before you know you're afraid"},
+    mid:{study:"LeDoux JE (1996). The Emotional Brain. New York: Simon & Schuster.\n\nPhelps EA (2006). Emotion and Cognition: Insights from Studies of the Human Amygdala. Annual Review of Psychology 57:27-53.",protocol:"FEAR INVENTORY: List your top 5 fears. Rate each: is this a real threat or a narrative? The amygdala doesn't know the difference."},
+    high:{protocol:"AMYGDALA DESENSITIZATION:\n1. Identify conditioned fear stimulus\n2. Controlled exposure (graded, with safety cues)\n3. Maintain ventral vagal engagement during exposure\n4. 30-second hold at peak activation\n5. Slow exhalation (exhale > inhale) to engage vagal brake\n\nRef: Milad MR & Quirk GJ (2012) Neuron",direction:"Connects to Phase 4 (PEACE): GABA-mediated inhibition of amygdala output is the neurological basis of equanimity"},
+    inner:{method:"LIMEN HELIX: The amygdala-mPFC axis is the primary site of recursive narrative distortion. Phase 0 identifies the fear inputs; Phase 3 exposes them; Phase 4 builds the inhibitory architecture to regulate them; Phase 8 revalues their meaning."}},
+  {trigger:"insula",label:"BODY MAP",angle:Math.PI*0.3,dist:0.72,
+    teaser:{title:"Craig 2009 · Interoception",line:"You feel yourself from the inside before you think yourself"},
+    mid:{study:"Craig AD (2009). How do you feel — now? The anterior insula and human awareness. Nature Reviews Neuroscience 10:59-70.\n\nKhalsa SS et al. (2018). Interoception and Mental Health. Biological Psychiatry 83(9):e55-e57.",protocol:"BODY SCAN: Close eyes. Move attention from feet to crown. Note: tension, temperature, pressure, emptiness. This is your insula's raw feed to mPFC."},
+    high:{protocol:"INTEROCEPTIVE TRAINING:\n1. Heartbeat detection task (count beats eyes closed, 30sec)\n2. Score accuracy against pulse ox\n3. Repeat 3x daily for 14 days\n4. Track accuracy improvement\n\nMeta: Higher interoceptive accuracy correlates with emotional regulation (r=0.42)\nRef: Garfinkel SN et al. (2015) Biological Psychology",direction:"Connects to Phase 2 (RHYTHM): interoceptive signals are the carrier wave for vagal co-regulation between two nervous systems"},
+    inner:{method:"LIMEN HELIX: Interoceptive accuracy is a trainable biomarker. Phase 0 baseline measurement → Phase 4 vagal training increases sensitivity → Phase 5 hormetic stress teaches tolerance of high-arousal interoceptive states → Phase 8 expanded empathic interoception."}},
+  {trigger:"tpj",label:"SOCIAL MODEL",angle:Math.PI*1.7,dist:0.68,
+    teaser:{title:"Saxe & Kanwisher 2003 · Theory of Mind",line:"You model other minds using the same hardware that models you"},
+    mid:{study:"Saxe R & Kanwisher N (2003). People thinking about thinking people: fMRI of Theory of Mind. NeuroImage 19(4):1835-1842.\n\nSchurz M et al. (2014). Fractionating theory of mind: A meta-analysis. Neuroscience & Biobehavioral Reviews 42:9-34.",protocol:"PERSPECTIVE AUDIT: Think of someone you disagree with. Write their argument as they would write it. If you can't, your TPJ is modeling poorly."},
+    high:{protocol:"MENTALIZING EXPANSION:\n1. Select a conflict relationship\n2. Write their internal monologue (200 words)\n3. Include their fears, values, and self-narrative\n4. Read aloud in first person\n5. Notice body response (insula feedback)\n\nRef: Epley N et al. (2004) Journal of Personality and Social Psychology",direction:"Connects to Phase 2 (RHYTHM): TPJ activation during co-regulation enables accurate attunement vs projection"},
+    inner:{method:"LIMEN HELIX: The TPJ is where self-narrative meets other-narrative. Phase 0 maps self-model; Phase 2 tests it against co-regulation; Phase 7 dissolves the self-other boundary entirely; Phase 8 rebuilds it with accurate empathic modeling."}},
+  {trigger:"pcc",label:"SELF-CONTINUITY",angle:Math.PI*0.0,dist:0.7,
+    teaser:{title:"Raichle 2001 · Default Mode Network",line:"The PCC never stops asking: who was I, who am I, who will I be"},
+    mid:{study:"Raichle ME et al. (2001). A default mode of brain function. PNAS 98(2):676-682.\n\nLeech R & Sharp DJ (2014). The role of the posterior cingulate cortex in cognition and disease. Brain 137(1):12-32.",protocol:"CONTINUITY CHALLENGE: Write your autobiography in 100 words. Wait 24 hours. Write it again. Compare. What changed? That's your PCC updating."},
+    high:{protocol:"NARRATIVE DISRUPTION:\n1. Record your 'origin story' (5 min audio)\n2. Listen back — note where you embellish, omit, or accelerate\n3. Rewrite with ONLY verified facts\n4. Notice the emotional difference\n5. The gap = mPFC confabulation, not PCC truth\n\nRef: Conway MA (2005). Memory and the self. Journal of Memory and Language",direction:"Connects to Phase 7 (SEPARATION): PCC is the second DMN hub to go offline during ego dissolution, after mPFC — the autobiography stops"},
+    inner:{method:"LIMEN HELIX: PCC provides the temporal scaffolding for self-narrative. It answers 'who have I always been.' Phase 0 baseline; Phase 7 disrupts; Phase 10 reconsolidates with novel topology. The autobiography rewrites."}}
+],
+1:[
+  {trigger:"anomaly",label:"PREDICTION ERROR",angle:Math.PI*1.2,dist:0.7,
+    teaser:{title:"Friston 2010 · Free Energy Principle",line:"Your brain runs on predictions — surprise is the only teacher"},
+    mid:{study:"Friston K (2010). The free-energy principle: a unified brain theory? Nature Reviews Neuroscience 11:127-138.\n\nSchultz W (2016). Dopamine reward prediction error signalling. Nature Reviews Neuroscience 17:183-195.",protocol:"SURPRISE LOG: For one day, note every moment of surprise — small or large. Each one is your dACC firing. Pattern: what predictions are you wrong about most?"},
+    high:{protocol:"DELIBERATE PREDICTION ERROR:\n1. Choose a routine behavior (daily)\n2. Change ONE variable deliberately\n3. Observe internal resistance (amygdala)\n4. Note what your mind predicts vs what happens\n5. Scale disruption weekly\n\nRef: Clark A (2013). Whatever next? Predictive brains, situated agents. Behavioral and Brain Sciences",direction:"Phase 1 is the entry point for all change. Without prediction error, the DMN never updates. Every subsequent phase depends on this crack."},
+    inner:{method:"LIMEN HELIX: Phase 1 exploits the free energy principle — the brain minimizes surprise. Introducing controlled prediction error (hormetic surprise) forces model updating. The Helix sequences surprise → safety → stress → integration in the neurobiologically optimal order."}}
+],
+2:[
+  {trigger:"vagal",label:"VAGAL TONE",angle:Math.PI*0.7,dist:0.68,
+    teaser:{title:"Porges 2011 · Polyvagal Theory",line:"Safety is not the absence of threat — it is a neural state"},
+    mid:{study:"Porges SW (2011). The Polyvagal Theory. New York: W.W. Norton.\n\nLaborde S et al. (2017). Heart rate variability and cardiac vagal tone in psychophysiological research. Frontiers in Psychology 8:213.",protocol:"VAGAL ACTIVATION: 5-5-7 breathing (inhale 5s, hold 5s, exhale 7s). 6 cycles. Measure: did your shoulders drop? That's ventral vagal engagement."},
+    high:{protocol:"CO-REGULATION PROTOCOL:\n1. Partner exercise (in-person or video)\n2. Synchronize breathing: lead/follow alternating 2min\n3. Maintain eye contact (activates fusiform + TPJ)\n4. Track HRV if available (Oura, Apple Watch)\n5. Target: respiratory sinus arrhythmia coherence\n\nRef: Feldman R (2012). Bio-behavioral synchrony. Neuroscience & Biobehavioral Reviews",direction:"Phase 2 builds the relational infrastructure for Phase 3 (DARKNESS). You cannot safely access shadow material without co-regulation capacity."},
+    inner:{method:"LIMEN HELIX: Polyvagal state determines which neural circuits are accessible. Ventral vagal = mPFC + TPJ online (social, reflective). Sympathetic = amygdala + LC dominant (reactive). Dorsal vagal = shutdown. The Helix sequences vagal state as the prerequisite for every phase transition."}}
+],
+3:[
+  {trigger:"thalamus",label:"THREAT RELAY",angle:Math.PI*0.5,dist:0.7,
+    teaser:{title:"LeDoux 2000 · Low Road",line:"The thalamus sends threat data to your amygdala 12ms before your cortex knows"},
+    mid:{study:"LeDoux JE (2000). Emotion circuits in the brain. Annual Review of Neuroscience 23:155-184.\n\nÖhman A (2005). The role of the amygdala in human fear. Psychoneuroendocrinology 30(10):953-958.",protocol:"TRIGGER MAP: Identify 3 situations where you react before you think. That's the thalamo-amygdala low road. Write: trigger → body reaction → time to cortical awareness."},
+    high:{protocol:"EXPOSURE PROTOCOL (CONTROLLED):\n1. Rate target fear 1-10 (Subjective Units of Distress)\n2. Begin at 3/10 intensity\n3. Hold exposure 90 seconds (extinction learning window)\n4. Maintain breath regulation (Phase 4 prerequisite)\n5. Increase by 1 unit per session\n6. Never exceed 7/10 without clinical support\n\nRef: Foa EB & Kozak MJ (1986). Emotional processing of fear. Psychological Bulletin",direction:"Phase 3 material feeds directly into Phase 8 (CONSCIENCE) — the fears you face here become the empathic data for moral recalibration"},
+    inner:{method:"LIMEN HELIX: Phase 3 is the most clinically sensitive phase. The framework uses hormetic fear exposure — enough to trigger reconsolidation, not enough to retraumatize. The key biomarker is HRV recovery time post-exposure. <90sec = proceed. >3min = return to Phase 4."}}
+],
+4:[
+  {trigger:"gaba",label:"INHIBITION CASCADE",angle:Math.PI*1.2,dist:0.68,
+    teaser:{title:"Nuss 2015 · GABA & Anxiety",line:"GABA is the brain's stop signal — without it, everything fires at once"},
+    mid:{study:"Nuss P (2015). Anxiety disorders and GABA neurotransmission. Neuropsychiatric Disease and Treatment 11:165-175.\n\nStreeter CC et al. (2012). Effects of yoga on thalamic GABA. Journal of Alternative and Complementary Medicine 18(12):1112-1118.",protocol:"GABA BOOST: 20-minute yoga with emphasis on long exhale. OR: 10 min progressive muscle relaxation. Measure: jaw tension before/after."},
+    high:{protocol:"PARASYMPATHETIC PROTOCOL (DAILY):\n1. Morning: Cold face immersion 30sec (dive reflex → vagal)\n2. Midday: 4-7-8 breathing x 4 cycles\n3. Evening: Yoga nidra 20min (body scan)\n4. Track: HRV trend over 14 days\n5. Target: RMSSD increase >15%\n\nRef: Gerritsen RJS & Band GPH (2018). Breath of Life. Frontiers in Human Neuroscience",direction:"Phase 4 mastery is the prerequisite for Phase 5 (ENDURANCE). You must be able to return to baseline before you load the system with stress."},
+    inner:{method:"LIMEN HELIX: Phase 4 is not rest — it is active restoration. The framework measures parasympathetic rebound capacity (PRC) as the gating biomarker for Phase 5 entry. PRC = time to return to baseline HRV after standardized stressor. Target: <120 seconds."}}
+],
+5:[
+  {trigger:"cold",label:"HORMETIC STRESSOR",angle:Math.PI*1.4,dist:0.7,
+    teaser:{title:"Calabrese 2008 · Hormesis",line:"Low-dose stress builds the systems that protect against high-dose stress"},
+    mid:{study:"Calabrese EJ (2008). Hormesis: Why it is important to toxicology and toxicologists. Environmental Toxicology and Chemistry 27(7):1451-1474.\n\nShevchuk NA (2008). Adapted cold shower as a potential treatment for depression. Medical Hypotheses 70(5):995-1001.",protocol:"COLD EXPOSURE: 30 seconds cold water at end of shower. Week 2: 60sec. Week 3: 90sec. Track: time to shiver cessation = norepinephrine response."},
+    high:{protocol:"HORMETIC LOADING PROTOCOL:\n1. Cold: 2-min cold immersion (50-59°F) 3x/week\n2. Heat: 20-min sauna (170°F+) 3x/week\n3. Exercise: Zone 2 cardio 150min/week + 1 VO2max session\n4. Fast: 16:8 time-restricted eating\n5. Track: BDNF proxy via cognitive performance\n\nRef: Mattson MP (2008). Hormesis defined. Ageing Research Reviews",direction:"Phase 5 stress inoculation builds the neural resilience tested in Phase 7 (SEPARATION). The ego that can endure physical stress can endure dissolution."},
+    inner:{method:"LIMEN HELIX: Phase 5 is calibrated hormetic loading. The framework uses rate of adaptation (ROA) as the progression metric — when a stressor no longer elevates cortisol >20% above baseline, increase dose. The ceiling is always set by Phase 4 recovery capacity."}}
+],
+6:[
+  {trigger:"parietal",label:"SPATIAL ARCHITECTURE",angle:Math.PI*1.3,dist:0.68,
+    teaser:{title:"Miller & Cohen 2001 · Prefrontal Function",line:"The dlPFC doesn't create — it holds the blueprint while you build"},
+    mid:{study:"Miller EK & Cohen JD (2001). An integrative theory of prefrontal cortex function. Annual Review of Neuroscience 24:167-202.\n\nBaddeley A (2003). Working memory: Looking back and looking forward. Nature Reviews Neuroscience 4:829-839.",protocol:"WORKING MEMORY TRAIN: Dual n-back task, 15 min/day. Start at 2-back. Advance when >80% accuracy. This directly trains dlPFC sustained firing."},
+    high:{protocol:"EXECUTIVE INTEGRATION:\n1. Morning: Define 3 priorities (dlPFC goal maintenance)\n2. Use Eisenhower matrix (basal ganglia gating)\n3. 90-min focus blocks (dopamine D1 sustained activity)\n4. 20-min breaks (DMN restoration)\n5. Evening: Review execution vs plan (ACC error check)\n\nRef: Miyake A et al. (2000). The unity and diversity of executive functions. Cognitive Psychology",direction:"Phase 6 provides the executive scaffolding that turns insight into action. Without it, Phases 0-5 produce understanding without change."},
+    inner:{method:"LIMEN HELIX: Phase 6 is where the recursive optimization loop becomes conscious. The framework teaches deliberate executive deployment: identify phase-specific challenge → select appropriate neural circuit → execute → measure → iterate. This is the Helix methodology itself made neurologically explicit."}}
+],
+7:[
+  {trigger:"sero",label:"SEROTONERGIC FLOOD",angle:Math.PI*0.5,dist:0.7,
+    teaser:{title:"Carhart-Harris 2014 · Entropic Brain",line:"Ego dissolution is the mPFC losing its grip on self-narrative"},
+    mid:{study:"Carhart-Harris RL et al. (2014). The entropic brain: a theory of conscious states informed by neuroimaging research with psychedelic drugs. Frontiers in Human Neuroscience 8:20.\n\nGriffith RR et al. (2006). Psilocybin can occasion mystical-type experiences. Psychopharmacology 187:268-283.",protocol:"NON-PHARMACOLOGICAL DISSOLUTION: Holotropic breathwork (Grof): 30 min accelerated breathing + evocative music. OR: Sensory deprivation float, 90 min. Track: oceanic boundlessness scale (OBN)."},
+    high:{protocol:"EGO DISSOLUTION PREPARATION:\n1. Phase 4 mastery confirmed (PRC <120s)\n2. Phase 5 stress tolerance confirmed\n3. Set + setting: safe space, trusted guide\n4. Intention setting (NOT goal setting)\n5. Integration session within 48 hours\n6. Journaling: what dissolved, what remained\n\nRef: Johnson MW et al. (2018). Classic psychedelics: An integrative review. Pharmacology & Therapeutics",direction:"Phase 7 is the pivot. Everything before it builds toward it. Everything after it integrates what was revealed. The self-narrative from Phase 0 must die for Phase 10's narrative to emerge."},
+    inner:{method:"LIMEN HELIX: Phase 7 is the controlled death of the recursive self-model. The framework does NOT require pharmacological intervention — holotropic breathwork, extended meditation, sensory deprivation, and extreme hormetic stress can all produce transient mPFC suppression. The key metric is Ego Dissolution Inventory (EDI) score >60%."}}
+],
+8:[
+  {trigger:"pain",label:"EMPATHIC PAIN",angle:Math.PI*1.4,dist:0.68,
+    teaser:{title:"Damasio 1994 · Somatic Marker Hypothesis",line:"Your moral compass is calibrated by body signals, not logic"},
+    mid:{study:"Damasio AR (1994). Descartes' Error: Emotion, Reason, and the Human Brain. New York: Putnam.\n\nDecety J & Jackson PL (2004). The functional architecture of human empathy. Behavioral and Cognitive Neuroscience Reviews 3(2):71-100.",protocol:"VALUE RECOMPUTATION: Post-Phase 7, list your top 5 values. Compare to pre-Phase 7 list. What changed? What survived dissolution? The survivors are somatic, not narrative."},
+    high:{protocol:"EMPATHY RECALIBRATION:\n1. Identify relationship where you caused harm\n2. Write their experience (TPJ exercise from Phase 0)\n3. Feel the somatic response (insula monitoring)\n4. Distinguish guilt (narrative) from conscience (somatic)\n5. Determine: repair, release, or transform\n\nRef: Batson CD (2011). Altruism in Humans. Oxford University Press",direction:"Phase 8 is where Phase 3's shadow material meets Phase 2's co-regulation capacity. The darkness you faced is now reprocessed through empathic modeling."},
+    inner:{method:"LIMEN HELIX: Phase 8 recalibrates the vmPFC valuation system using post-dissolution data. The somatic markers that survived ego death are more accurate than pre-dissolution markers because they are not contaminated by self-narrative bias. This is the neurological basis of moral development."}}
+],
+9:[
+  {trigger:"spark",label:"BINDING EVENT",angle:Math.PI*0.5,dist:0.65,
+    teaser:{title:"Crick & Koch 2005 · The Claustrum",line:"Francis Crick's final paper proposed this tiny structure as the seat of consciousness"},
+    mid:{study:"Crick FC & Koch C (2005). What is the function of the claustrum? Philosophical Transactions of the Royal Society B 360(1458):1271-1279.\n\nKoubeissi MZ et al. (2014). Electrical stimulation of a small brain area reversibly disrupts consciousness. Epilepsy & Behavior 37:32-35.",protocol:"INTEGRATION PRACTICE: After any dissolution experience, sit in silence 20 min. Do not narrate. Do not interpret. Allow binding to occur without forcing it. The claustrum works best when the cortex is quiet."},
+    high:{protocol:"POST-DISSOLUTION INTEGRATION:\n1. 48-hour low-stimulation period\n2. No narrative processing (no journaling, no talking about it)\n3. Body-based practices only: walking, swimming, yoga\n4. Day 3: First verbal integration session\n5. Day 7: Written integration\n6. Day 14: Behavioral commitments\n\nRef: Watts R et al. (2017). Patients' accounts of psilocybin-assisted psychotherapy. Qualitative Research in Psychology",direction:"Phase 9 cannot be forced. It is the natural consequence of Phases 0-8 executed in sequence. The binding event is emergent."},
+    inner:{method:"LIMEN HELIX: Phase 9 is the only phase with no active protocol. The framework provides the conditions (silence, safety, time) and the claustro-cortical system does the rest. Attempting to control integration reactivates the mPFC — which is exactly what must NOT happen until Phase 10."}}
+],
+10:[
+  {trigger:"hippo2",label:"RECONSOLIDATED MEMORY",angle:Math.PI*0.8,dist:0.7,
+    teaser:{title:"Nader 2003 · Memory Reconsolidation",line:"Every time you remember, you rewrite — now you rewrite with new wiring"},
+    mid:{study:"Nader K et al. (2000). Fear memories require protein synthesis in the amygdala for reconsolidation. Nature 406:722-726.\n\nSchiller D et al. (2010). Preventing the return of fear in humans. Nature 463:49-53.",protocol:"NEW NARRATIVE: Rewrite your 100-word autobiography from Phase 0. What changed? This is your novel topology expressed in language."},
+    high:{protocol:"TOPOLOGY VALIDATION:\n1. Compare Phase 0 memory audit to current\n2. Identify: which fears (Phase 3) no longer activate?\n3. Test: body scan — where did tension live before? Now?\n4. Relationship check: who do you model differently?\n5. Value audit: what shifted post-dissolution?\n\nRef: Lane RD et al. (2015). Memory reconsolidation, emotional arousal, and the process of change in psychotherapy. Behavioral and Brain Sciences",direction:"Phase 10 is not an endpoint — it is Phase 0 of the next spiral. The helix recurses. Each pass deepens."},
+    inner:{method:"LIMEN HELIX: Phase 10 validates the recursive optimization. The novel topology is measured against Phase 0 baseline across 5 dimensions: narrative flexibility, amygdala reactivity (Phase 3), vagal tone (Phase 4), stress tolerance (Phase 5), and empathic accuracy (Phase 8). Improvement across all 5 = successful spiral completion. The next recursion begins."}}
+]
+};
 
 function enterPhaseExperience(){
   if(immersiveMode)return;
@@ -974,6 +1112,9 @@ function enterPhaseExperience(){
   immActiveInputs=[];
   immAssembledWords=[];
   immLastSeqIdx=-1;
+  immHotspots=[];
+  immActiveDrawer=null;
+  closeDrawer();
   
   // Hide HUD
   hideEnterBtn();
@@ -991,6 +1132,8 @@ function enterPhaseExperience(){
 function exitPhaseExperience(){
   immersiveMode=false;
   immersiveZoom=0;
+  immHotspots=[];
+  closeDrawer();
   
   // Restore HUD
   document.getElementById('plabel').style.opacity='1';
@@ -1004,6 +1147,97 @@ function exitPhaseExperience(){
   document.getElementById('immersive-source').style.color='rgba(201,169,78,0)';
   
   enterTimer=setTimeout(showEnterBtn,2000);
+}
+
+function closeDrawer(){
+  var d=document.getElementById('content-drawer');
+  if(d)d.classList.remove('open');
+  immActiveDrawer=null;
+}
+
+function openDrawer(hotspotData){
+  var ct=getContentTier();
+  var d=document.getElementById('drawer-content');
+  var html='';
+  
+  // Always show teaser
+  html+='<div class="drawer-title">'+hotspotData.teaser.title+'</div>';
+  html+='<div class="drawer-study" style="color:rgba(255,255,255,0.6)">'+hotspotData.teaser.line+'</div>';
+  html+='<div class="drawer-divider"></div>';
+  
+  if(ct>=1&&hotspotData.mid){
+    // Mid tier: studies + basic protocol
+    html+='<div class="drawer-title" style="font-size:0.6rem;opacity:0.5">RESEARCH</div>';
+    html+='<div class="drawer-study">'+hotspotData.mid.study+'</div>';
+    html+='<div class="drawer-divider"></div>';
+    html+='<div class="drawer-title" style="font-size:0.6rem;opacity:0.5">PROTOCOL</div>';
+    html+='<div class="drawer-protocol">'+hotspotData.mid.protocol+'</div>';
+  }else if(ct<1){
+    html+='<div class="drawer-lock">FULL STUDIES + PROTOCOL REQUIRE ACOLYTE ACCESS ($50+)<br><a href="https://chapel-pos-v2.vercel.app">⟐ UNLOCK</a></div>';
+  }
+  
+  if(ct>=2&&hotspotData.high){
+    html+='<div class="drawer-divider"></div>';
+    html+='<div class="drawer-title" style="font-size:0.6rem;opacity:0.5">ADVANCED PROTOCOL</div>';
+    html+='<div class="drawer-protocol">'+hotspotData.high.protocol+'</div>';
+    if(hotspotData.high.direction){
+      html+='<div class="drawer-title" style="font-size:0.6rem;opacity:0.5">PHASE CONNECTION</div>';
+      html+='<div class="drawer-direction">'+hotspotData.high.direction+'</div>';
+    }
+  }else if(ct>=1&&ct<2){
+    html+='<div class="drawer-lock">ADVANCED PROTOCOLS + PHASE CONNECTIONS REQUIRE ORACLE ACCESS ($500+)<br><a href="https://chapel-pos-v2.vercel.app">⟐ UNLOCK</a></div>';
+  }
+  
+  if(ct>=3&&hotspotData.inner){
+    html+='<div class="drawer-divider"></div>';
+    html+='<div class="drawer-title" style="font-size:0.6rem;opacity:0.5">LIMEN HELIX METHODOLOGY</div>';
+    html+='<div class="drawer-method">'+hotspotData.inner.method+'</div>';
+  }else if(ct>=2&&ct<3){
+    html+='<div class="drawer-lock">FULL METHODOLOGY REQUIRES THRESHOLD KEEPER ACCESS ($5,000+)<br><a href="https://chapel-pos-v2.vercel.app">⟐ UNLOCK</a></div>';
+  }
+  
+  d.innerHTML=html;
+  document.getElementById('content-drawer').classList.add('open');
+  immActiveDrawer=hotspotData;
+}
+
+// Spawn a hotspot when a signal arrives
+function spawnHotspot(triggerName){
+  var phaseData=HOTSPOT_DATA[phase];
+  if(!phaseData)return;
+  for(var hi=0;hi<phaseData.length;hi++){
+    if(phaseData[hi].trigger===triggerName){
+      // Don't duplicate
+      for(var eh=0;eh<immHotspots.length;eh++){
+        if(immHotspots[eh].trigger===triggerName)return;
+      }
+      immHotspots.push({
+        trigger:triggerName,
+        label:phaseData[hi].label,
+        angle:phaseData[hi].angle,
+        dist:phaseData[hi].dist,
+        data:phaseData[hi],
+        spawnT:immersiveT,
+        pulse:0
+      });
+      return;
+    }
+  }
+}
+
+// Check hotspot tap
+function checkHotspotTap(tapX,tapY,cx,cy,somaR){
+  for(var hi=0;hi<immHotspots.length;hi++){
+    var hs=immHotspots[hi];
+    var hx=cx+Math.cos(hs.angle+Math.sin(immersiveT*0.005+hi)*0.15)*somaR*hs.dist;
+    var hy=cy+Math.sin(hs.angle+Math.sin(immersiveT*0.005+hi)*0.15)*somaR*hs.dist;
+    var dx=tapX-hx,dy=tapY-hy;
+    if(Math.sqrt(dx*dx+dy*dy)<35){
+      openDrawer(hs.data);
+      return true;
+    }
+  }
+  return false;
 }
 
 // Draw immersive experience — called from main draw loop
@@ -1205,6 +1439,8 @@ function drawImmersive(ctx,p,W,H,t){
           duration:300,// frames
           arrived:false
         });
+        // Spawn floating hotspot for this input
+        spawnHotspot(seq[si].input);
       }
       // Word assembly (no input signal, just convergence)
       if(seq[si].word&&!seq[si].input){
@@ -1285,6 +1521,48 @@ function drawImmersive(ctx,p,W,H,t){
     }
   }
   
+  // ── FLOATING HOTSPOTS — tappable content nodes ──
+  for(var hi=0;hi<immHotspots.length;hi++){
+    var hs=immHotspots[hi];
+    var hsAge=(immersiveT-hs.spawnT)/60;// age in seconds
+    var fadeIn=Math.min(1,hsAge/2);
+    // Gentle orbit
+    var orbAngle=hs.angle+Math.sin(immersiveT*0.005+hi*1.7)*0.15;
+    var hx=cx+Math.cos(orbAngle)*somaR*hs.dist;
+    var hy=cy+Math.sin(orbAngle)*somaR*hs.dist;
+    
+    // Outer glow
+    var hsAlpha=fadeIn*0.35;
+    var hsPulse=0.8+Math.sin(immersiveT*0.04+hi*2.1)*0.2;
+    var hsR=10*hsPulse;
+    var hsGrad=ctx.createRadialGradient(hx,hy,0,hx,hy,hsR*2.5);
+    hsGrad.addColorStop(0,'rgba(201,169,78,'+(hsAlpha*0.6)+')');
+    hsGrad.addColorStop(0.4,'rgba(201,169,78,'+(hsAlpha*0.2)+')');
+    hsGrad.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=hsGrad;ctx.beginPath();ctx.arc(hx,hy,hsR*2.5,0,Math.PI*2);ctx.fill();
+    
+    // Core dot
+    ctx.beginPath();ctx.arc(hx,hy,hsR*0.5,0,Math.PI*2);
+    ctx.fillStyle='rgba(201,169,78,'+(hsAlpha*1.2)+')';ctx.fill();
+    
+    // Ring
+    ctx.beginPath();ctx.arc(hx,hy,hsR,0,Math.PI*2);
+    ctx.strokeStyle='rgba(201,169,78,'+(hsAlpha*0.5)+')';ctx.lineWidth=1;ctx.stroke();
+    
+    // Label
+    var isMob2=W<600;
+    ctx.font=(isMob2?'9':'10')+'px monospace';ctx.textAlign='center';
+    ctx.fillStyle='rgba(201,169,78,'+(hsAlpha*0.7)+')';
+    ctx.fillText(hs.label,hx,hy+hsR*2.5+12);
+    
+    // Tier indicator — small lock or checkmark
+    var ct=getContentTier();
+    var tierIcon=ct>=1?'◈':'⊘';
+    ctx.font=(isMob2?'7':'8')+'px monospace';
+    ctx.fillStyle='rgba(201,169,78,'+(hsAlpha*0.4)+')';
+    ctx.fillText(tierIcon,hx,hy+hsR*2.5+22);
+  }
+
   // ── ASSEMBLED NARRATIVE — the words you've bound ──
   if(immAssembledWords.length>0){
     var isMob=W<600;
