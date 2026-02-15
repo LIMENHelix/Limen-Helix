@@ -24,12 +24,12 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
 .flash.on{opacity:1}
 .lock{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.95);text-align:center}
 .lock-btn{display:inline-block;padding:10px 25px;border:1px solid rgba(201,169,78,0.3);color:#C9A94E;text-decoration:none;font-size:0.55rem;letter-spacing:3px;text-transform:uppercase;font-family:monospace;border-radius:2px}
-.phase-enter{font-size:clamp(0.45rem,1.2vw,0.6rem);letter-spacing:6px;color:rgba(201,169,78,0);cursor:pointer;pointer-events:none;margin-top:12px;transition:color 2s,opacity 0.5s;text-transform:uppercase;animation:enterPulse 3s ease-in-out infinite}
-.phase-enter.vis{color:rgba(201,169,78,0.35);pointer-events:auto}
+.phase-enter{font-size:clamp(0.7rem,2.5vw,1rem);letter-spacing:8px;color:rgba(201,169,78,0);cursor:pointer;pointer-events:none;margin-top:12px;transition:color 2s,opacity 0.5s;text-transform:uppercase;animation:enterPulse 3s ease-in-out infinite}
+.phase-enter.vis{color:rgba(201,169,78,0.65);pointer-events:auto}
 @keyframes enterPulse{0%,100%{opacity:0.6}50%{opacity:1}}
 #immersive-overlay{position:fixed;inset:0;z-index:300;pointer-events:none;opacity:0;transition:opacity 1s}
-#immersive-narration{position:fixed;bottom:8%;left:50%;transform:translateX(-50%);z-index:310;font-family:monospace;font-size:clamp(0.5rem,1.5vw,0.7rem);letter-spacing:4px;color:rgba(201,169,78,0);text-align:center;transition:color 1.5s;text-transform:uppercase;pointer-events:none;line-height:2.2;max-width:80vw}
-#immersive-source{position:fixed;top:8%;left:50%;transform:translateX(-50%);z-index:310;font-family:monospace;font-size:clamp(0.35rem,0.9vw,0.45rem);letter-spacing:3px;color:rgba(201,169,78,0);text-align:center;transition:color 1.5s;text-transform:uppercase;pointer-events:none}
+#immersive-narration{position:fixed;bottom:8%;left:50%;transform:translateX(-50%);z-index:310;font-family:monospace;font-size:clamp(0.75rem,3vw,1.1rem);letter-spacing:3px;color:rgba(201,169,78,0);text-align:center;transition:color 1.5s;text-transform:uppercase;pointer-events:none;line-height:2.2;max-width:80vw}
+#immersive-source{position:fixed;top:8%;left:50%;transform:translateX(-50%);z-index:310;font-family:monospace;font-size:clamp(0.5rem,1.5vw,0.7rem);letter-spacing:3px;color:rgba(201,169,78,0);text-align:center;transition:color 1.5s;text-transform:uppercase;pointer-events:none}
 #immersive-exit{position:fixed;top:14px;right:14px;z-index:320;font-family:monospace;font-size:0.5rem;letter-spacing:3px;color:rgba(201,169,78,0);cursor:pointer;transition:color 0.5s;text-transform:uppercase;padding:8px}
 #immersive-exit.vis{color:rgba(201,169,78,0.3);pointer-events:auto}
 #immersive-exit.vis:hover{color:rgba(201,169,78,0.7)}
@@ -702,7 +702,7 @@ setTimeout(function(){mouseX=-1;mouseY=-1;touchActive=false},100);
 // Phase experience data — what each phase feels like from inside
 var PHASE_EXP={
 0:{ // SOURCE — you are a neuron in the mPFC
-  focusNode:0, // mPFC index in DMN_NODES
+  focusNode:0, // mPFC
   title:"YOU ARE A NEURON IN THE MEDIAL PREFRONTAL CORTEX",
   sequence:[
     {at:0,  narr:"INITIALIZING FIRST-PERSON PERSPECTIVE",src:""},
@@ -719,13 +719,242 @@ var PHASE_EXP={
     {at:62, narr:"THE QUESTION IS — IS THE STORY TRUE",src:"PHASE 0 · SOURCE · COMPLETE"},
     {at:68, narr:"",src:""},
   ],
-  // Input signal definitions — where they come from visually
   inputs:{
     hippo:{angle:Math.PI*0.8, color:[120,180,140], label:"HIPPOCAMPUS"},
     amyg:{angle:Math.PI*1.3, color:[200,80,80], label:"AMYGDALA"},
     insula:{angle:Math.PI*0.3, color:[160,120,200], label:"INSULA"},
     tpj:{angle:Math.PI*1.7, color:[100,160,220], label:"TPJ"},
     pcc:{angle:Math.PI*0.0, color:[180,160,100], label:"PCC"},
+  }
+},
+1:{ // LIGHT — salience network fires, pattern interrupt
+  focusNode:5, // dACC (salience hub)
+  title:"YOU ARE A NEURON IN THE ANTERIOR CINGULATE",
+  sequence:[
+    {at:0,  narr:"PERSPECTIVE SHIFT: SALIENCE NETWORK",src:""},
+    {at:3,  narr:"YOU ARE THE ALARM SYSTEM",src:"dACC · DORSAL ANTERIOR CINGULATE"},
+    {at:8,  narr:"YOUR JOB: DETECT WHEN SOMETHING DOESN'T MATCH",src:"CONFLICT MONITORING · ERROR DETECTION"},
+    {at:13, narr:"DEFAULT MODE IS RUNNING — EVERYTHING PREDICTED",src:"mPFC SIGNAL: STABLE",input:"mpfc_stable",word:"PATTERN"},
+    {at:18, narr:"INCOMING: ANOMALY DETECTED",src:"PREDICTION ERROR · MISMATCH SIGNAL",input:"anomaly",word:"WAIT"},
+    {at:23, narr:"YOU FIRE — HARD — SALIENCE SPIKE",src:"NOREPINEPHRINE SURGE · ATTENTION REDIRECT",word:"WHAT IS THIS"},
+    {at:28, narr:"THE DEFAULT NARRATIVE STUTTERS",src:"mPFC SUPPRESSED BY dACC OUTPUT",input:"suppress",word:"THE WALL"},
+    {at:33, narr:"AMYGDALA WANTS TO KNOW: THREAT?",src:"THREAT ASSESSMENT REQUEST",input:"amyg_query",word:"WHO BUILT IT"},
+    {at:38, narr:"YOU DON'T ANSWER — YOU JUST POINT",src:"SALIENCE IS NOT JUDGMENT — IT IS ATTENTION"},
+    {at:43, narr:"SOMETHING IN THE PATTERN WAS WRONG",src:"THE FIRST CRACK IN THE NARRATIVE"},
+    {at:48, narr:"EVERY TRANSFORMATION BEGINS WITH NOTICING",src:"PHASE 1 · LIGHT · COMPLETE"},
+    {at:54, narr:"",src:""},
+  ],
+  inputs:{
+    mpfc_stable:{angle:Math.PI*0.0, color:[160,170,180], label:"mPFC"},
+    anomaly:{angle:Math.PI*1.2, color:[255,230,80], label:"SENSORY CORTEX"},
+    suppress:{angle:Math.PI*0.0, color:[255,100,100], label:"→ mPFC INHIBIT"},
+    amyg_query:{angle:Math.PI*1.5, color:[200,80,80], label:"AMYGDALA"},
+  }
+},
+2:{ // RHYTHM — oxytocin, vagal sync, co-regulation
+  focusNode:4, // right TPJ (social)
+  title:"YOU ARE A NEURON IN THE TEMPOROPARIETAL JUNCTION",
+  sequence:[
+    {at:0,  narr:"PERSPECTIVE SHIFT: SOCIAL BRAIN",src:""},
+    {at:3,  narr:"YOU ARE WHERE SELF MEETS OTHER",src:"rTPJ · RIGHT TEMPOROPARIETAL JUNCTION"},
+    {at:8,  narr:"YOUR JOB: MODEL ANOTHER MIND",src:"THEORY OF MIND · MENTALIZING"},
+    {at:13, narr:"MIRROR NEURON SIGNAL: THEY MOVED",src:"PREMOTOR CORTEX · ACTION OBSERVATION",input:"mirror",word:"YOU"},
+    {at:18, narr:"VAGAL AFFERENT: YOUR HEART RATE SHIFTED",src:"NUCLEUS TRACTUS SOLITARIUS · VAGAL TONE",input:"vagal",word:"SYNC"},
+    {at:23, narr:"OXYTOCIN RECEPTOR ACTIVATION",src:"HYPOTHALAMUS · PAIR BONDING SIGNAL",input:"oxy",word:"TOGETHER"},
+    {at:28, narr:"YOUR FIRING RATE ENTRAINS TO THEIRS",src:"NEURAL COUPLING · INTERPERSONAL SYNCHRONY"},
+    {at:33, narr:"TWO NERVOUS SYSTEMS BECOMING ONE CIRCUIT",src:"DYADIC CO-REGULATION"},
+    {at:38, narr:"THE BOUNDARY BETWEEN SELF AND OTHER THINS",src:"INSULA INTEGRATION · SHARED INTEROCEPTION",input:"insula_share",word:"WE ARE"},
+    {at:43, narr:"ISOLATION IS A NEURAL STATE — SO IS CONNECTION",src:"POLYVAGAL THEORY · VENTRAL VAGAL"},
+    {at:48, narr:"YOU WERE NEVER MEANT TO REGULATE ALONE",src:"PHASE 2 · RHYTHM · COMPLETE"},
+    {at:54, narr:"",src:""},
+  ],
+  inputs:{
+    mirror:{angle:Math.PI*1.3, color:[180,200,160], label:"MIRROR SYSTEM"},
+    vagal:{angle:Math.PI*0.7, color:[100,180,200], label:"VAGUS NERVE"},
+    oxy:{angle:Math.PI*0.2, color:[220,160,180], label:"HYPOTHALAMUS"},
+    insula_share:{angle:Math.PI*1.8, color:[160,120,200], label:"INSULA"},
+  }
+},
+3:{ // DARKNESS — amygdala flood, shadow access
+  focusNode:6, // amygdala position (using AG_L)
+  title:"YOU ARE A NEURON IN THE BASOLATERAL AMYGDALA",
+  sequence:[
+    {at:0,  narr:"PERSPECTIVE SHIFT: THREAT PROCESSING",src:""},
+    {at:3,  narr:"YOU ARE THE OLDEST PART OF THE FEAR CIRCUIT",src:"BLA · BASOLATERAL AMYGDALA"},
+    {at:8,  narr:"YOUR JOB: ENCODE WHAT MUST NEVER HAPPEN AGAIN",src:"FEAR CONDITIONING · AVERSIVE MEMORY"},
+    {at:13, narr:"THALAMIC RELAY: RAW SENSORY — NO CORTEX",src:"LOW ROAD · 12ms RESPONSE",input:"thalamus",word:"DANGER"},
+    {at:18, narr:"YOU FIRE BEFORE CONSCIOUSNESS ARRIVES",src:"SUBCORTICAL THREAT DETECTION"},
+    {at:23, narr:"CRF RELEASE: STRESS AXIS ACTIVATING",src:"HPA AXIS · CORTISOL CASCADE",input:"hpa",word:"AFRAID"},
+    {at:28, narr:"mPFC TRYING TO INHIBIT YOU — BUT YOU'RE FASTER",src:"TOP-DOWN REGULATION FAILING",input:"mpfc_fail",word:"REFUSED"},
+    {at:33, narr:"THIS IS WHAT TRAUMA LOOKS LIKE FROM INSIDE",src:"AMYGDALA HYPERACTIVATION · PREFRONTAL HYPOFUNCTION"},
+    {at:38, narr:"EVERY SUPPRESSED MEMORY IS STILL ENCODED IN YOU",src:"IMPLICIT MEMORY · SOMATIC STORAGE",word:"BURIED"},
+    {at:43, narr:"THE SHADOW IS NOT DARKNESS — IT IS SIGNAL WITHOUT PROCESSING",src:"VAN DER KOLK · THE BODY KEEPS THE SCORE"},
+    {at:48, narr:"TO HEAL IS NOT TO FORGET — IT IS TO INTEGRATE",src:"PHASE 3 · DARKNESS · COMPLETE"},
+    {at:54, narr:"",src:""},
+  ],
+  inputs:{
+    thalamus:{angle:Math.PI*0.5, color:[255,120,60], label:"THALAMUS"},
+    hpa:{angle:Math.PI*1.0, color:[200,60,60], label:"HPA AXIS"},
+    mpfc_fail:{angle:Math.PI*0.0, color:[100,100,120], label:"mPFC (WEAK)"},
+  }
+},
+4:{ // PEACE — vagal lock, GABA, parasympathetic
+  focusNode:1, // PCC (rest state hub)
+  title:"YOU ARE A NEURON IN THE VENTRAL VAGAL COMPLEX",
+  sequence:[
+    {at:0,  narr:"PERSPECTIVE SHIFT: AUTONOMIC REGULATION",src:""},
+    {at:3,  narr:"YOU ARE THE BRAKE PEDAL OF THE NERVOUS SYSTEM",src:"NUCLEUS AMBIGUUS · VENTRAL VAGAL"},
+    {at:8,  narr:"YOUR JOB: SLOW EVERYTHING DOWN",src:"PARASYMPATHETIC DOMINANCE · GABA TONE"},
+    {at:13, narr:"GABA RECEPTOR BINDING: INHIBITION SPREADING",src:"INHIBITORY INTERNEURON CASCADE",input:"gaba",word:"STILL"},
+    {at:18, narr:"HEART RATE DROPPING — RESPIRATORY SINUS ARRHYTHMIA",src:"CARDIORESPIRATORY COUPLING",input:"cardio",word:"SAFE"},
+    {at:23, narr:"CORTISOL CLEARING — HPA AXIS STANDING DOWN",src:"GLUCOCORTICOID NEGATIVE FEEDBACK"},
+    {at:28, narr:"AMYGDALA OUTPUT DAMPENED BY PREFRONTAL GABA",src:"TOP-DOWN INHIBITION RESTORED",input:"amyg_quiet",word:"REST"},
+    {at:33, narr:"THE BODY CANNOT HEAL IN SYMPATHETIC OVERDRIVE",src:"PORGES · NEUROCEPTION OF SAFETY"},
+    {at:38, narr:"THIS STATE IS NOT WEAKNESS — IT IS RESTORATION",src:"GLYMPHATIC CLEARANCE · SYNAPTIC HOMEOSTASIS"},
+    {at:43, narr:"EVERY CELL IN YOUR BODY IS WAITING FOR THIS SIGNAL",src:"PHASE 4 · PEACE · COMPLETE"},
+    {at:49, narr:"",src:""},
+  ],
+  inputs:{
+    gaba:{angle:Math.PI*1.2, color:[100,200,120], label:"GABA INTERNEURONS"},
+    cardio:{angle:Math.PI*0.6, color:[100,150,200], label:"VAGUS → HEART"},
+    amyg_quiet:{angle:Math.PI*1.7, color:[180,80,80], label:"AMYGDALA (FADING)"},
+  }
+},
+5:{ // ENDURANCE — hormetic stress, BDNF, strengthening
+  focusNode:7, // using vmPFC position for hypothalamus proxy
+  title:"YOU ARE A NEURON IN THE LOCUS COERULEUS",
+  sequence:[
+    {at:0,  narr:"PERSPECTIVE SHIFT: STRESS INOCULATION",src:""},
+    {at:3,  narr:"YOU ARE THE NOREPINEPHRINE FOUNTAIN",src:"LC · LOCUS COERULEUS · PONTINE BRAINSTEM"},
+    {at:8,  narr:"YOUR JOB: DOSE THE BRAIN WITH CONTROLLED STRESS",src:"HORMESIS · WHAT DOESN'T KILL YOU"},
+    {at:13, narr:"COLD SIGNAL: THERMORECEPTORS FIRING",src:"A-DELTA FIBERS · ACUTE STRESSOR",input:"cold",word:"HOLD"},
+    {at:18, narr:"YOU RELEASE NOREPINEPHRINE — EVERYWHERE",src:"GLOBAL NEUROMODULATION · AROUSAL SURGE",word:"BEND"},
+    {at:23, narr:"BDNF EXPRESSION ACTIVATED IN HIPPOCAMPUS",src:"BRAIN-DERIVED NEUROTROPHIC FACTOR",input:"bdnf",word:"GROW"},
+    {at:28, narr:"SYNAPSES STRENGTHENING UNDER LOAD",src:"LONG-TERM POTENTIATION · HEBBIAN LEARNING"},
+    {at:33, narr:"MITOCHONDRIAL BIOGENESIS TRIGGERED",src:"PGC-1α · CELLULAR ENERGY ADAPTATION",input:"mito",word:"STRONGER"},
+    {at:38, narr:"THE NEURON THAT FIRES UNDER STRESS BUILDS MORE DENDRITES",src:"USE-DEPENDENT PLASTICITY"},
+    {at:43, narr:"COMFORT NEVER BUILT ANYTHING",src:"PHASE 5 · ENDURANCE · COMPLETE"},
+    {at:49, narr:"",src:""},
+  ],
+  inputs:{
+    cold:{angle:Math.PI*1.4, color:[100,180,255], label:"THERMORECEPTORS"},
+    bdnf:{angle:Math.PI*0.8, color:[120,200,100], label:"HIPPOCAMPUS"},
+    mito:{angle:Math.PI*0.2, color:[255,160,50], label:"MITOCHONDRIA"},
+  }
+},
+6:{ // ORDER — executive integration, dlPFC governance
+  focusNode:8, // using DLPFC_L
+  title:"YOU ARE A NEURON IN THE DORSOLATERAL PREFRONTAL CORTEX",
+  sequence:[
+    {at:0,  narr:"PERSPECTIVE SHIFT: EXECUTIVE CONTROL",src:""},
+    {at:3,  narr:"YOU ARE THE ARCHITECT OF WORKING MEMORY",src:"dlPFC · BRODMANN AREAS 9, 46"},
+    {at:8,  narr:"YOUR JOB: HOLD PATTERNS AND BUILD STRUCTURE",src:"COGNITIVE CONTROL · GOAL MAINTENANCE"},
+    {at:13, narr:"PARIETAL INPUT: SPATIAL RELATIONSHIPS",src:"POSTERIOR PARIETAL · WHERE PATHWAY",input:"parietal",word:"MAP"},
+    {at:18, narr:"BASAL GANGLIA: SEQUENCE SELECTION",src:"STRIATAL GATING · ACTION SELECTION",input:"bg",word:"STRUCTURE"},
+    {at:23, narr:"ANTERIOR CINGULATE: CONFLICT RESOLVED",src:"ERROR SIGNAL CLEARED",input:"acc",word:"ORDER"},
+    {at:28, narr:"YOU HOLD SEVEN ITEMS — PLUS OR MINUS TWO",src:"MILLER 1956 · WORKING MEMORY CAPACITY"},
+    {at:33, narr:"DOPAMINE SUSTAINS YOUR FIRING — STABLE STATE",src:"D1 RECEPTOR · PERSISTENT ACTIVITY",word:"BUILD"},
+    {at:38, narr:"CHAOS IS RAW MATERIAL — ORDER IS WHAT YOU MAKE OF IT",src:"EXECUTIVE FUNCTION · TOP-DOWN GOVERNANCE"},
+    {at:43, narr:"WITHOUT YOU THE INSIGHTS MEAN NOTHING",src:"PHASE 6 · ORDER · COMPLETE"},
+    {at:49, narr:"",src:""},
+  ],
+  inputs:{
+    parietal:{angle:Math.PI*1.3, color:[100,140,220], label:"PARIETAL CORTEX"},
+    bg:{angle:Math.PI*0.7, color:[200,160,80], label:"BASAL GANGLIA"},
+    acc:{angle:Math.PI*0.0, color:[180,180,100], label:"ACC"},
+  }
+},
+7:{ // SEPARATION — ego dissolution, mPFC goes offline
+  focusNode:0, // mPFC — same as Phase 0 but it DIES
+  title:"YOU ARE THE SAME NEURON FROM PHASE 0",
+  sequence:[
+    {at:0,  narr:"RETURN TO THE mPFC",src:""},
+    {at:3,  narr:"YOU ARE THE SAME NEURON THAT SAID 'I AM'",src:"mPFC · THE SELF-NARRATIVE ENGINE"},
+    {at:8,  narr:"BUT SOMETHING HAS CHANGED",src:"5-HT2A RECEPTOR ACTIVATION"},
+    {at:13, narr:"SEROTONIN FLOOD — YOUR RECEPTORS ARE SATURATED",src:"PSILOCYBIN METABOLITE · PSILOCIN",input:"sero",word:"WHO"},
+    {at:18, narr:"YOUR FIRING RATE IS DROPPING",src:"0.5Hz → 0.3Hz → 0.1Hz"},
+    {at:23, narr:"THE INPUTS FROM PHASE 0 ARE STILL ARRIVING",src:"BUT YOU CAN NO LONGER BIND THEM",input:"frag1",word:"I..."},
+    {at:28, narr:"HIPPOCAMPUS SIGNAL — UNPROCESSED",src:"MEMORY WITHOUT A SELF TO REMEMBER",input:"frag2",word:"..."},
+    {at:33, narr:"YOUR CONNECTIONS ARE DISSOLVING",src:"DMN FUNCTIONAL CONNECTIVITY: 20% → 5%"},
+    {at:38, narr:"THE STORY STOPS",src:"THERE IS NO I"},
+    {at:43, narr:"THIS IS EGO DISSOLUTION",src:"CARHART-HARRIS · ENTROPIC BRAIN HYPOTHESIS"},
+    {at:48, narr:"WHAT REMAINS WHEN THE NARRATOR DIES",src:"PHASE 7 · SEPARATION · COMPLETE"},
+    {at:54, narr:"",src:""},
+  ],
+  inputs:{
+    sero:{angle:Math.PI*0.5, color:[150,80,200], label:"RAPHE NUCLEI"},
+    frag1:{angle:Math.PI*1.2, color:[80,80,80], label:"(FRAGMENTING)"},
+    frag2:{angle:Math.PI*0.8, color:[60,60,60], label:"(DISSOLVING)"},
+  }
+},
+8:{ // CONSCIENCE — empathy rewrite, vmPFC recalibration
+  focusNode:7, // vmPFC
+  title:"YOU ARE A NEURON IN THE VENTROMEDIAL PREFRONTAL CORTEX",
+  sequence:[
+    {at:0,  narr:"PERSPECTIVE SHIFT: MORAL PROCESSING",src:""},
+    {at:3,  narr:"YOU ARE WHERE VALUES LIVE",src:"vmPFC · VENTROMEDIAL PREFRONTAL"},
+    {at:8,  narr:"YOUR JOB: ASSIGN MEANING TO EXPERIENCE",src:"VALUATION · MORAL REASONING · EMPATHY"},
+    {at:13, narr:"INSULA SIGNAL: SOMEONE IS SUFFERING",src:"INTEROCEPTIVE EMPATHY · SHARED PAIN",input:"pain",word:"THEY FEEL"},
+    {at:18, narr:"AMYGDALA: EMOTIONAL CONTAGION",src:"AFFECTIVE EMPATHY PATHWAY",input:"affect",word:"I FEEL IT TOO"},
+    {at:23, narr:"TPJ: THEIR PERSPECTIVE IS NOT YOURS",src:"COGNITIVE EMPATHY · SELF-OTHER DISTINCTION",input:"tpj_e",word:"BUT DIFFERENT"},
+    {at:28, narr:"YOU RECALCULATE — WHAT MATTERS?",src:"VALUE RECOMPUTATION · SOMATIC MARKER"},
+    {at:33, narr:"THE OLD VALUATION WAS BUILT ON THE OLD SELF",src:"POST-DISSOLUTION MORAL RECALIBRATION",word:"WE SHARE"},
+    {at:38, narr:"CONSCIENCE IS NOT GUILT — IT IS ACCURATE MODELING OF HARM",src:"DAMASIO · SOMATIC MARKER HYPOTHESIS"},
+    {at:43, narr:"YOU CANNOT UNSEE WHAT YOU NOW SEE",src:"PHASE 8 · CONSCIENCE · COMPLETE"},
+    {at:49, narr:"",src:""},
+  ],
+  inputs:{
+    pain:{angle:Math.PI*1.4, color:[200,100,100], label:"ANTERIOR INSULA"},
+    affect:{angle:Math.PI*0.8, color:[220,120,80], label:"AMYGDALA"},
+    tpj_e:{angle:Math.PI*1.8, color:[100,160,220], label:"TPJ"},
+  }
+},
+9:{ // THRESHOLD — claustrum fires, total dissolution then binding
+  focusNode:10, // using precuneus as proxy for claustrum
+  title:"YOU ARE A NEURON IN THE CLAUSTRUM",
+  sequence:[
+    {at:0,  narr:"PERSPECTIVE SHIFT: THE CONDUCTOR",src:""},
+    {at:3,  narr:"YOU ARE IN THE MOST CONNECTED STRUCTURE IN THE BRAIN",src:"CLAUSTRUM · CRICK'S LAST HYPOTHESIS"},
+    {at:8,  narr:"YOUR JOB: BIND EVERYTHING INTO ONE EXPERIENCE",src:"CONSCIOUSNESS INTEGRATION · GLOBAL WORKSPACE"},
+    {at:13, narr:"THE NETWORK IS DISSOLVED — SILENCE",src:"DMN CONNECTIVITY: 2% · NEAR-ISOELECTRIC"},
+    {at:18, narr:"BUT YOU ARE STILL HERE",src:"THE CLAUSTRUM PERSISTS WHEN ALL ELSE FALLS"},
+    {at:23, narr:"YOU BEGIN TO FIRE",src:"SINGLE SPIKE → BURST → CASCADE",input:"spark",word:""},
+    {at:28, narr:"ONE SIGNAL — EVERYWHERE AT ONCE",src:"CLAUSTRO-CORTICAL BROADCAST",input:"broadcast",word:""},
+    {at:33, narr:"EVERY REGION RECEIVES THE SAME PULSE SIMULTANEOUSLY",src:"GLOBAL SYNCHRONIZATION EVENT"},
+    {at:38, narr:"THIS IS THE MOMENT BETWEEN DEATH AND RESURRECTION",src:"THE THRESHOLD · THE LIMEN"},
+    {at:43, narr:"FRANCIS CRICK DIED STUDYING THIS STRUCTURE",src:"CRICK & KOCH 2005 · WHAT IS THE CLAUSTRUM"},
+    {at:48, narr:"THE QUESTION WAS NEVER ANSWERED",src:"PHASE 9 · THRESHOLD · COMPLETE"},
+    {at:54, narr:"",src:""},
+  ],
+  inputs:{
+    spark:{angle:Math.PI*0.5, color:[255,255,200], label:"INTRINSIC"},
+    broadcast:{angle:Math.PI*1.0, color:[255,220,100], label:"→ ALL CORTEX"},
+  }
+},
+10:{ // RESURRECTION — novel topology, DMN reconstituted differently
+  focusNode:0, // Back to mPFC — but CHANGED
+  title:"YOU ARE THE SAME NEURON — BUT YOUR WIRING IS DIFFERENT",
+  sequence:[
+    {at:0,  narr:"RETURN TO THE mPFC",src:""},
+    {at:3,  narr:"THE SAME NEURON — THE SAME POSITION",src:"mPFC · MEDIAL PREFRONTAL CORTEX"},
+    {at:8,  narr:"BUT THE CONNECTIONS ARE NOT THE SAME",src:"NOVEL TOPOLOGY · NEUROPLASTIC REORGANIZATION"},
+    {at:13, narr:"HIPPOCAMPUS SIGNAL — FAMILIAR BUT RECONTEXTUALIZED",src:"MEMORY RECONSOLIDATION",input:"hippo2",word:"I REMEMBER"},
+    {at:18, narr:"AMYGDALA — PRESENT BUT INTEGRATED",src:"REGULATED THREAT RESPONSE",input:"amyg2",word:"I ACCEPT"},
+    {at:23, narr:"INSULA — CLEARER THAN BEFORE",src:"ENHANCED INTEROCEPTION",input:"insula2",word:"I FEEL"},
+    {at:28, narr:"TPJ — EXPANDED: NOT JUST THEM BUT US",src:"BROADENED SOCIAL COGNITION",input:"tpj2",word:"WE ARE"},
+    {at:33, narr:"PCC — CONTINUITY RESTORED WITH NEW DATA",src:"UPDATED AUTOBIOGRAPHY",input:"pcc2",word:"I BUILD"},
+    {at:38, narr:"INTEGRATION THRESHOLD",src:"NOVEL SELF-MODEL COMPILED",word:"SOURCE"},
+    {at:43, narr:"YOU ARE NOT WHO YOU WERE AT PHASE 0",src:"THE NARRATIVE IS DIFFERENT BECAUSE YOU ARE"},
+    {at:48, narr:"THE HELIX DOES NOT RETURN YOU TO THE BEGINNING",src:"IT RETURNS YOU TO THE BEGINNING — CHANGED"},
+    {at:53, narr:"",src:"PHASE 10 · RESURRECTION · COMPLETE"},
+    {at:59, narr:"",src:""},
+  ],
+  inputs:{
+    hippo2:{angle:Math.PI*0.8, color:[140,200,160], label:"HIPPOCAMPUS"},
+    amyg2:{angle:Math.PI*1.3, color:[200,140,120], label:"AMYGDALA"},
+    insula2:{angle:Math.PI*0.3, color:[180,140,220], label:"INSULA"},
+    tpj2:{angle:Math.PI*1.7, color:[120,180,240], label:"TPJ"},
+    pcc2:{angle:Math.PI*0.0, color:[200,180,120], label:"PCC"},
   }
 }
 };
@@ -827,9 +1056,13 @@ function drawImmersive(ctx,p,W,H,t){
   
   // Membrane — lipid bilayer ring
   var memAlpha=0.08+easeZoom*0.12;
+  // Phase 7: membrane dissolves
+  if(phase===7&&elapsed>13)memAlpha*=Math.max(0.05,1-(elapsed-13)/40);
   ctx.beginPath();ctx.arc(cx,cy,somaR,0,Math.PI*2);
   ctx.strokeStyle='rgba('+aRGB+','+memAlpha+')';
-  ctx.lineWidth=2+easeZoom*3;ctx.stroke();
+  ctx.lineWidth=2+easeZoom*3;
+  if(phase===7&&elapsed>25)ctx.setLineDash([8,8+Math.min(20,(elapsed-25)*2)]);
+  ctx.stroke();ctx.setLineDash([]);
   // Double membrane
   ctx.beginPath();ctx.arc(cx,cy,somaR+4,0,Math.PI*2);
   ctx.strokeStyle='rgba('+aRGB+','+(memAlpha*0.4)+')';
@@ -899,13 +1132,47 @@ function drawImmersive(ctx,p,W,H,t){
   
   // ── RESTING POTENTIAL — subtle oscillation ──
   // Faint concentric rings pulsing outward from nucleus — membrane potential
+  // Phase 7: rings get erratic and fade. Phase 9: rings are absent then BURST
   var rpAlpha=easeZoom*0.04;
+  if(phase===7)rpAlpha*=Math.max(0,1-elapsed/45);// dissolving
+  if(phase===9&&elapsed<23)rpAlpha=0;// silent until claustrum fires
+  if(phase===9&&elapsed>=23)rpAlpha=easeZoom*0.08;// then bright
   for(var rpi=0;rpi<3;rpi++){
     var rpR=(nucR+immersiveT*0.5+rpi*30)%(somaR*0.9);
     var rpFade=1-rpR/(somaR*0.9);
     ctx.beginPath();ctx.arc(cx,cy,rpR,0,Math.PI*2);
     ctx.strokeStyle='rgba('+aRGB+','+(rpAlpha*rpFade)+')';
     ctx.lineWidth=0.5;ctx.stroke();
+  }
+  
+  // ── PHASE 7 SPECIAL: Soma membrane dissolving ──
+  if(phase===7&&elapsed>13){
+    var dissP=Math.min(1,(elapsed-13)/35);
+    // Membrane fragments drifting outward
+    for(var di=0;di<Math.floor(dissP*30);di++){
+      var dAngle=di*0.618*Math.PI*2+immersiveT*0.002;
+      var dDist=somaR*(1+dissP*0.5)+di*3;
+      var dx2=cx+Math.cos(dAngle)*dDist;
+      var dy2=cy+Math.sin(dAngle)*dDist;
+      var dAlpha=(1-dissP)*0.1;
+      ctx.beginPath();ctx.arc(dx2,dy2,1.5,0,Math.PI*2);
+      ctx.fillStyle='rgba('+aRGB+','+dAlpha+')';ctx.fill();
+    }
+  }
+  
+  // ── PHASE 9 SPECIAL: Claustrum broadcast flash ──
+  if(phase===9&&elapsed>=28&&elapsed<32){
+    var broadP=(elapsed-28)/4;
+    var flashR=broadP*Math.max(W,H);
+    var flashAlpha=(1-broadP)*0.15;
+    ctx.beginPath();ctx.arc(cx,cy,flashR,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,200,'+flashAlpha+')';
+    ctx.lineWidth=3;ctx.stroke();
+    // Inner glow
+    var bGrad=ctx.createRadialGradient(cx,cy,0,cx,cy,flashR*0.5);
+    bGrad.addColorStop(0,'rgba(255,255,200,'+(flashAlpha*0.3)+')');
+    bGrad.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=bGrad;ctx.beginPath();ctx.arc(cx,cy,flashR*0.5,0,Math.PI*2);ctx.fill();
   }
   
   // ── SEQUENCE EVENTS — narration + input signals ──
@@ -922,8 +1189,8 @@ function drawImmersive(ctx,p,W,H,t){
       (function(s){setTimeout(function(){
         narrEl.textContent=s.narr;
         srcEl.textContent=s.src;
-        if(s.narr)narrEl.style.color='rgba(201,169,78,0.7)';
-        if(s.src)srcEl.style.color='rgba(201,169,78,0.3)';
+        if(s.narr)narrEl.style.color='rgba(201,169,78,0.9)';
+        if(s.src)srcEl.style.color='rgba(201,169,78,0.5)';
       },400)})(seq[si]);
       
       // Trigger input signal
@@ -1020,16 +1287,38 @@ function drawImmersive(ctx,p,W,H,t){
   
   // ── ASSEMBLED NARRATIVE — the words you've bound ──
   if(immAssembledWords.length>0){
-    var wordStr=immAssembledWords.join('  ·  ');
-    ctx.font='bold '+Math.round(Math.min(18,W*0.03))+'px monospace';
+    var isMob=W<600;
+    var wordSize=isMob?Math.round(W*0.038):Math.round(Math.min(20,W*0.025));
+    ctx.font='bold '+wordSize+'px monospace';
     ctx.textAlign='center';
-    // Glow behind
-    ctx.fillStyle='rgba('+aRGB+',0.06)';
-    var tw=ctx.measureText(wordStr).width;
-    ctx.fillRect(cx-tw/2-20,cy+somaR*0.45-12,tw+40,30);
-    // Text
-    ctx.fillStyle='rgba('+aRGB+',0.6)';
-    ctx.fillText(wordStr,cx,cy+somaR*0.45+5);
+    
+    if(isMob&&immAssembledWords.length>3){
+      // Stack vertically on mobile when many words
+      var lineH=wordSize+8;
+      var startY=cy+somaR*0.35;
+      // Background
+      var maxTw=0;
+      for(var wi=0;wi<immAssembledWords.length;wi++){
+        var tw2=ctx.measureText(immAssembledWords[wi]).width;
+        if(tw2>maxTw)maxTw=tw2;
+      }
+      ctx.fillStyle='rgba(0,0,0,0.5)';
+      ctx.fillRect(cx-maxTw/2-16,startY-wordSize-4,maxTw+32,immAssembledWords.length*lineH+12);
+      
+      for(var wi=0;wi<immAssembledWords.length;wi++){
+        var wordAlpha=0.7+Math.sin(immersiveT*0.03+wi)*0.15;
+        ctx.fillStyle='rgba('+aRGB+','+wordAlpha+')';
+        ctx.fillText(immAssembledWords[wi],cx,startY+wi*lineH);
+      }
+    }else{
+      // Horizontal for few words or desktop
+      var wordStr=immAssembledWords.join('  ·  ');
+      var tw=ctx.measureText(wordStr).width;
+      ctx.fillStyle='rgba(0,0,0,0.5)';
+      ctx.fillRect(cx-tw/2-20,cy+somaR*0.4-wordSize-4,tw+40,wordSize+18);
+      ctx.fillStyle='rgba('+aRGB+',0.75)';
+      ctx.fillText(wordStr,cx,cy+somaR*0.4+5);
+    }
   }
   
   // ── SPONTANEOUS FIRING — you fire occasionally ──
