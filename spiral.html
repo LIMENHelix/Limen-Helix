@@ -1458,14 +1458,14 @@ function drawImmersive(ctx,p,W,H,t){
       ctx.beginPath();ctx.arc(sx,sy,3,0,Math.PI*2);
       ctx.fillStyle='rgba(255,255,255,'+(sigAlpha*0.9)+')';ctx.fill();
       
-      // Trail
-      for(var tr=1;tr<=10;tr++){
-        var tp=Math.max(0,inpProgress-tr*0.02);
+      // Trail (light)
+      for(var tr=1;tr<=4;tr++){
+        var tp=Math.max(0,inpProgress-tr*0.03);
         var td=startDist+(endDist-startDist)*tp*tp;
         var tx=cx+Math.cos(inp.angle)*td;
         var ty=cy+Math.sin(inp.angle)*td;
-        ctx.beginPath();ctx.arc(tx,ty,2.5-tr*0.2,0,Math.PI*2);
-        ctx.fillStyle='rgba('+iRGB+','+(sigAlpha*(1-tr/11)*0.4)+')';ctx.fill();
+        ctx.beginPath();ctx.arc(tx,ty,2.5-tr*0.4,0,Math.PI*2);
+        ctx.fillStyle='rgba('+iRGB+','+(sigAlpha*(1-tr/5)*0.4)+')';ctx.fill();
       }
       
       // Source label — where it's coming from
@@ -1485,62 +1485,47 @@ function drawImmersive(ctx,p,W,H,t){
       }
     }
     
-    // Post-arrival — soma brightens with that signal's color
+    // Post-arrival — soma flash (simple)
     if(inp.arrived){
       var postP=Math.min(1,(inpProgress-1)*2);
-      var flashAlpha=(1-postP)*0.15;
-      var flashGrad=ctx.createRadialGradient(cx,cy,0,cx,cy,somaR*0.6);
-      flashGrad.addColorStop(0,'rgba('+iRGB+','+flashAlpha+')');
-      flashGrad.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=flashGrad;ctx.beginPath();ctx.arc(cx,cy,somaR*0.6,0,Math.PI*2);ctx.fill();
+      var flashAlpha=(1-postP)*0.1;
+      ctx.beginPath();ctx.arc(cx,cy,somaR*0.4,0,Math.PI*2);
+      ctx.fillStyle='rgba('+iRGB+','+flashAlpha+')';ctx.fill();
     }
   }
   
   // ── FLOATING HOTSPOTS — tappable content nodes ──
   for(var hi=0;hi<immHotspots.length;hi++){
     var hs=immHotspots[hi];
-    var hsAge=(immersiveT-hs.spawnT)/60;// age in seconds
+    var hsAge=(immersiveT-hs.spawnT)/60;
     var fadeIn=Math.min(1,hsAge/2);
-    // Gentle orbit
     var orbAngle=hs.angle+Math.sin(immersiveT*0.005+hi*1.7)*0.15;
     var hx=cx+Math.cos(orbAngle)*somaR*hs.dist;
     var hy=cy+Math.sin(orbAngle)*somaR*hs.dist;
-    
-    // Outer glow
-    var hsAlpha=fadeIn*0.35;
+    var hsAlpha=fadeIn*0.4;
     var hsPulse=0.8+Math.sin(immersiveT*0.04+hi*2.1)*0.2;
-    var hsR=10*hsPulse;
-    var hsGrad=ctx.createRadialGradient(hx,hy,0,hx,hy,hsR*2.5);
-    hsGrad.addColorStop(0,'rgba(201,169,78,'+(hsAlpha*0.6)+')');
-    hsGrad.addColorStop(0.4,'rgba(201,169,78,'+(hsAlpha*0.2)+')');
-    hsGrad.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=hsGrad;ctx.beginPath();ctx.arc(hx,hy,hsR*2.5,0,Math.PI*2);ctx.fill();
+    var hsR=8*hsPulse;
     
-    // Core dot
-    ctx.beginPath();ctx.arc(hx,hy,hsR*0.5,0,Math.PI*2);
-    ctx.fillStyle='rgba(201,169,78,'+(hsAlpha*1.2)+')';ctx.fill();
-    
-    // Ring
-    ctx.beginPath();ctx.arc(hx,hy,hsR,0,Math.PI*2);
-    ctx.strokeStyle='rgba(201,169,78,'+(hsAlpha*0.5)+')';ctx.lineWidth=1;ctx.stroke();
+    // Simple dot + ring (no gradient)
+    ctx.beginPath();ctx.arc(hx,hy,hsR*0.6,0,Math.PI*2);
+    ctx.fillStyle='rgba(201,169,78,'+hsAlpha+')';ctx.fill();
+    ctx.beginPath();ctx.arc(hx,hy,hsR*1.5,0,Math.PI*2);
+    ctx.strokeStyle='rgba(201,169,78,'+(hsAlpha*0.4)+')';ctx.lineWidth=1;ctx.stroke();
     
     // Label
     var isMob2=W<600;
     ctx.font=(isMob2?'9':'10')+'px monospace';ctx.textAlign='center';
     ctx.fillStyle='rgba(201,169,78,'+(hsAlpha*0.7)+')';
-    ctx.fillText(hs.label,hx,hy+hsR*2.5+12);
+    ctx.fillText(hs.label,hx,hy+hsR*2+12);
     
-    // Tier indicator — portal or content
-    var ct=getContentTier();
-    var isPortal=phaseData[0]&&false;// check from data
-    // Check if this specific hotspot has a portal
+    // Portal or content icon
+    var phaseData=HOTSPOT_DATA[phase];
     var hsData2=null;
-    for(var pd=0;pd<phaseData.length;pd++){if(phaseData[pd].trigger===hs.trigger)hsData2=phaseData[pd];}
+    if(phaseData){for(var pd=0;pd<phaseData.length;pd++){if(phaseData[pd].trigger===hs.trigger)hsData2=phaseData[pd];}}
     var tierIcon=(hsData2&&hsData2.portal)?'⊘ ENTER':'◈';
-    var iconAlpha=(hsData2&&hsData2.portal)?(hsAlpha*0.9):(hsAlpha*0.4);
     ctx.font=(isMob2?'8':'9')+'px monospace';
-    ctx.fillStyle='rgba(201,169,78,'+iconAlpha+')';
-    ctx.fillText(tierIcon,hx,hy+hsR*2.5+22);
+    ctx.fillStyle='rgba(201,169,78,'+(hsAlpha*0.5)+')';
+    ctx.fillText(tierIcon,hx,hy+hsR*2+22);
   }
 
   // ── ASSEMBLED NARRATIVE — the words you've bound ──
